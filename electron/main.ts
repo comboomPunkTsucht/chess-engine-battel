@@ -77,7 +77,7 @@ function createWindow() {
       }
     }
   });
-  win.webContents.ipc.on("log", (_, logMessage: LogMessage) => {
+  win.webContents.ipc.on("log", (_e, logMessage: LogMessage) => {
     let { level, message, timestamp } = logMessage;
 
     if (typeof message === "object" && message !== null) {
