@@ -9,6 +9,7 @@
   },
   files: ["dist", "dist-electron"],
   mac: {
+    icon: "public/AppIcon.icon",
     target: [
       {
         target: "dmg",
@@ -26,6 +27,7 @@
     artifactName: "${productName}-Mac-${version}-${arch}-Installer.${ext}",
   },
   win: {
+    icon: "public/icon.png",
     target: [
       {
         target: "nsis",
@@ -56,6 +58,7 @@
     oneClick: false,
   },
   linux: {
+    icon: "public/icon.png",
     target: [
       {
         target: "AppImage",

@@ -3,6 +3,8 @@ import { app, BrowserWindow } from "electron";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 
+import { type LogMessage } from "../src/log";
+
 //const require = createRequire(import.meta.url);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -30,7 +32,7 @@ let win: BrowserWindow | null;
 
 function createWindow() {
   win = new BrowserWindow({
-    icon: path.join(process.env.VITE_PUBLIC, "electron-vite.svg"),
+    icon: path.join(process.env.VITE_PUBLIC, "icon.png"),
     webPreferences: {
       preload: path.join(__dirname, "preload.mjs"),
     },
@@ -59,6 +61,14 @@ app.on("window-all-closed", () => {
   }
 });
 
+app.setAboutPanelOptions({
+  applicationName: "Chess Engine Battle",
+  iconPath: path.join(
+    process.env.VITE_PUBLIC,
+    process.platform === "darwin" ? "AppIcon.icon" : "icon.png",
+  ),
+});
+
 app.on("activate", () => {
   // On OS X it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
@@ -66,5 +76,52 @@ app.on("activate", () => {
     createWindow();
   }
 });
+
+app.on("ready", () => {
+  win?.setAppDetails({
+    appId: "app.comboompunktsucht.chess-engine-battel",
+    appIconPath: path.join(
+      process.env.VITE_PUBLIC,
+      process.platform === "darwin" ? "AppIcon.icon" : "icon.png",
+    ),
+  });
+});
+
+app.on("web-contents-created", () => {
+  win?.webContents.ipc.on("ping", (e, ...args) => {
+    if (e.processId === win?.webContents.getProcessId()) {
+      win?.webContents.send("ping", "[Ping] ".concat(...args));
+    }
+  });
+  win?.webContents.ipc.on("log", (e, logMessage: LogMessage) => {
+    let message: string;
+
+    // Typ-sichere und saubere Formatierung der Nachricht
+    if (typeof logMessage.message === "string") {
+      message = logMessage.message;
+    } else if (typeof logMessage.message === "object" && logMessage.message !== null) {
+      // Objekte strukturiert und gut lesbar formatieren
+      message = JSON.stringify(logMessage.message, null, 2);
+    } else {
+      message = String(logMessage.message);
+    }
+
+    // Sicheres Parsen des Datums, falls es über IPC als String ankommt
+    const timeString = new Date(logMessage.timestamp).toLocaleString();
+
+    // Einheitlicher Log-String mittels Template Literals
+    const formattedLog = `[${timeString}][${logMessage.level}] ${message}`;
+
+    // Log in der Main-Prozess Konsole ausgeben
+    console.log(formattedLog);
+
+    // An den Renderer-Prozess zurücksenden
+    if (e.processId === win?.webContents.getProcessId()) {
+      win?.webContents.send("log", formattedLog);
+    }
+  });
+});
+
+app.enableSandbox();
 
 app.whenReady().then(createWindow);
