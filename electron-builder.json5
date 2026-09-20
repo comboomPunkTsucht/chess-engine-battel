@@ -19,11 +19,7 @@
         arch: ["x64", "arm64", "universal"],
       },
       {
-        target: "tar",
-        arch: ["x64", "arm64", "universal"],
-      },
-      {
-        target: "nsis",
+        target: "pkg",
         arch: ["x64", "arm64", "universal"],
       },
     ],
@@ -33,6 +29,14 @@
     target: [
       {
         target: "nsis",
+        arch: ["x64", "arm64"],
+      },
+      {
+        target: "msiWrapped",
+        arch: ["x64", "arm64"],
+      },
+      {
+        target: "portable",
         arch: ["x64", "arm64"],
       },
       {
@@ -47,6 +51,9 @@
     perMachine: false,
     allowToChangeInstallationDirectory: true,
     deleteAppDataOnUninstall: false,
+  },
+  msiWrapped: {
+    oneClick: false,
   },
   linux: {
     target: [
