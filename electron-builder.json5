@@ -1,0 +1,76 @@
+// @see - https://www.electron.build/configuration/configuration
+{
+  $schema: "https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json",
+  appId: "app.comboompunktsucht.chess-engine-battel",
+  asar: true,
+  productName: "Chess Engine Battle",
+  directories: {
+    output: "release/${version}",
+  },
+  files: ["dist", "dist-electron"],
+  mac: {
+    target: [
+      {
+        target: "dmg",
+        arch: ["x64", "arm64", "universal"],
+      },
+      {
+        target: "zip",
+        arch: ["x64", "arm64", "universal"],
+      },
+      {
+        target: "tar",
+        arch: ["x64", "arm64", "universal"],
+      },
+      {
+        target: "nsis",
+        arch: ["x64", "arm64", "universal"],
+      },
+    ],
+    artifactName: "${productName}-Mac-${version}-${arch}-Installer.${ext}",
+  },
+  win: {
+    target: [
+      {
+        target: "nsis",
+        arch: ["x64", "arm64"],
+      },
+      {
+        target: "zip",
+        arch: ["x64", "arm64"],
+      },
+    ],
+    artifactName: "${productName}-Windows-${version}-${arch}-Setup.${ext}",
+  },
+  nsis: {
+    oneClick: false,
+    perMachine: false,
+    allowToChangeInstallationDirectory: true,
+    deleteAppDataOnUninstall: false,
+  },
+  linux: {
+    target: [
+      {
+        target: "AppImage",
+        arch: ["x64", "arm64"],
+      },
+      {
+        target: "rpm",
+        arch: ["x64", "arm64"],
+      },
+      {
+        target: "deb",
+        arch: ["x64", "arm64"],
+      },
+      {
+        target: "tar",
+        arch: ["x64", "arm64"],
+      },
+      {
+        target: "zip",
+        arch: ["x64", "arm64"],
+      },
+    ],
+    artifactName: "${productName}-Linux-${version}-${arch}.${ext}",
+  },
+}
