@@ -8,8 +8,10 @@
     output: "release/${version}",
   },
   files: ["dist", "dist-electron"],
+
   mac: {
     icon: "public/AppIcon.icon",
+    category: "public.app-category.games",
     target: [
       {
         target: "dmg",
@@ -24,7 +26,13 @@
         arch: ["x64", "arm64", "universal"],
       },
     ],
-    artifactName: "${productName}-Mac-${version}-${arch}-Installer.${ext}",
+    artifactName: "${productName}-Mac-${version}-${arch}.${ext}",
+  },
+  pkg: {
+    license: "LICENSE",
+  },
+  dmg: {
+    license: "LICENSE",
   },
   win: {
     icon: "public/icon.png",
@@ -46,13 +54,14 @@
         arch: ["x64", "arm64"],
       },
     ],
-    artifactName: "${productName}-Windows-${version}-${arch}-Setup.${ext}",
+    artifactName: "${productName}-Windows-${version}-${arch}.${ext}",
   },
   nsis: {
     oneClick: false,
     perMachine: false,
     allowToChangeInstallationDirectory: true,
     deleteAppDataOnUninstall: false,
+    license: "LICENSE",
   },
   msiWrapped: {
     oneClick: false,

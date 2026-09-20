@@ -3,7 +3,7 @@
   import viteLogo from "/electron-vite.animate.svg";
   import "./App.css";
   import { onMount } from "svelte";
-  import { log, LogLevel } from "./log";
+  import { log } from "./log";
 
   let count = $state(0);
 
@@ -15,23 +15,8 @@
     }
   });
 
-  $effect(() => {
-    if (window.ipcRenderer) {
-      const handleLog = (_event: any, message: string) => {
-        console.log(message);
-      };
-
-      window.ipcRenderer.on("log", handleLog);
-
-      // Wird aufgerufen, wenn die Komponente zerstört oder durch HMR neu geladen wird
-      return () => {
-        window.ipcRenderer.off("log", handleLog);
-      };
-    }
-  });
-
   function sendMessage() {
-    log(LogLevel.INFO, "Sende Nachricht an den Main-Prozess");
+    log("INFO", "Sende Nachricht an den Main-Prozess");
   }
 </script>
 

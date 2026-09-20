@@ -21,12 +21,14 @@
     "electron": "^44.4.3",
     "electron-builder": "^26.15.3",
     "eslint": "^10.11.0",
+    "runed": "^0.37.1",
     "svelte-check": "^4.7.6",
     "typescript": "^7.0.2",
     "vite": "catalog:",
     "vite-plugin-electron": "^1.1.2",
     "vite-plugin-electron-renderer": "^1.0.0",
-    "vite-plus": "catalog:"
+    "vite-plus": "catalog:",
+    "zod": "^4.6.5"
   },
   "devEngines": {
     "packageManager": {
