@@ -50,9 +50,8 @@ bool build_raylib(bool debug) {
     cmd_append(&cmd, "RAYLIB_BUILD_MODE=RELEASE");
   }
   cmd_append(&cmd, "RAYLIB_MODULE_RAYGUI=TRUE");
-  // cmd_append(&cmd, "RAYLIB_MODULE_RAYGUI_PATH=" THIRDPARTY_FOLDER
-  // "raygui/src");
-  cmd_append(&cmd, "RAYLIB_RELEASE_PATH=" BUILD_FOLDER "raylib");
+  cmd_append(&cmd, "RAYLIB_MODULE_RAYGUI_PATH=../../raygui/src");
+  cmd_append(&cmd, "RAYLIB_RELEASE_PATH=../../../build/raylib");
   return cmd_run(&cmd);
 }
 
@@ -67,7 +66,7 @@ int main(int argc, char **argv) {
   bool  help = false;
   bool  compile = false;
   bool  debug = false;
-  char *debugger = "lldb";
+  char *debugger = (char *)"lldb";
   bool  run = false;
   flag_bool_var(&help, "-help", false,
                 "Print this help to stdout and exit with 0");
@@ -123,6 +122,25 @@ int main(int argc, char **argv) {
     cmd_append(&cmd, "-L", BUILD_FOLDER "raylib");
     cmd_append(&cmd, "-lraylib");
     cmd_append(&cmd, "-lm");
+#ifdef __APPLE__
+    cmd_append(&cmd, "-framework", "OpenGL");
+    cmd_append(&cmd, "-framework", "Cocoa");
+    cmd_append(&cmd, "-framework", "IOKit");
+    cmd_append(&cmd, "-framework", "CoreVideo");
+    cmd_append(&cmd, "-framework", "QuartzCore");
+#elif defined(__linux__)
+    cmd_append(&cmd, "-ldl");
+    cmd_append(&cmd, "-lrt");
+    cmd_append(&cmd, "-lpthread");
+    cmd_append(&cmd, "-lX11");
+    cmd_append(&cmd, "-lGL");
+    cmd_append(&cmd, "-lGLU");
+#elif defined(_WIN32)
+    cmd_append(&cmd, "-lopengl32");
+    cmd_append(&cmd, "-lgdi32");
+    cmd_append(&cmd, "-lwinmm");
+#endif
+
     cmd_append(&cmd, "-Wno-unused-function");
     cmd_append(&cmd, "-Wno-unused-variable");
     cmd_append(&cmd, "-Wno-unused-parameter");
