@@ -65,12 +65,12 @@ NOBDEF void nob_breakpoint(void) {
 NOBDEF void nob_addon_advanced_log_handler(Nob_Log_Level level, const char *fmt,
                                            va_list args) {
   switch ((int)level) {
-    case 0 : fprintf(stderr, "ℹ️ \x1b[36m[INFO]\x1b[0m "); break; // NOB_INFO
-    case 1 : fprintf(stderr, "⚠️ \x1b[33m[WARN]\x1b[0m "); break; // NOB_WARNING
-    case 2 : fprintf(stderr, "🚨 \x1b[31m[ERROR]\x1b[0m "); break; // NOB_ERROR
-    case 3 : fprintf(stderr, "🔍 \x1b[35m[TRACE]\x1b[0m "); break; // NOB_TRACE
-    case 4 : fprintf(stderr, "🐛 \x1b[32m[DEBUG]\x1b[0m "); break; // NOB_DEBUG
-    case 5 : fprintf(stderr, "💀 \x1b[31m[FATAL]\x1b[0m "); break; // NOB_FATAL
+    case 0 : fprintf(stderr, "ℹ️  \x1b[36m[INFO]\x1b[0m "); break; // NOB_INFO
+    case 1 : fprintf(stderr, "⚠️  \x1b[33m[WARN]\x1b[0m "); break; // NOB_WARNING
+    case 2 : fprintf(stderr, "🚨  \x1b[31m[ERROR]\x1b[0m "); break; // NOB_ERROR
+    case 3 : fprintf(stderr, "🔍  \x1b[35m[TRACE]\x1b[0m "); break; // NOB_TRACE
+    case 4 : fprintf(stderr, "🐛  \x1b[32m[DEBUG]\x1b[0m "); break; // NOB_DEBUG
+    case 5 : fprintf(stderr, "💀  \x1b[31m[FATAL]\x1b[0m "); break; // NOB_FATAL
     default: fprintf(stderr, "   [LOG] "); break;
   }
   vfprintf(stderr, fmt, args);

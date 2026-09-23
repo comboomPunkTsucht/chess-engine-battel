@@ -39,13 +39,10 @@
   "C_Cpp_Runner.linkerArgs": [],
   "C_Cpp_Runner.includePaths": [],
   "C_Cpp_Runner.includeSearch": [
-    "../src",
-    "../thirdparty",
-    "../thirdparty/nob.h",
-    "../thirdparty/flag.h",
-    "../thirdparty/ht.h",
-    "../thirdparty/raylib/src",
-    "../thirdparty/raygui/src"
+    "../src/",
+    "../tools/",
+    "../thirdparty/include/",
+    "../"
   ],
   "C_Cpp_Runner.excludeSearch": [
     "**/build",
@@ -62,12 +59,9 @@
   "C_Cpp_Runner.useLinkTimeOptimization": false,
   "C_Cpp_Runner.msvcSecureNoWarnings": false,
   "c-cpp-flylint.clang.includePaths": [
-    "../src",
-    "../thirdparty",
-    "../thirdparty/nob.h",
-    "../thirdparty/flag.h",
-    "../thirdparty/ht.h",
-    "../thirdparty/raylib/src",
-    "../thirdparty/raygui/src"
+    "../src/",
+    "../tools/",
+    "../thirdparty/include/",
+    "../"
   ]
 }

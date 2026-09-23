@@ -6,8 +6,10 @@
 #include <string.h>
 
 #define RAYGUI_IMPLEMENTATION
-#include "raygui.h"
 #include "raylib.h"
+#include "raymath.h"
+
+#include "raygui.h"
 
 #define NOB_IMPLEMENTATION
 #include "nob_addons.h"

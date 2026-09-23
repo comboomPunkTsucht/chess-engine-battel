@@ -10,8 +10,9 @@
 #define TOOLS_SRC_FOLDER "tools/"
 #define TOOLS_BUILD_FOLDER BUILD_FOLDER "tools/"
 #define THIRDPARTY_FOLDER "thirdparty/"
+#define THIRDPARTY_INCLUDE_FOLDER THIRDPARTY_FOLDER "include/"
 
-#define EXECUTABLE BUILD_FOLDER "chess-engine"
+#define EXECUTABLE BUILD_FOLDER "chess-engine-battel"
 
 Cmd cmd = {0};
 
@@ -48,10 +49,9 @@ bool build_tools(bool debug) {
     cmd_append(&cmd, "-O3");
   }
   clangpp_flags(&cmd);
-  cmd_append(&cmd, "-I", THIRDPARTY_FOLDER "nob.h");
-  cmd_append(&cmd, "-I", THIRDPARTY_FOLDER "ht.h");
-  cmd_append(&cmd, "-I", THIRDPARTY_FOLDER "raylib/src");
-  cmd_append(&cmd, "-I", THIRDPARTY_FOLDER "raygui/src");
+  cmd_append(&cmd, "-I", THIRDPARTY_INCLUDE_FOLDER);
+  cmd_append(&cmd, "-I", TOOLS_SRC_FOLDER);
+  cmd_append(&cmd, "-I", SOURCE_FOLDER);
   cmd_append(&cmd, "-I", ".");
   cmd_append(&cmd, "-L", BUILD_FOLDER "raylib");
   cmd_append(&cmd, "-lraylib");
@@ -87,6 +87,12 @@ bool build_tools(bool debug) {
   return cmd_run(&cmd);
 }
 
+bool run_tools(bool debug) {
+  if (!build_tools(debug)) { return 1; }
+  cmd_append(&cmd, TOOLS_BUILD_FOLDER "assets2c");
+  return cmd_run(&cmd);
+}
+
 bool build_raylib(bool debug) {
   if (!mkdir_if_not_exists(BUILD_FOLDER "raylib")) { return 1; }
 
@@ -101,22 +107,21 @@ bool build_raylib(bool debug) {
   cmd_append(&cmd, "RAYLIB_MODULE_RAYGUI=TRUE");
   cmd_append(&cmd, "RAYLIB_MODULE_RAYGUI_PATH=../../raygui/src");
   cmd_append(&cmd, "RAYLIB_RELEASE_PATH=../../../build/raylib");
-  return cmd_run(&cmd);
-}
-
-bool run_tools(bool debug) {
-  if (!build_tools(debug)) { return 1; }
-  cmd_append(&cmd, TOOLS_BUILD_FOLDER "assets2c");
+  cmd_append(&cmd, "EXTERNAL_CONFIG_FLAGS=-DSUPPORT_FILEFORMAT_FLAC=1");
+  if (debug) {
+    cmd_append(&cmd,
+               "EXTERNAL_CONFIG_FLAGS+=-DRLGL_ENABLE_OPENGL_DEBUG_CONTEXT=1");
+  }
+  cmd_append(&cmd, "EXTERNAL_CONFIG_FLAGS+=-DRLGL_SHOW_GL_DETAILS_INFO=1");
   return cmd_run(&cmd);
 }
 
 int main(int argc, char **argv) {
+  addon_init_logging();
   F_Args f_args = {0};
 
   for (int i = 0; i < argc; ++i) { da_append(&f_args, strdup(argv[i])); }
   NOB_GO_REBUILD_URSELF(argc, argv);
-
-  addon_init_logging();
 
   bool  help = false;
   bool  compile = false;
@@ -170,11 +175,9 @@ int main(int argc, char **argv) {
       cmd_append(&cmd, "-O3");
     }
     clangpp_flags(&cmd);
-    cmd_append(&cmd, "-I", THIRDPARTY_FOLDER "nob.h");
-    cmd_append(&cmd, "-I", THIRDPARTY_FOLDER "flag.h");
-    cmd_append(&cmd, "-I", THIRDPARTY_FOLDER "ht.h");
-    cmd_append(&cmd, "-I", THIRDPARTY_FOLDER "raylib/src");
-    cmd_append(&cmd, "-I", THIRDPARTY_FOLDER "raygui/src");
+    cmd_append(&cmd, "-I", THIRDPARTY_INCLUDE_FOLDER);
+    cmd_append(&cmd, "-I", TOOLS_SRC_FOLDER);
+    cmd_append(&cmd, "-I", SOURCE_FOLDER);
     cmd_append(&cmd, "-I", ".");
     cmd_append(&cmd, "-L", BUILD_FOLDER "raylib");
     cmd_append(&cmd, "-lraylib");

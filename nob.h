@@ -1,1 +1,1 @@
-thirdparty/nob.h/nob.h
+thirdparty/include/nob.h
