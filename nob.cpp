@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #define NOB_IMPLEMENTATION
-#include "nob.h"
 #include "nob_addons.h"
 #define FLAG_IMPLEMENTATION
 #include "flag.h"
@@ -61,7 +60,7 @@ int main(int argc, char **argv) {
   for (int i = 0; i < argc; ++i) { da_append(&f_args, strdup(argv[i])); }
   NOB_GO_REBUILD_URSELF(argc, argv);
 
-  nob_set_log_handler(nob_cancer_log_handler);
+  addon_init_logging();
 
   bool  help = false;
   bool  compile = false;

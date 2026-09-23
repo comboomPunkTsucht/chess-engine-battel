@@ -1,8 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define RAYGUI_IMPLEMENTATION
+#include "raygui.h"
+#include "raylib.h"
+
 #define NOB_IMPLEMENTATION
-#include "nob.h"
 #include "nob_addons.h"
 
 #define FLAG_IMPLEMENTATION
@@ -11,12 +14,8 @@
 #define HT_IMPLEMENTATION
 #include "ht.h"
 
-#define RAYGUI_IMPLEMENTATION
-#include "raygui.h"
-#include "raylib.h"
-
 int main(int argc, char **argv) {
-  nob_set_log_handler(nob_cancer_log_handler);
+  addon_init_logging();
   UNUSED(argc);
   UNUSED(argv);
   nob_log(INFO, "Hello, World!");
