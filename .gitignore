@@ -72,3 +72,5 @@ vcpkg_installed/
 Testing/
 .cache/
 .DS_Store
+
+thirdparty/raylib/src/*
