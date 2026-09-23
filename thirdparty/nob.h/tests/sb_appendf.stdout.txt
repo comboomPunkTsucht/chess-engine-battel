@@ -1,2 +1,0 @@
-count = 0, capacity = 0, items = ""
-count = 10, capacity = 16, items = "Hello, 69."

@@ -1,6 +1,0 @@
-Reset:
-Don't Reset:
-  ./empty
-  foo
-  bar
-  baz
