@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -27,11 +28,11 @@ int main(int argc, char **argv) {
   int screenWidth = 800;
   int screenHeight = 450;
 
-  SetWindowState(FLAG_VSYNC_HINT | FLAG_WINDOW_RESIZABLE | FLAG_MSAA_4X_HINT |
-                 FLAG_INTERLACED_HINT | FLAG_WINDOW_HIGHDPI |
-                 FLAG_WINDOW_ALWAYS_RUN);
+  SetConfigFlags(FLAG_MSAA_4X_HINT | FLAG_INTERLACED_HINT |
+                 FLAG_WINDOW_HIGHDPI);
   InitWindow(screenWidth, screenHeight, "Raylib Bouncing Circle");
-
+  SetWindowState(FLAG_VSYNC_HINT | FLAG_WINDOW_RESIZABLE |
+                 FLAG_WINDOW_ALWAYS_RUN);
   // 2. Variablen für den Kreis definieren
   Vector2 ballPosition = {(float)screenWidth / 2, (float)screenHeight / 2};
   Vector2 ballSpeed = {5.0f, 4.0f}; // Geschwindigkeit in X- und Y-Richtung
@@ -81,7 +82,8 @@ int main(int argc, char **argv) {
 
     // Kreis zeichnen (Position, Radius, Farbe)
     DrawCircleV(ballPosition,
-                (float)ballRadius * (min(screenWidth, screenHeight) * 0.1f),
+                (float)ballRadius *
+                    (std::min(screenWidth, screenHeight) * 0.001f),
                 MAROON);
 
     // Optional: Einen Text in die obere linke Ecke setzen
