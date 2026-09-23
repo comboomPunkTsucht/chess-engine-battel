@@ -1,34 +1,74 @@
-# Logs
-logs
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Linker files
+*.ilk
+
+# Debugger Files
+*.pdb
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+*.so.*
+
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+nob
+nob.old
+
+!tools/
+# Build directories
+build/
+Build/
+build-*/
+
+# CMake generated files
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+install_manifest.txt
+compile_commands.json
+
+# Temporary files
+*.tmp
 *.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
+*.bak
+*.swp
 
-node_modules
-dist
-dist-ssr
-dist-electron
-release
-*.local
+# vcpkg
+vcpkg_installed/
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
+# debug information files
+*.dwo
+
+# test output & cache
+Testing/
+.cache/
 .DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-!.vscode/
-!.vscode/settings.json
-!.vscode/extensions.json
-
-# dotenv environment variable files
-.env
-.env.*
-!.env.example

@@ -1,3 +1,8 @@
 {
-  "recommendations": ["VoidZero.vite-plus-extension-pack"]
+  "recommendations": [
+    "ms-vscode.cpptools",
+    "franneck94.c-cpp-runner",
+    "vadimcn.vscode-lldb",
+    "discretegames.f5anything"
+  ]
 }

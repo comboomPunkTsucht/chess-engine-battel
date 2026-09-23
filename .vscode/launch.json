@@ -1,0 +1,63 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Compile",
+      "type": "f5anything",
+      "request": "launch",
+      "command": "./nob --compile",
+      "terminalName": "Compile",
+      "terminalIndex": -1,
+      "showTerminal": true,
+      "vscCommand": ""
+    },
+    {
+      "name": "Run",
+      "type": "f5anything",
+      "request": "launch",
+      "command": "./nob --run",
+      "terminalName": "Run",
+      "terminalIndex": -1,
+      "showTerminal": true,
+      "vscCommand": ""
+    },
+    {
+      "name": "Debug",
+      "type": "f5anything",
+      "request": "launch",
+      "command": "./nob --run --debug",
+      "terminalName": "Debug",
+      "terminalIndex": -1,
+      "showTerminal": true,
+      "vscCommand": ""
+    },
+    {
+      "name": "Compile and Run",
+      "type": "f5anything",
+      "request": "launch",
+      "command": "./nob --compile --run",
+      "terminalName": "Compile and Run",
+      "terminalIndex": -1,
+      "showTerminal": true,
+      "vscCommand": ""
+    },
+    {
+      "name": "Compile and Debug",
+      "type": "f5anything",
+      "request": "launch",
+      "command": "./nob --compile --run --debug",
+      "terminalName": "Compile and Debug",
+      "terminalIndex": -1,
+      "showTerminal": true,
+      "vscCommand": ""
+    },
+    {
+      "name": "C/C++ Runner: Debug Session",
+      "type": "lldb",
+      "request": "launch",
+      "args": [],
+      "cwd": "/Users/mahd/DEV/chess/chess-engine-battel",
+      "program": "/Users/mahd/DEV/chess/chess-engine-battel/build/Debug/outDebug"
+    }
+  ]
+}
