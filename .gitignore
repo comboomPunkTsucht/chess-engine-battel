@@ -74,3 +74,5 @@ Testing/
 .DS_Store
 
 thirdparty/raylib/src/*
+thirdparty/raylib/
+thirdparty/raygui/
