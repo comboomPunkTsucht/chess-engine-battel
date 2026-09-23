@@ -7,9 +7,11 @@
 
 #define BUILD_FOLDER "build/"
 #define SOURCE_FOLDER "src/"
+#define TOOLS_SRC_FOLDER "tools/"
+#define TOOLS_BUILD_FOLDER BUILD_FOLDER "tools/"
 #define THIRDPARTY_FOLDER "thirdparty/"
 
-#define EXECUTABLE (BUILD_FOLDER "chess-engine")
+#define EXECUTABLE BUILD_FOLDER "chess-engine"
 
 Cmd cmd = {0};
 
@@ -35,9 +37,57 @@ void print_list(const char **items, size_t count) {
   printf("]\n");
 }
 
-bool build_raylib(bool debug) {
+bool build_tools(bool debug) {
+  if (!mkdir_if_not_exists(TOOLS_BUILD_FOLDER)) { return 1; }
+  clangpp(&cmd);
+  cmd_append(&cmd, TOOLS_SRC_FOLDER "assets2c.cpp");
+  clangpp_flags(&cmd);
+  if (debug) {
+    cmd_append(&cmd, "-g");
+  } else {
+    cmd_append(&cmd, "-O3");
+  }
+  clangpp_flags(&cmd);
+  cmd_append(&cmd, "-I", THIRDPARTY_FOLDER "nob.h");
+  cmd_append(&cmd, "-I", THIRDPARTY_FOLDER "ht.h");
+  cmd_append(&cmd, "-I", THIRDPARTY_FOLDER "raylib/src");
+  cmd_append(&cmd, "-I", THIRDPARTY_FOLDER "raygui/src");
+  cmd_append(&cmd, "-I", ".");
+  cmd_append(&cmd, "-L", BUILD_FOLDER "raylib");
+  cmd_append(&cmd, "-lraylib");
+  cmd_append(&cmd, "-lm");
+#ifdef __APPLE__
+  cmd_append(&cmd, "-framework", "OpenGL");
+  cmd_append(&cmd, "-framework", "Cocoa");
+  cmd_append(&cmd, "-framework", "IOKit");
+  cmd_append(&cmd, "-framework", "CoreVideo");
+  cmd_append(&cmd, "-framework", "QuartzCore");
+#elif defined(__linux__)
+  cmd_append(&cmd, "-ldl");
+  cmd_append(&cmd, "-lrt");
+  cmd_append(&cmd, "-lpthread");
+  cmd_append(&cmd, "-lX11");
+  cmd_append(&cmd, "-lGL");
+  cmd_append(&cmd, "-lGLU");
+#elif defined(_WIN32)
+  cmd_append(&cmd, "-lopengl32");
+  cmd_append(&cmd, "-lgdi32");
+  cmd_append(&cmd, "-lwinmm");
+// more platforms can be added here
+#endif
 
-  if (!mkdir_if_not_exists(BUILD_FOLDER)) { return 1; }
+  cmd_append(&cmd, "-Wno-unused-function");
+  cmd_append(&cmd, "-Wno-unused-variable");
+  cmd_append(&cmd, "-Wno-unused-parameter");
+  cmd_append(&cmd, "-Wno-missing-field-initializers");
+  cmd_append(&cmd, "-Wno-unused-value");
+  cmd_append(&cmd, "-Wno-writable-strings");
+
+  cmd_append(&cmd, "-o", TOOLS_BUILD_FOLDER "assets2c");
+  return cmd_run(&cmd);
+}
+
+bool build_raylib(bool debug) {
   if (!mkdir_if_not_exists(BUILD_FOLDER "raylib")) { return 1; }
 
   cmd_append(&cmd, "make", "-C", THIRDPARTY_FOLDER "raylib/src");
@@ -51,6 +101,12 @@ bool build_raylib(bool debug) {
   cmd_append(&cmd, "RAYLIB_MODULE_RAYGUI=TRUE");
   cmd_append(&cmd, "RAYLIB_MODULE_RAYGUI_PATH=../../raygui/src");
   cmd_append(&cmd, "RAYLIB_RELEASE_PATH=../../../build/raylib");
+  return cmd_run(&cmd);
+}
+
+bool run_tools(bool debug) {
+  if (!build_tools(debug)) { return 1; }
+  cmd_append(&cmd, TOOLS_BUILD_FOLDER "assets2c");
   return cmd_run(&cmd);
 }
 
@@ -103,6 +159,9 @@ int main(int argc, char **argv) {
   if (compile) {
     if (!mkdir_if_not_exists(BUILD_FOLDER)) { return 1; }
     if (!build_raylib(debug)) { return 1; }
+
+    if (!run_tools(debug)) { return 1; }
+
     clangpp(&cmd);
     cmd_append(&cmd, SOURCE_FOLDER "main.cpp");
     if (debug) {
@@ -113,7 +172,6 @@ int main(int argc, char **argv) {
     clangpp_flags(&cmd);
     cmd_append(&cmd, "-I", THIRDPARTY_FOLDER "nob.h");
     cmd_append(&cmd, "-I", THIRDPARTY_FOLDER "flag.h");
-    cmd_append(&cmd, "-I", THIRDPARTY_FOLDER "ht.h");
     cmd_append(&cmd, "-I", THIRDPARTY_FOLDER "ht.h");
     cmd_append(&cmd, "-I", THIRDPARTY_FOLDER "raylib/src");
     cmd_append(&cmd, "-I", THIRDPARTY_FOLDER "raygui/src");
