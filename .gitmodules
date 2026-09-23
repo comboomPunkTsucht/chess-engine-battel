@@ -1,15 +1,20 @@
 [submodule "thirdparty/nob.h"]
 	path = thirdparty/nob.h
 	url = https://github.com/tsoding/nob.h.git
+	ignore = dirty
 [submodule "thirdparty/flag.h"]
 	path = thirdparty/flag.h
 	url = https://github.com/tsoding/flag.h.git
+	ignore = dirty
 [submodule "thirdparty/ht.h"]
 	path = thirdparty/ht.h
 	url = https://github.com/tsoding/ht.h.git
+	ignore = dirty
 [submodule "thirdparty/raylib"]
 	path = thirdparty/raylib
 	url = https://github.com/raysan5/raylib.git
+	ignore = dirty
 [submodule "thirdparty/raygui"]
 	path = thirdparty/raygui
 	url = https://github.com/raysan5/raygui.git
+	ignore = dirty
