@@ -139,6 +139,7 @@ int main(int argc, char **argv) {
     cmd_append(&cmd, "-lopengl32");
     cmd_append(&cmd, "-lgdi32");
     cmd_append(&cmd, "-lwinmm");
+// more platforms can be added here
 #endif
 
     cmd_append(&cmd, "-Wno-unused-function");
