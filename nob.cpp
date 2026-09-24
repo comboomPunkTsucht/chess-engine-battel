@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #define NOB_IMPLEMENTATION
 #include "nob_addons.h"
 #define FLAG_IMPLEMENTATION
