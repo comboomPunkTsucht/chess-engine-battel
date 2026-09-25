@@ -38,7 +38,12 @@
   "C_Cpp_Runner.compilerArgs": [],
   "C_Cpp_Runner.linkerArgs": [],
   "C_Cpp_Runner.includePaths": [],
-  "C_Cpp_Runner.includeSearch": [".", "src", "tools", "thirdparty/include"],
+  "C_Cpp_Runner.includeSearch": [
+    ".",
+    "src",
+    "tools",
+    "thirdparty/include"
+  ],
   "C_Cpp_Runner.excludeSearch": [
     "**/build",
     "**/build/**",
@@ -62,7 +67,12 @@
   "cmake.ignoreCMakeListsMissing": true,
   "C_Cpp.default.cppStandard": "c++26",
   "C_Cpp.default.cStandard": "c99",
-  "C_Cpp.default.browse.path": [".", "src", "tools", "thirdparty/include"],
+  "C_Cpp.default.browse.path": [
+    ".",
+    "src",
+    "tools",
+    "thirdparty/include"
+  ],
   "C_Cpp.default.recursiveIncludes.order": "breadthFirst",
   "C_Cpp.default.recursiveIncludes.priority": "afterSystemIncludes",
   "C_Cpp.default.recursiveIncludes.reduce": "default",
