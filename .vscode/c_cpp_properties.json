@@ -1,17 +1,134 @@
 {
   "configurations": [
     {
-      "name": "macos-clang-arm64",
+      "name": "Mac (arm64)",
       "includePath": [
-        "${workspaceFolder}/**"
+        "${workspaceFolder}/**",
+        "${workspaceFolder}/thirdparty/include",
+        "${workspaceFolder}/src",
+        "${workspaceFolder}/tools"
       ],
-      "compilerPath": "/opt/homebrew/opt/llvm/bin/clang",
+      "defines": [
+        "RAYGUI_IMPLEMENTATION",
+        "NOB_IMPLEMENTATION",
+        "FLAG_IMPLEMENTATION",
+        "HT_IMPLEMENTATION",
+        "SUPPORT_FILEFORMAT_FLAC=1"
+      ],
+      "macFrameworkPath": [
+        "/System/Library/Frameworks",
+        "/Library/Frameworks"
+      ],
+      "compilerPath": "/usr/bin/clang++",
       "cStandard": "c99",
       "cppStandard": "c++26",
-      "intelliSenseMode": "macos-clang-arm64",
-      "compilerArgs": [
-        ""
-      ]
+      "intelliSenseMode": "macos-clang-arm64"
+    },
+    {
+      "name": "Mac (x64)",
+      "includePath": [
+        "${workspaceFolder}/**",
+        "${workspaceFolder}/thirdparty/include",
+        "${workspaceFolder}/src",
+        "${workspaceFolder}/tools"
+      ],
+      "defines": [
+        "RAYGUI_IMPLEMENTATION",
+        "NOB_IMPLEMENTATION",
+        "FLAG_IMPLEMENTATION",
+        "HT_IMPLEMENTATION",
+        "SUPPORT_FILEFORMAT_FLAC=1"
+      ],
+      "macFrameworkPath": [
+        "/System/Library/Frameworks",
+        "/Library/Frameworks"
+      ],
+      "compilerPath": "/usr/bin/clang++",
+      "cStandard": "c99",
+      "cppStandard": "c++26",
+      "intelliSenseMode": "macos-clang-x64"
+    },
+    {
+      "name": "Linux (x64)",
+      "includePath": [
+        "${workspaceFolder}/**",
+        "${workspaceFolder}/thirdparty/include",
+        "${workspaceFolder}/src",
+        "${workspaceFolder}/tools"
+      ],
+      "defines": [
+        "RAYGUI_IMPLEMENTATION",
+        "NOB_IMPLEMENTATION",
+        "FLAG_IMPLEMENTATION",
+        "HT_IMPLEMENTATION",
+        "SUPPORT_FILEFORMAT_FLAC=1"
+      ],
+      "compilerPath": "/usr/bin/clang++",
+      "cStandard": "c99",
+      "cppStandard": "c++26",
+      "intelliSenseMode": "linux-clang-x64"
+    },
+    {
+      "name": "Linux (arm64)",
+      "includePath": [
+        "${workspaceFolder}/**",
+        "${workspaceFolder}/thirdparty/include",
+        "${workspaceFolder}/src",
+        "${workspaceFolder}/tools"
+      ],
+      "defines": [
+        "RAYGUI_IMPLEMENTATION",
+        "NOB_IMPLEMENTATION",
+        "FLAG_IMPLEMENTATION",
+        "HT_IMPLEMENTATION",
+        "SUPPORT_FILEFORMAT_FLAC=1"
+      ],
+      "compilerPath": "/usr/bin/clang++",
+      "cStandard": "c99",
+      "cppStandard": "c++26",
+      "intelliSenseMode": "linux-clang-arm64"
+    },
+    {
+      "name": "Windows (x64)",
+      "includePath": [
+        "${workspaceFolder}/**",
+        "${workspaceFolder}/thirdparty/include",
+        "${workspaceFolder}/src",
+        "${workspaceFolder}/tools"
+      ],
+      "defines": [
+        "RAYGUI_IMPLEMENTATION",
+        "NOB_IMPLEMENTATION",
+        "FLAG_IMPLEMENTATION",
+        "HT_IMPLEMENTATION",
+        "SUPPORT_FILEFORMAT_FLAC=1",
+        "_WIN32"
+      ],
+      "compilerPath": "C:/msys64/mingw64/bin/clang++.exe",
+      "cStandard": "c99",
+      "cppStandard": "c++26",
+      "intelliSenseMode": "windows-clang-x64"
+    },
+    {
+      "name": "Windows (arm64)",
+      "includePath": [
+        "${workspaceFolder}/**",
+        "${workspaceFolder}/thirdparty/include",
+        "${workspaceFolder}/src",
+        "${workspaceFolder}/tools"
+      ],
+      "defines": [
+        "RAYGUI_IMPLEMENTATION",
+        "NOB_IMPLEMENTATION",
+        "FLAG_IMPLEMENTATION",
+        "HT_IMPLEMENTATION",
+        "SUPPORT_FILEFORMAT_FLAC=1",
+        "_WIN32"
+      ],
+      "compilerPath": "C:/msys64/mingw64/bin/clang++.exe",
+      "cStandard": "c99",
+      "cppStandard": "c++26",
+      "intelliSenseMode": "windows-clang-arm64"
     }
   ],
   "version": 4
