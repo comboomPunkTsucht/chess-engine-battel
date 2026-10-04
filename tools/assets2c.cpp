@@ -13,8 +13,6 @@ namespace fs = std::filesystem;
 
 namespace Assets2C {
 
-// Hilfsfunktion: Macht aus Dateinamen gültige C++ Variablennamen
-// z.B. "images/logo.png" -> "images_logo_png"
 std::string sanitize_name(std::string name) {
   for (char &c : name) {
     if (!isalnum(c)) { c = '_'; }
@@ -26,8 +24,8 @@ bool generate_header(const std::string &input_dir,
                      const std::string &output_header) {
   std::ofstream out(output_header);
   if (!out) {
-    std::cerr << "Fehler: Konnte Ausgabedatei nicht oeffnen: " << output_header
-              << "\n";
+    nob_log(ERROR, "Konnte Ausgabedatei nicht oeffnen: %s",
+            output_header.c_str());
     return false;
   }
 
@@ -39,25 +37,39 @@ bool generate_header(const std::string &input_dir,
   if (!fs::exists(input_dir) || !fs::is_directory(input_dir)) {
     nob_log(ERROR, "Asset-Verzeichnis '%s' existiert nicht.",
             input_dir.c_str());
-    return true;
+    return false; // Wurde korrigiert (vorher 'return true;')
   }
 
   // Iteriere durch alle Dateien im Ordner (auch Unterordner)
   for (const auto &entry : fs::recursive_directory_iterator(input_dir)) {
     if (entry.is_regular_file()) {
-      std::ifstream in(entry.path(), std::ios::binary);
+      std::string filename = entry.path().filename().string();
+
+      // Versteckte macOS/Linux-Systemdateien wie .DS_Store ignorieren
+      if (filename.front() == '.') { continue; }
+
+      // Datei im Binärmodus öffnen und direkt ans Ende springen, um die Größe
+      // zu lesen
+      std::ifstream in(entry.path(), std::ios::binary | std::ios::ate);
       if (!in) { continue; }
 
-      // Gesamte Datei in Buffer lesen
-      std::vector<unsigned char> buffer((std::istreambuf_iterator<char>(in)),
-                                        {});
+      std::streamsize size = in.tellg();
+      in.seekg(0, std::ios::beg);
 
-      // Relativen Pfad als Basis für den Variablennamen nutzen
-      std::string rel_path = fs::relative(entry.path(), input_dir).string();
-      std::string var_name = sanitize_name(rel_path);
+      // Leere Dateien abfangen, da leere C-Arrays [] = {} Fehler verursachen
+      if (size <= 0) { continue; }
 
-      // Array schreiben (inline verhindert Multiple-Definition Fehler beim
-      // Linken)
+      // Effizienteres Auslesen als Block statt per char-Iterator
+      std::vector<unsigned char> buffer(size);
+      if (!in.read(reinterpret_cast<char *>(buffer.data()), size)) {
+        nob_log(ERROR, "Fehler beim Lesen der Datei: %s", filename.c_str());
+        continue;
+      }
+
+      // Nur den Dateinamen als Basis für den Variablennamen nutzen, nicht den
+      // vollen Pfad
+      std::string var_name = sanitize_name(filename);
+
       out << "    inline const unsigned char " << var_name
           << "[] = {\n        ";
       for (size_t i = 0; i < buffer.size(); ++i) {
@@ -68,7 +80,7 @@ bool generate_header(const std::string &input_dir,
         }
       }
       out << "\n    };\n";
-      // Größe speichern
+      // std::dec garantiert die Dezimaldarstellung der Größe
       out << "    inline const size_t " << var_name << "_size = " << std::dec
           << buffer.size() << ";\n\n";
     }
@@ -80,19 +92,16 @@ bool generate_header(const std::string &input_dir,
 } // namespace Assets2C
 
 int main(int argc, char **argv) {
-
   addon_init_logging();
-  // Standard-Pfade
+
   std::string input_dir = "assets";
   std::string output_dir = "build/assets";
   std::string output_file = "build/assets/assets.h";
 
-  // Erlaube Überschreiben per Argumente (CLI)
   if (argc > 1) { input_dir = argv[1]; }
   if (argc > 2) { output_file = argv[2]; }
   if (argc > 3) { output_dir = argv[3]; }
 
-  // Stelle sicher, dass der Ausgabeordner (z.B. build/assets/) existiert
   if (!mkdir_if_not_exists(output_dir.c_str())) {
     nob_log(ERROR, "Konnte Ausgabeordner '%s' nicht erstellen.",
             output_dir.c_str());

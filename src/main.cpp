@@ -30,11 +30,30 @@ int main(int argc, char **argv) {
   // 1. Fenster und Umgebung initialisieren
   int screenWidth = 800;
   int screenHeight = 450;
+  int font_size = (int)(screenWidth * 0.025);
 
   SetConfigFlags(FLAG_MSAA_4X_HINT | FLAG_INTERLACED_HINT |
                  FLAG_WINDOW_HIGHDPI | FLAG_VSYNC_HINT | FLAG_WINDOW_RESIZABLE |
                  FLAG_WINDOW_ALWAYS_RUN);
   InitWindow(screenWidth, screenHeight, "Raylib Bouncing Circle");
+
+  Font font_regular = LoadFontFromMemory(
+      ".ttf", Assets::CaskaydiaCoveNerdFontPropo_Regular_ttf,
+      Assets::CaskaydiaCoveNerdFontPropo_Regular_ttf_size, font_size, NULL, 0);
+  Font font_itallic = LoadFontFromMemory(
+      ".ttf", Assets::CaskaydiaCoveNerdFontPropo_Italic_ttf,
+      Assets::CaskaydiaCoveNerdFontPropo_Italic_ttf_size, font_size, NULL, 0);
+
+  Font font_bold = LoadFontFromMemory(
+      ".ttf", Assets::CaskaydiaCoveNerdFontPropo_Bold_ttf,
+      Assets::CaskaydiaCoveNerdFontPropo_Bold_ttf_size, font_size, NULL, 0);
+
+#ifndef __APPLE__
+
+  SetWindowIcon(
+      LoadImageFromMemory(".png", Assets::icon_png, Assets::icon_png_size));
+
+#endif
   // 2. Variablen für den Kreis definieren
   Vector2 ballPosition = {(float)screenWidth / 2, (float)screenHeight / 2};
   Vector2 ballSpeed = {5.0f, 4.0f}; // Geschwindigkeit in X- und Y-Richtung
@@ -54,6 +73,19 @@ int main(int argc, char **argv) {
     if (IsWindowResized()) {
       screenWidth = GetScreenWidth();
       screenHeight = GetScreenHeight();
+      font_size = (int)(screenWidth * 0.025);
+      font_regular = LoadFontFromMemory(
+          ".ttf", Assets::CaskaydiaCoveNerdFontPropo_Regular_ttf,
+          Assets::CaskaydiaCoveNerdFontPropo_Regular_ttf_size, font_size, NULL,
+          0);
+      font_itallic = LoadFontFromMemory(
+          ".ttf", Assets::CaskaydiaCoveNerdFontPropo_Italic_ttf,
+          Assets::CaskaydiaCoveNerdFontPropo_Italic_ttf_size, font_size, NULL,
+          0);
+
+      font_bold = LoadFontFromMemory(
+          ".ttf", Assets::CaskaydiaCoveNerdFontPropo_Bold_ttf,
+          Assets::CaskaydiaCoveNerdFontPropo_Bold_ttf_size, font_size, NULL, 0);
     }
 
     ballPosition.x += ballSpeed.x;
@@ -91,10 +123,11 @@ int main(int argc, char **argv) {
                 NORD_PRIMARY_COLOR);
 
     // Optional: Einen Text in die obere linke Ecke setzen
-    DrawText("Raylib Bouncing Circle", 10, 10, 20, NORD_FOREGROUND_COLOR);
+    DrawTextEx(font_regular, "Raylib Bouncing Circle", {10, 10}, 20, 4,
+               NORD_FOREGROUND_COLOR);
 
-    DrawText(nob_temp_sprintf("%d FPS", GetFPS()), 10, 38, 20,
-             NORD_PRIMARY_COLOR);
+    DrawTextEx(font_regular, nob_temp_sprintf("%d FPS", GetFPS()), {10, 34}, 20,
+               4, NORD_PRIMARY_COLOR);
 
     EndDrawing();
   }

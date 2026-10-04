@@ -218,5 +218,117 @@ int main(int argc, char **argv) {
     cmd_append(&cmd, EXECUTABLE);
     if (!cmd_run(&cmd)) { return 1; }
   }
+
+#if defined(__APPLE__)
+  if (compile && !run && !debug) {
+    // Pfade sauber als Variablen definieren
+    const char *app_dir = BUILD_FOLDER "chess-engine-battel.app";
+    const char *contents_dir = BUILD_FOLDER "chess-engine-battel.app/Contents";
+    const char *macos_dir =
+        BUILD_FOLDER "chess-engine-battel.app/Contents/MacOS";
+    const char *plist_path =
+        BUILD_FOLDER "chess-engine-battel.app/Contents/Info.plist";
+    const char *pkginfo_path =
+        BUILD_FOLDER "chess-engine-battel.app/Contents/PkgInfo";
+
+    cmd_append(&cmd, "rm", "-rf", app_dir);
+
+    if (!cmd_run(&cmd)) { return 1; }
+
+    // 1. Verzeichnisstruktur erstellen
+    if (!mkdir_if_not_exists(app_dir)) { return 1; }
+    if (!mkdir_if_not_exists(contents_dir)) { return 1; }
+    if (!mkdir_if_not_exists(macos_dir)) { return 1; }
+
+    // 4. Dein Icon-Verzeichnis kopieren
+    if (!copy_directory_recursively(
+            "assets-macos-extra",
+            BUILD_FOLDER "chess-engine-battel.app/Contents/Resources")) {
+      return 1;
+    }
+
+    // 2. Executable in das MacOS-Verzeichnis kopieren
+    if (!copy_file(
+            EXECUTABLE, BUILD_FOLDER
+            "chess-engine-battel.app/Contents/MacOS/chess-engine-battel")) {
+      return 1;
+    }
+
+    // 3. Info.plist schreiben (Fehler aus dem Originalcode behoben)
+    //        "   <key>DTCompiler</key>\n"
+    //        "      <string>com.apple.compilers.llvm.clang.1_0 </string>\n"
+    const char *plist_content =
+        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+        "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" "
+        "\"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
+        "<plist version=\"1.0\">\n"
+        "<dict>\n"
+        "   <key>BuildMachineOSBuild</key>\n"
+        "       <string>26A5416b</string>\n"
+        "   <key>CFBundleDevelopmentRegion</key>\n"
+        "       <string>en</string>\n"
+        "   <key>CFBundleDisplayName</key>\n"
+        "       <string>comboom.sucht Chess Battle</string>\n"
+        "   <key>CFBundleExecutable</key>\n"
+        "       <string>chess-engine-battel</string>\n"
+        "   <key>CFBundleIconFile</key>\n"
+        "       <string>AppIcon</string>\n"
+        "   <key>CFBundleIconName</key>\n"
+        "       <string>AppIcon</string>\n"
+        "   <key>CFBundleIdentifier</key>\n"
+        "      <string>dev.comboom.sucht.chess-engine-battel</string>\n"
+        "   <key>CFBundleInfoDictionaryVersion</key>\n"
+        "      <string>6.0</string>\n"
+        "   <key>CFBundleName</key>\n"
+        "      <string>comboom.sucht Chess Battle</string>\n"
+        "   <key>CFBundlePackageType</key>\n"
+        "      <string>APPL</string>\n"
+        "   <key>CFBundleShortVersionString</key>\n"
+        "      <string>0.0.1</string>\n"
+        "   <key>CFBundleSupportedPlatforms</key>\n"
+        "      <array>\n"
+        "         <string>MacOSX</string>\n"
+        "      </array>\n"
+        "   <key>CFBundleVersion</key>\n"
+        "      <string>0.0.1</string>\n"
+        "   <key>DTPlatformBuild</key>\n"
+        "      <string>26A5406c</string>\n"
+        "   <key>DTPlatformName</key>\n"
+        "      <string>macosx</string>\n"
+        "   <key>DTPlatformVersion</key>\n"
+        "      <string>27.0</string>\n"
+        "   <key>DTSDKBuild</key>\n"
+        "      <string>26A5406c</string>\n"
+        "   <key>DTSDKName</key>\n"
+        "      <string>macosx27.0</string>\n"
+        "   <key>DTXcode</key>\n"
+        "      <string>2700</string>\n"
+        "   <key>DTXcodeBuild</key>\n"
+        "      <string>27A5237l</string>\n"
+        "   <key>LSApplicationCategoryType</key>\n"
+        "      <string>public.app-category.games</string>\n"
+        "   <key>LSMinimumSystemVersion</key>\n"
+        "      <string>26.0</string>\n"
+        "   <key>LSUIElement</key>\n"
+        "      <true/>\n"
+
+        "</dict>\n"
+        "</plist>";
+
+    const char *pkginfo_content = "\x41\x50\x50\x4C\x3f\x3f\x3f\x3f";
+
+    if (!write_entire_file(plist_path, plist_content, strlen(plist_content))) {
+      nob_log(ERROR, "Konnte Info.plist nicht erstellen: %s", plist_path);
+      return 1;
+    };
+
+    if (!write_entire_file(pkginfo_path, pkginfo_content,
+                           strlen(pkginfo_content))) {
+      nob_log(ERROR, "Konnte PkgInfo nicht erstellen: %s", pkginfo_path);
+      return 1;
+    };
+  }
+#endif
+
   return 0;
 }
