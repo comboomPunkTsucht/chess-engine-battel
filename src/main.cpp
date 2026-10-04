@@ -45,7 +45,9 @@ int main(int argc, char **argv) {
 
   // 3. Haupt-Schleife (läuft, bis ESC gedrückt oder das Fenster geschlossen
   // wird)
+  size_t mark = temp_save();
   while (!WindowShouldClose()) {
+    temp_rewind(mark); // Alle temporären Strings zurücksetzen
     // --- UPDATE (Logik) ---
 
     if (IsWindowResized()) {
