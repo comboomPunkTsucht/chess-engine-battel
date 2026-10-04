@@ -39,9 +39,6 @@ uint32_t get_Nord_Color_as_uint32_by_index(int index) {
   return get_Nord_Color_as_uint32(get_Nord_Color_by_index(index));
 }
 
-#define NORD_ANSI_RGB(color)                                                   \
-  (((color) >> 24) & 0xFF), (((color) >> 16) & 0xFF), (((color) >> 8) & 0xFF)
-
 #ifdef RAYLIB_H
 
 Color get_Nord_Color_as_raylib_color(Nord_Colors color) {
@@ -158,30 +155,12 @@ NOBDEF void nob_breakpoint(void) {
 NOBDEF void nob_addon_advanced_log_handler(Nob_Log_Level level, const char *fmt,
                                            va_list args) {
   switch ((int)level) {
-    case 0:
-      fprintf(stderr, "ℹ️  \x1b[38;2;%d;%d;%dm[INFO]\x1b[0m ",
-              NORD_ANSI_RGB(NORD6));
-      break; // NOB_INFO
-    case 1:
-      fprintf(stderr, "⚠️  \x1b[38;2;%d;%d;%dm[WARN]\x1b[0m ",
-              NORD_ANSI_RGB(NORD12));
-      break; // NOB_WARNING
-    case 2:
-      fprintf(stderr, "🚨  \x1b[38;2;%d;%d;%dm[ERROR]\x1b[0m ",
-              NORD_ANSI_RGB(NORD11));
-      break; // NOB_ERROR
-    case 3:
-      fprintf(stderr, "🔍  \x1b[38;2;%d;%d;%dm[TRACE]\x1b[0m ",
-              NORD_ANSI_RGB(NORD13));
-      break; // NOB_TRACE
-    case 4:
-      fprintf(stderr, "🐛  \x1b[38;2;%d;%d;%dm[DEBUG]\x1b[0m ",
-              NORD_ANSI_RGB(NORD15));
-      break; // NOB_DEBUG
-    case 5:
-      fprintf(stderr, "💀  \x1b[38;2;%d;%d;%dm[FATAL]\x1b[0m ",
-              NORD_ANSI_RGB(NORD11));
-      break; // NOB_FATAL
+    case 0 : fprintf(stderr, "ℹ️  \x1b[36m[INFO]\x1b[0m "); break; // NOB_INFO
+    case 1 : fprintf(stderr, "⚠️  \x1b[33m[WARN]\x1b[0m "); break; // NOB_WARNING
+    case 2 : fprintf(stderr, "🚨  \x1b[31m[ERROR]\x1b[0m "); break; // NOB_ERROR
+    case 3 : fprintf(stderr, "🔍  \x1b[35m[TRACE]\x1b[0m "); break; // NOB_TRACE
+    case 4 : fprintf(stderr, "🐛  \x1b[32m[DEBUG]\x1b[0m "); break; // NOB_DEBUG
+    case 5 : fprintf(stderr, "💀  \x1b[31m[FATAL]\x1b[0m "); break; // NOB_FATAL
     default: fprintf(stderr, "   [LOG] "); break;
   }
   vfprintf(stderr, fmt, args);
