@@ -1,4 +1,97 @@
 #include "nob.h"
+#include <stdint.h>
+
+#ifndef NORD_COLORS_H
+#define NORD_COLORS_H
+
+typedef enum {
+  // Polar Night
+  NORD0 = 0x2e3440ff,
+  NORD1 = 0x3b4252ff,
+  NORD2 = 0x434c5eff,
+  NORD3 = 0x4c566aff,
+  // Snow Storm
+  NORD4 = 0xd8dee9ff,
+  NORD5 = 0xe5e9f0ff,
+  NORD6 = 0xeceff4ff,
+  // Frost
+  NORD7 = 0x8fbcbbff,
+  NORD8 = 0x88c0d0ff,
+  NORD9 = 0x81a1c1ff,
+  NORD10 = 0x5e81acff,
+  // Aurora
+  NORD11 = 0xbf616aff,
+  NORD12 = 0xd08770ff,
+  NORD13 = 0xebcb8bff,
+  NORD14 = 0xa3be8cff,
+  NORD15 = 0xb48eadff,
+
+} Nord_Colors;
+
+static const Nord_Colors Nord_colors[] = {
+    NORD0, NORD1, NORD2,  NORD3,  NORD4,  NORD5,  NORD6,  NORD7,
+    NORD8, NORD9, NORD10, NORD11, NORD12, NORD13, NORD14, NORD15};
+
+uint32_t get_Nord_Color_as_uint32(Nord_Colors color) { return (uint32_t)color; }
+Nord_Colors get_Nord_Color_by_index(int index) { return Nord_colors[index]; }
+
+uint32_t get_Nord_Color_as_uint32_by_index(int index) {
+  return get_Nord_Color_as_uint32(get_Nord_Color_by_index(index));
+}
+
+#define NORD_ANSI_RGB(color)                                                   \
+  (((color) >> 24) & 0xFF), (((color) >> 16) & 0xFF), (((color) >> 8) & 0xFF)
+
+#ifdef RAYLIB_H
+
+Color get_Nord_Color_as_raylib_color(Nord_Colors color) {
+  return GetColor(get_Nord_Color_as_uint32(color));
+}
+
+Color get_Nord_Color_as_raylib_color_by_index(int index) {
+  return get_Nord_Color_as_raylib_color(get_Nord_Color_by_index(index));
+}
+
+#endif
+
+// this is a personel addition section for better theming and color usage, this
+// is not part of the original nord color palette
+
+#ifdef RAYLIB_H
+
+#define NORD_BACKGROUND_COLOR get_Nord_Color_as_raylib_color(NORD0)
+#define NORD_FOREGROUND_COLOR get_Nord_Color_as_raylib_color(NORD6)
+#define NORD_TEXT_COLOR NORD_FOREGROUND_COLOR
+#define NORD_PRIMARY_COLOR get_Nord_Color_as_raylib_color(NORD14)
+#define NORD_ACCENT_COLOR get_Nord_Color_as_raylib_color(NORD11)
+#define NORD_HIGHLIGHT_COLOR NORD_ACCENT_COLOR
+#define NORD_ERROR_COLOR get_Nord_Color_as_raylib_color(NORD11)
+#define NORD_WARNING_COLOR get_Nord_Color_as_raylib_color(NORD12)
+#define NORD_INFO_COLOR get_Nord_Color_as_raylib_color(NORD6)
+#define NORD_TRACE_COLOR get_Nord_Color_as_raylib_color(NORD13)
+#define NORD_DEBUG_COLOR get_Nord_Color_as_raylib_color(NORD15)
+#define NORD_FATAL_COLOR get_Nord_Color_as_raylib_color(NORD11)
+#define NORD_SUCCESS_COLOR get_Nord_Color_as_raylib_color(NORD14)
+
+#else
+
+#define NORD_BACKGROUND_COLOR get_Nord_Color_as_uint32(NORD0)
+#define NORD_FOREGROUND_COLOR get_Nord_Color_as_uint32(NORD6)
+#define NORD_TEXT_COLOR NORD_FOREGROUND_COLOR
+#define NORD_PRIMARY_COLOR get_Nord_Color_as_uint32(NORD14)
+#define NORD_ACCENT_COLOR get_Nord_Color_as_uint32(NORD11)
+#define NORD_HIGHLIGHT_COLOR NORD_ACCENT_COLOR
+#define NORD_ERROR_COLOR get_Nord_Color_as_uint32(NORD11)
+#define NORD_WARNING_COLOR get_Nord_Color_as_uint32(NORD12)
+#define NORD_INFO_COLOR get_Nord_Color_as_uint32(NORD6)
+#define NORD_TRACE_COLOR get_Nord_Color_as_uint32(NORD13)
+#define NORD_DEBUG_COLOR get_Nord_Color_as_uint32(NORD15)
+#define NORD_FATAL_COLOR get_Nord_Color_as_uint32(NORD11)
+#define NORD_SUCCESS_COLOR get_Nord_Color_as_uint32(NORD14)
+
+#endif
+
+#endif // NORD_COLORS_H
 
 #ifdef NOB_H_
 
@@ -65,12 +158,30 @@ NOBDEF void nob_breakpoint(void) {
 NOBDEF void nob_addon_advanced_log_handler(Nob_Log_Level level, const char *fmt,
                                            va_list args) {
   switch ((int)level) {
-    case 0 : fprintf(stderr, "ℹ️  \x1b[36m[INFO]\x1b[0m "); break; // NOB_INFO
-    case 1 : fprintf(stderr, "⚠️  \x1b[33m[WARN]\x1b[0m "); break; // NOB_WARNING
-    case 2 : fprintf(stderr, "🚨  \x1b[31m[ERROR]\x1b[0m "); break; // NOB_ERROR
-    case 3 : fprintf(stderr, "🔍  \x1b[35m[TRACE]\x1b[0m "); break; // NOB_TRACE
-    case 4 : fprintf(stderr, "🐛  \x1b[32m[DEBUG]\x1b[0m "); break; // NOB_DEBUG
-    case 5 : fprintf(stderr, "💀  \x1b[31m[FATAL]\x1b[0m "); break; // NOB_FATAL
+    case 0:
+      fprintf(stderr, "ℹ️  \x1b[38;2;%d;%d;%dm[INFO]\x1b[0m ",
+              NORD_ANSI_RGB(NORD6));
+      break; // NOB_INFO
+    case 1:
+      fprintf(stderr, "⚠️  \x1b[38;2;%d;%d;%dm[WARN]\x1b[0m ",
+              NORD_ANSI_RGB(NORD12));
+      break; // NOB_WARNING
+    case 2:
+      fprintf(stderr, "🚨  \x1b[38;2;%d;%d;%dm[ERROR]\x1b[0m ",
+              NORD_ANSI_RGB(NORD11));
+      break; // NOB_ERROR
+    case 3:
+      fprintf(stderr, "🔍  \x1b[38;2;%d;%d;%dm[TRACE]\x1b[0m ",
+              NORD_ANSI_RGB(NORD13));
+      break; // NOB_TRACE
+    case 4:
+      fprintf(stderr, "🐛  \x1b[38;2;%d;%d;%dm[DEBUG]\x1b[0m ",
+              NORD_ANSI_RGB(NORD15));
+      break; // NOB_DEBUG
+    case 5:
+      fprintf(stderr, "💀  \x1b[38;2;%d;%d;%dm[FATAL]\x1b[0m ",
+              NORD_ANSI_RGB(NORD11));
+      break; // NOB_FATAL
     default: fprintf(stderr, "   [LOG] "); break;
   }
   vfprintf(stderr, fmt, args);

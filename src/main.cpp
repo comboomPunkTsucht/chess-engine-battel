@@ -78,19 +78,20 @@ int main(int argc, char **argv) {
     // --- DRAW (Zeichnen) ---
     BeginDrawing();
 
-    ClearBackground(
-        RAYWHITE); // Bildschirm mit Farbe füllen (verhindert Schlieren)
+    ClearBackground(NORD_BACKGROUND_COLOR); // Bildschirm mit Farbe füllen
+                                            // (verhindert Schlieren)
 
     // Kreis zeichnen (Position, Radius, Farbe)
     DrawCircleV(ballPosition,
                 (float)ballRadius *
                     (std::min(screenWidth, screenHeight) * 0.001f),
-                MAROON);
+                NORD_PRIMARY_COLOR);
 
     // Optional: Einen Text in die obere linke Ecke setzen
-    DrawText("Raylib Bouncing Circle", 10, 10, 20, DARKGRAY);
+    DrawText("Raylib Bouncing Circle", 10, 10, 20, NORD_FOREGROUND_COLOR);
 
-    DrawFPS(20, 40); // FPS in die obere linke Ecke setzen
+    DrawText(nob_temp_sprintf("%d FPS", GetFPS()), 10, 38, 20,
+             NORD_PRIMARY_COLOR);
 
     EndDrawing();
   }
