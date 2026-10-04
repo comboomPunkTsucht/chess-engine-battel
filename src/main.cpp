@@ -1,4 +1,4 @@
-#include "assets/assets.h"
+#include "assets.h"
 #include <algorithm>
 #include <math.h>
 #include <stdbool.h>

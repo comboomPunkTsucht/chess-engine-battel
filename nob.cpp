@@ -176,6 +176,7 @@ int main(int argc, char **argv) {
     cmd_append(&cmd, "-I", THIRDPARTY_INCLUDE_FOLDER);
     cmd_append(&cmd, "-I", TOOLS_SRC_FOLDER);
     cmd_append(&cmd, "-I", SOURCE_FOLDER);
+    cmd_append(&cmd, "-I", BUILD_FOLDER "assets");
     cmd_append(&cmd, "-I", ".");
     cmd_append(&cmd, "-L", BUILD_FOLDER "raylib");
     cmd_append(&cmd, "-lraylib");
