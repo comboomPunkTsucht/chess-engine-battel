@@ -1,36 +1,15 @@
-#ifndef ASSETS2C_H_
-#define ASSETS2C_H_
-#include "raylib.h"
-#include "raymath.h"
-#define NOB_IMPLEMENTATION
-#include "nob_addons.h"
-#define HT_IMPLEMENTATION
-#include "ht.h"
+#pragma once
+#include <string>
 
-enum AssetType {
-  ASSET_TYPE_UNKNOWN = 0,
-  ASSET_TYPE_IMAGE,
-  ASSET_TYPE_SOUND,
-  ASSET_TYPE_MUSIC,
-  ASSET_TYPE_SHADER,
-  ASSET_TYPE_FONT,
-  ASSET_TYPE_TEXT,
-  ASSET_TYPE_BINARY
-};
-
-typedef struct {
-    char          *name;
-    enum AssetType type;
-
-    union {
-        Image  image;
-        Sound  sound;
-        Music  music;
-        Shader shader;
-        Font   font;
-        char  *text;
-        void  *binary;
-    } data;
-} Asset;
-
-#endif
+namespace Assets2C {
+/**
+ * Konvertiert alle Dateien in 'input_dir' in C-Arrays und schreibt sie in
+ * 'output_header'.
+ * @param input_dir Der Pfad zum Assets-Ordner (z.B. "assets")
+ * @param output_header Der Pfad zur generierten Header-Datei (z.B.
+ * "build/assets/assets.h")
+ * @return true bei Erfolg, false bei Fehlern.
+ */
+bool generate_header(const std::string &input_dir,
+                     const std::string &output_header);
+} // namespace Assets2C
