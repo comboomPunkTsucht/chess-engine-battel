@@ -25,3 +25,5 @@
 [submodule "thirdparty/IXWebSocket"]
 	path = thirdparty/IXWebSocket
 	url = https://github.com/machinezone/IXWebSocket.git
+    ignore = dirty
+    
