@@ -329,7 +329,7 @@ int main(int argc, char **argv) {
         "   <key>NSHighResolutionCapable</key>\n"
         "      <true/>\n"
         "   <key>NSHumanReadableCopyright</key>\n"
-        "      <string>Copyright © 2026 comboom.sucht.Alle Rechte "
+        "      <string>Copyright © 2026 comboom.sucht. Alle Rechte "
         "vorbehalten.</string>\n"
         "   </dict>\n"
         "   </plist>";
