@@ -46,6 +46,13 @@ bool build_tools(bool debug) {
   clangpp_flags(&cmd);
   if (debug) {
     cmd_append(&cmd, "-g");
+
+    // NEU: Zwingt Clang, die .o Datei zu behalten, damit dsymutil sie lesen
+    // kann
+    cmd_append(&cmd, "-save-temps=obj");
+    // NEU: Legt die .o Datei sauber im "build/"-Ordner ab anstatt im
+    // Hauptverzeichnis
+    cmd_append(&cmd, "-dumpdir", TOOLS_BUILD_FOLDER);
   } else {
     cmd_append(&cmd, "-O3");
   }
@@ -120,6 +127,8 @@ bool build_raylib(bool debug) {
 #ifdef __APPLE__
   cmd_append(&cmd, "EXTERNAL_CONFIG_FLAGS+=-mmacos-version-min=26.0");
 #endif
+  // cmd_append(&cmd, "EXTERNAL_CONFIG_FLAGS+=--dumpdir",
+  //           "EXTERNAL_CONFIG_FLAGS+=../../../build/raylib");
   return cmd_run(&cmd);
 }
 
@@ -178,6 +187,12 @@ int main(int argc, char **argv) {
     cmd_append(&cmd, SOURCE_FOLDER "main.cpp");
     if (debug) {
       cmd_append(&cmd, "-g");
+      // NEU: Zwingt Clang, die .o Datei zu behalten, damit dsymutil sie lesen
+      // kann
+      cmd_append(&cmd, "-save-temps=obj");
+      // NEU: Legt die .o Datei sauber im "build/"-Ordner ab anstatt im
+      // Hauptverzeichnis
+      cmd_append(&cmd, "-dumpdir", BUILD_FOLDER);
     } else {
       cmd_append(&cmd, "-O3");
     }
@@ -278,7 +293,7 @@ int main(int argc, char **argv) {
     // 3. DebugInfo
     if (debug) {
 #ifdef __APPLE__
-      cmd_append(&cmd, "dsymutil", EXECUTABLE, "-o", dysm_path);
+      cmd_append(&cmd, "dsymutil", "-o", dysm_path, EXECUTABLE);
       if (!cmd_run(&cmd)) { return 1; }
 
 #endif
@@ -286,9 +301,9 @@ int main(int argc, char **argv) {
 
     const char *debug_plist_entry =
         debug ? "   <key>CSResourcesFileMapped</key>\n"
-                "      <true/>\n" // Häufig genutzt in Debug-Builds
+                "      <true/>\n"
                 "   <key>NSAppSleepDisabled</key>\n"
-                "      <true/>\n" // Praktisch beim Debuggen, verhindert App Nap
+                "      <true/>\n"
               : "";
 
     // 4. Info.plist schreiben (Fehler aus dem Originalcode behoben)

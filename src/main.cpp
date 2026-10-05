@@ -60,12 +60,18 @@ int main(int argc, char **argv) {
   Vector2 ballPosition = {(float)screenWidth / 2, (float)screenHeight / 2};
   Vector2 previousBallPosition =
       ballPosition; // NEU: Speichert die Position vor dem Update
-  Vector2 ballSpeed = {5.0f, 4.0f}; // Geschwindigkeit in X- und Y-Richtung
+  Vector2 ballSpeed = {screenWidth * 0.01f,
+                       screenHeight *
+                           0.01f}; // Geschwindigkeit in X- und Y-Richtung
   float   ballRadius = font_size * 0.5;
 
   float   updateRate = 20.0f;
   float   timePerTick = 1.0f / updateRate;
   float   timeAccumulator = 0.0f;
+
+  Vector2 previousWindowPosition = GetWindowPosition();
+
+  bool    debug = false; // <-- Setze dies auf true, um Debugging zu aktivieren
 
   SetTargetFPS(
       GetMonitorRefreshRate(GetCurrentMonitor())); // Spiel-Logik auf 60 Frames
@@ -102,33 +108,91 @@ int main(int argc, char **argv) {
           Assets::CaskaydiaCoveNerdFontPropo_Bold_ttf_size, font_size, NULL, 0);
     }
 
+    if (IsKeyPressed(KEY_F3)) {
+      debug = !debug;
+      nob_log(INFO, "Debugging %s", debug ? "enabled" : "disabled");
+    }
+
     // Zeit seit dem letzten Frame zum Accumulator hinzufügen
     timeAccumulator += GetFrameTime();
 
     // Logik in festen Zeitschritten (20-mal pro Sekunde) ausführen
+    // Logik in festen Zeitschritten (20-mal pro Sekunde) ausführen
     while (timeAccumulator >= timePerTick) {
+
       previousBallPosition = ballPosition;
 
-      ballPosition.x += ballSpeed.x;
-      ballPosition.y += ballSpeed.y;
+      // NEU: Fensterbewegung erfassen und auf den Ball übertragen
+      Vector2 currentWindowPosition = GetWindowPosition();
+      Vector2 windowDelta = {currentWindowPosition.x - previousWindowPosition.x,
+                             currentWindowPosition.y -
+                                 previousWindowPosition.y};
 
-      // Kollision mit der linken und rechten Fensterkante
-      if ((ballPosition.x >= (screenWidth - ballRadius)) ||
-          (ballPosition.x <= ballRadius)) {
-        ballSpeed.x *= -1.0f; // Richtung auf der X-Achse umkehren
+      // Fensterposition für den nächsten Tick aktualisieren
+      previousWindowPosition = currentWindowPosition;
+
+      // Wenn das Fenster bewegt wurde, addieren wir einen Bruchteil des Deltas
+      // zur Ballgeschwindigkeit. Der Ball bewegt sich *entgegen* der
+      // Fensterbewegung (Trägheit). Faktor anpassen, um den Effekt zu
+      // verstärken oder abzuschwächen.
+      if (windowDelta.x != 0.0f || windowDelta.y != 0.0f) {
+        ballSpeed.x -= windowDelta.x * 0.15f;
+        ballSpeed.y -= windowDelta.y * 0.15f;
       }
 
-      // Kollision mit der oberen und unteren Fensterkante
-      if ((ballPosition.y >= (screenHeight - ballRadius)) ||
-          (ballPosition.y <= ballRadius)) {
-        ballSpeed.y *= -1.0f; // Richtung auf der Y-Achse umkehren
+      // 1. Schwerkraft anwenden: Die Y-Geschwindigkeit wird in jedem Tick
+      // erhöht
+      float gravity = 0.002f * ballRadius; // Stärke der Schwerkraft anpassen
+                                           // je nach gewünschtem "Gewicht"
+      ballSpeed.y += gravity;
+
+      // Position aktualisieren
+      ballPosition += ballSpeed;
+
+      // 2. Kollision mit der linken und rechten Fensterkante
+      if (ballPosition.x >= (screenWidth - ballRadius)) {
+        ballPosition.x =
+            screenWidth - ballRadius; // Verhindert Feststecken in der Wand
+        ballSpeed.x *= -0.8f;         // Abprallen mit Energieverlust (Dämpfung)
+      } else if (ballPosition.x <= ballRadius) {
+        ballPosition.x = ballRadius;
+        ballSpeed.x *= -0.8f;
       }
 
-      if (ballPosition.x < 0 || ballPosition.x > screenWidth ||
-          ballPosition.y < 0 || ballPosition.y > screenHeight) {
-        // Ball ist aus dem Fenster herausgefallen, zurücksetzen
+      // 3. Kollision mit der UNTEREN Fensterkante (Boden)
+      if (ballPosition.y >= (screenHeight - ballRadius)) {
+        ballPosition.y =
+            screenHeight - ballRadius; // Verhindert Einsinken in den Boden
+
+        // Energieverlust beim Aufprall
+        ballSpeed.y *= -0.75f;
+
+        // Bodenreibung: Horizontale Geschwindigkeit verringern, wenn der Ball
+        // rollt/rutscht
+        ballSpeed.x *= 0.95f;
+
+        // Ruhezustand: Wenn der Ball am Boden ist und nur noch minimal hüpft,
+        // stoppe ihn komplett auf der Y-Achse
+        if (fabs(ballSpeed.y) < 3.0f) { ballSpeed.y = 0.0f; }
+
+        // Wenn er auch fast nicht mehr rollt, stoppe ihn komplett auf der
+        // X-Achse
+        if (fabs(ballSpeed.x) < 0.5f) { ballSpeed.x = 0.0f; }
+      }
+      // 4. Kollision mit der OBEREN Fensterkante (Decke)
+      else if (ballPosition.y <= ballRadius) {
+        ballPosition.y = ballRadius;
+        ballSpeed.y *= -0.8f;
+      }
+
+      // 5. Fallback: Ball ist komplett aus dem Fenster gefallen (z.B. beim
+      // Verkleinern des Fensters)
+      if (ballPosition.x < -100 || ballPosition.x > screenWidth + 100 ||
+          ballPosition.y < -100 || ballPosition.y > screenHeight + 100) {
         ballPosition.x = (float)screenWidth / 2;
         ballPosition.y = (float)screenHeight / 2;
+        ballSpeed = {screenWidth * 0.01f,
+                     screenHeight * 0.01f}; // Neustart-Schwung
       }
 
       // Die konsumierte Zeit vom Accumulator abziehen
@@ -140,8 +204,8 @@ int main(int argc, char **argv) {
     Vector2 renderPosition =
         Vector2Lerp(previousBallPosition, ballPosition, alpha);
 
-    breakpoint(); // <-- Hier wird der Breakpoint gesetzt, um den Ball zu
-                  // inspizieren
+    // breakpoint(); // <-- Hier wird der Breakpoint gesetzt, um den Ball zu
+    //  inspizieren
     // --- DRAW (Zeichnen) ---
     BeginDrawing();
 
@@ -151,13 +215,23 @@ int main(int argc, char **argv) {
     // Kreis zeichnen (Position, Radius, Farbe)
     DrawCircleV(renderPosition, ballRadius, NORD_PRIMARY_COLOR);
 
-    // Optional: Einen Text in die obere linke Ecke setzen
-    DrawTextEx(font_regular, "Raylib Bouncing Circle", {10, 10}, 20, 4,
-               NORD_FOREGROUND_COLOR);
+    if (debug) {
+      DrawTextEx(font_regular,
+                 nob_temp_sprintf("Ball Position: (%.2f, %.2f)",
+                                  renderPosition.x, renderPosition.y),
+                 {10, 58}, 20, 4, NORD_INFO_COLOR);
+      DrawTextEx(font_regular,
+                 nob_temp_sprintf("Ball Speed: (%.2f, %.2f)", ballSpeed.x,
+                                  ballSpeed.y),
+                 {10, 82}, 20, 4, NORD_INFO_COLOR);
 
-    DrawTextEx(font_regular, nob_temp_sprintf("%d FPS", GetFPS()), {10, 34}, 20,
-               4, NORD_PRIMARY_COLOR);
+      // Optional: Einen Text in die obere linke Ecke setzen
+      DrawTextEx(font_regular, "Raylib Bouncing Circle", {10, 10}, 20, 4,
+                 NORD_FOREGROUND_COLOR);
 
+      DrawTextEx(font_regular, nob_temp_sprintf("%d FPS", GetFPS()), {10, 34},
+                 20, 4, NORD_PRIMARY_COLOR);
+    }
     EndDrawing();
   }
 
