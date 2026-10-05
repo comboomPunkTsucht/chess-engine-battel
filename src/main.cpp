@@ -28,9 +28,10 @@ int main(int argc, char **argv) {
   nob_log(INFO, "Hello, World!");
 
   // 1. Fenster und Umgebung initialisieren
-  int screenWidth = 800;
-  int screenHeight = 450;
-  int font_size = (int)(screenWidth * 0.025);
+  int   screenWidth = 800;
+  int   screenHeight = 450;
+  float font_size =
+      std::min(floor(screenWidth * 0.044 + 0.2), floor(screenHeight * 0.025));
 
   SetConfigFlags(FLAG_MSAA_4X_HINT | FLAG_INTERLACED_HINT |
                  FLAG_WINDOW_HIGHDPI | FLAG_VSYNC_HINT | FLAG_WINDOW_RESIZABLE |
@@ -55,9 +56,16 @@ int main(int argc, char **argv) {
 
 #endif
   // 2. Variablen für den Kreis definieren
+  // 2. Variablen für den Kreis definieren
   Vector2 ballPosition = {(float)screenWidth / 2, (float)screenHeight / 2};
+  Vector2 previousBallPosition =
+      ballPosition; // NEU: Speichert die Position vor dem Update
   Vector2 ballSpeed = {5.0f, 4.0f}; // Geschwindigkeit in X- und Y-Richtung
-  int     ballRadius = 20;
+  float   ballRadius = font_size * 0.5;
+
+  float   updateRate = 20.0f;
+  float   timePerTick = 1.0f / updateRate;
+  float   timeAccumulator = 0.0f;
 
   SetTargetFPS(
       GetMonitorRefreshRate(GetCurrentMonitor())); // Spiel-Logik auf 60 Frames
@@ -73,7 +81,12 @@ int main(int argc, char **argv) {
     if (IsWindowResized()) {
       screenWidth = GetScreenWidth();
       screenHeight = GetScreenHeight();
-      font_size = (int)(screenWidth * 0.025);
+      ballRadius = font_size * 0.5;
+      font_size = std::min(floor(screenWidth * 0.044 + 0.2),
+                           floor(screenHeight * 0.025)) < 20
+                      ? 20
+                      : std::min(floor(screenWidth * 0.044 + 0.2),
+                                 floor(screenHeight * 0.025));
       font_regular = LoadFontFromMemory(
           ".ttf", Assets::CaskaydiaCoveNerdFontPropo_Regular_ttf,
           Assets::CaskaydiaCoveNerdFontPropo_Regular_ttf_size, font_size, NULL,
@@ -88,27 +101,43 @@ int main(int argc, char **argv) {
           Assets::CaskaydiaCoveNerdFontPropo_Bold_ttf_size, font_size, NULL, 0);
     }
 
-    ballPosition.x += ballSpeed.x;
-    ballPosition.y += ballSpeed.y;
+    // Zeit seit dem letzten Frame zum Accumulator hinzufügen
+    timeAccumulator += GetFrameTime();
 
-    // Kollision mit der linken und rechten Fensterkante
-    if ((ballPosition.x >= (screenWidth - ballRadius)) ||
-        (ballPosition.x <= ballRadius)) {
-      ballSpeed.x *= -1.0f; // Richtung auf der X-Achse umkehren
+    // Logik in festen Zeitschritten (20-mal pro Sekunde) ausführen
+    while (timeAccumulator >= timePerTick) {
+      previousBallPosition = ballPosition;
+
+      ballPosition.x += ballSpeed.x;
+      ballPosition.y += ballSpeed.y;
+
+      // Kollision mit der linken und rechten Fensterkante
+      if ((ballPosition.x >= (screenWidth - ballRadius)) ||
+          (ballPosition.x <= ballRadius)) {
+        ballSpeed.x *= -1.0f; // Richtung auf der X-Achse umkehren
+      }
+
+      // Kollision mit der oberen und unteren Fensterkante
+      if ((ballPosition.y >= (screenHeight - ballRadius)) ||
+          (ballPosition.y <= ballRadius)) {
+        ballSpeed.y *= -1.0f; // Richtung auf der Y-Achse umkehren
+      }
+
+      if (ballPosition.x < 0 || ballPosition.x > screenWidth ||
+          ballPosition.y < 0 || ballPosition.y > screenHeight) {
+        // Ball ist aus dem Fenster herausgefallen, zurücksetzen
+        ballPosition.x = (float)screenWidth / 2;
+        ballPosition.y = (float)screenHeight / 2;
+      }
+
+      // Die konsumierte Zeit vom Accumulator abziehen
+      timeAccumulator -= timePerTick;
     }
 
-    // Kollision mit der oberen und unteren Fensterkante
-    if ((ballPosition.y >= (screenHeight - ballRadius)) ||
-        (ballPosition.y <= ballRadius)) {
-      ballSpeed.y *= -1.0f; // Richtung auf der Y-Achse umkehren
-    }
+    float   alpha = timeAccumulator / timePerTick;
 
-    if (ballPosition.x < 0 || ballPosition.x > screenWidth ||
-        ballPosition.y < 0 || ballPosition.y > screenHeight) {
-      // Ball ist aus dem Fenster herausgefallen, zurücksetzen
-      ballPosition.x = (float)screenWidth / 2;
-      ballPosition.y = (float)screenHeight / 2;
-    }
+    Vector2 renderPosition =
+        Vector2Lerp(previousBallPosition, ballPosition, alpha);
 
     // --- DRAW (Zeichnen) ---
     BeginDrawing();
@@ -117,10 +146,7 @@ int main(int argc, char **argv) {
                                             // (verhindert Schlieren)
 
     // Kreis zeichnen (Position, Radius, Farbe)
-    DrawCircleV(ballPosition,
-                (float)ballRadius *
-                    (std::min(screenWidth, screenHeight) * 0.001f),
-                NORD_PRIMARY_COLOR);
+    DrawCircleV(renderPosition, ballRadius, NORD_PRIMARY_COLOR);
 
     // Optional: Einen Text in die obere linke Ecke setzen
     DrawTextEx(font_regular, "Raylib Bouncing Circle", {10, 10}, 20, 4,
