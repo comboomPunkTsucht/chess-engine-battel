@@ -58,6 +58,9 @@ bool build_tools(bool debug) {
   cmd_append(&cmd, "-lraylib");
   cmd_append(&cmd, "-lm");
 #ifdef __APPLE__
+
+  cmd_append(&cmd, "-mmacos-version-min=26.0");
+
   cmd_append(&cmd, "-framework", "OpenGL");
   cmd_append(&cmd, "-framework", "Cocoa");
   cmd_append(&cmd, "-framework", "IOKit");
@@ -80,6 +83,9 @@ bool build_tools(bool debug) {
   cmd_append(&cmd, "-Wno-missing-field-initializers");
   cmd_append(&cmd, "-Wno-unused-value");
   cmd_append(&cmd, "-Wno-writable-strings");
+  cmd_append(&cmd, "-Wno-unused-command-line-argument");
+
+  cmd_append(&cmd, "-static-libclosure", "-static-libsan", "-static-openmp");
 
   cmd_append(&cmd, "-o", TOOLS_BUILD_FOLDER "assets2c");
   return cmd_run(&cmd);
@@ -111,6 +117,9 @@ bool build_raylib(bool debug) {
                "EXTERNAL_CONFIG_FLAGS+=-DRLGL_ENABLE_OPENGL_DEBUG_CONTEXT=1");
   }
   cmd_append(&cmd, "EXTERNAL_CONFIG_FLAGS+=-DRLGL_SHOW_GL_DETAILS_INFO=1");
+#ifdef __APPLE__
+  cmd_append(&cmd, "EXTERNAL_CONFIG_FLAGS+=-mmacos-version-min=26.0");
+#endif
   return cmd_run(&cmd);
 }
 
@@ -182,6 +191,9 @@ int main(int argc, char **argv) {
     cmd_append(&cmd, "-lraylib");
     cmd_append(&cmd, "-lm");
 #ifdef __APPLE__
+
+    cmd_append(&cmd, "-mmacos-version-min=26.0");
+
     cmd_append(&cmd, "-framework", "OpenGL");
     cmd_append(&cmd, "-framework", "Cocoa");
     cmd_append(&cmd, "-framework", "IOKit");
@@ -207,6 +219,9 @@ int main(int argc, char **argv) {
     cmd_append(&cmd, "-Wno-missing-field-initializers");
     cmd_append(&cmd, "-Wno-unused-value");
     cmd_append(&cmd, "-Wno-writable-strings");
+    cmd_append(&cmd, "-Wno-unused-command-line-argument");
+
+    cmd_append(&cmd, "-static-libclosure", "-static-libsan", "-static-openmp");
 
     cmd_append(&cmd, "-o", EXECUTABLE);
     if (!cmd_run(&cmd)) { return 1; }
