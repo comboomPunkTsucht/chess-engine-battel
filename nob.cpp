@@ -227,7 +227,7 @@ int main(int argc, char **argv) {
     if (!cmd_run(&cmd)) { return 1; }
   }
 
-  if (debug) { cmd_append(&cmd, debugger); }
+  if (debug && run) { cmd_append(&cmd, debugger); }
 
   if (run) {
     cmd_append(&cmd, EXECUTABLE);
