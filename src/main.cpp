@@ -31,7 +31,7 @@ int main(int argc, char **argv) {
   int   screenWidth = 800;
   int   screenHeight = 450;
   float font_size =
-      std::min(floor(screenWidth * 0.044 + 0.2), floor(screenHeight * 0.025));
+      std::max(floor(screenWidth * 0.044 + 0.2), floor(screenHeight * 0.025));
 
   SetConfigFlags(FLAG_MSAA_4X_HINT | FLAG_INTERLACED_HINT |
                  FLAG_WINDOW_HIGHDPI | FLAG_VSYNC_HINT | FLAG_WINDOW_RESIZABLE |
@@ -81,12 +81,13 @@ int main(int argc, char **argv) {
     if (IsWindowResized()) {
       screenWidth = GetScreenWidth();
       screenHeight = GetScreenHeight();
-      ballRadius = font_size * 0.5;
-      font_size = std::min(floor(screenWidth * 0.044 + 0.2),
+
+      font_size = std::max(floor(screenWidth * 0.044 + 0.2),
                            floor(screenHeight * 0.025)) < 20
                       ? 20
-                      : std::min(floor(screenWidth * 0.044 + 0.2),
+                      : std::max(floor(screenWidth * 0.044 + 0.2),
                                  floor(screenHeight * 0.025));
+      ballRadius = font_size * 0.5;
       font_regular = LoadFontFromMemory(
           ".ttf", Assets::CaskaydiaCoveNerdFontPropo_Regular_ttf,
           Assets::CaskaydiaCoveNerdFontPropo_Regular_ttf_size, font_size, NULL,

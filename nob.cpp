@@ -311,9 +311,13 @@ int main(int argc, char **argv) {
         "      <string>26.0</string>\n"
         "   <key>LSUIElement</key>\n"
         "      <true/>\n"
-
-        "</dict>\n"
-        "</plist>";
+        "   <key>NSHighResolutionCapable</key>\n"
+        "      <true/>\n"
+        "   <key>NSHumanReadableCopyright</key>\n"
+        "      <string>Copyright © 2026 comboom.sucht.Alle Rechte "
+        "vorbehalten.</string>\n"
+        "   </dict>\n"
+        "   </plist>";
 
     const char *pkginfo_content = "\x41\x50\x50\x4C\x3f\x3f\x3f\x3f";
 
