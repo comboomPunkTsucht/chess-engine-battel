@@ -140,6 +140,8 @@ int main(int argc, char **argv) {
     Vector2 renderPosition =
         Vector2Lerp(previousBallPosition, ballPosition, alpha);
 
+    breakpoint(); // <-- Hier wird der Breakpoint gesetzt, um den Ball zu
+                  // inspizieren
     // --- DRAW (Zeichnen) ---
     BeginDrawing();
 
