@@ -235,7 +235,7 @@ int main(int argc, char **argv) {
   }
 
 #if defined(__APPLE__)
-  if (compile && !run && !debug) {
+  if (compile && !run) {
     // Pfade sauber als Variablen definieren
     const char *app_dir = BUILD_FOLDER "chess-engine-battel.app";
     const char *contents_dir = BUILD_FOLDER "chess-engine-battel.app/Contents";
@@ -245,6 +245,12 @@ int main(int argc, char **argv) {
         BUILD_FOLDER "chess-engine-battel.app/Contents/Info.plist";
     const char *pkginfo_path =
         BUILD_FOLDER "chess-engine-battel.app/Contents/PkgInfo";
+
+#ifdef __APPLE__
+
+    const char *dysm_path = BUILD_FOLDER
+        "chess-engine-battel.app/Contents/MacOS/chess-engine-battel.dSYM";
+#endif
 
     cmd_append(&cmd, "rm", "-rf", app_dir);
 
@@ -269,10 +275,26 @@ int main(int argc, char **argv) {
       return 1;
     }
 
-    // 3. Info.plist schreiben (Fehler aus dem Originalcode behoben)
+    // 3. DebugInfo
+    if (debug) {
+#ifdef __APPLE__
+      cmd_append(&cmd, "dsymutil", EXECUTABLE, "-o", dysm_path);
+      if (!cmd_run(&cmd)) { return 1; }
+
+#endif
+    }
+
+    const char *debug_plist_entry =
+        debug ? "   <key>CSResourcesFileMapped</key>\n"
+                "      <true/>\n" // Häufig genutzt in Debug-Builds
+                "   <key>NSAppSleepDisabled</key>\n"
+                "      <true/>\n" // Praktisch beim Debuggen, verhindert App Nap
+              : "";
+
+    // 4. Info.plist schreiben (Fehler aus dem Originalcode behoben)
     //        "   <key>DTCompiler</key>\n"
     //        "      <string>com.apple.compilers.llvm.clang.1_0 </string>\n"
-    const char *plist_content =
+    const char *plist_content = temp_sprintf(
         "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
         "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" "
         "\"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
@@ -331,8 +353,10 @@ int main(int argc, char **argv) {
         "   <key>NSHumanReadableCopyright</key>\n"
         "      <string>Copyright © 2026 comboom.sucht. Alle Rechte "
         "vorbehalten.</string>\n"
+        "%s"
         "   </dict>\n"
-        "   </plist>";
+        "   </plist>",
+        debug_plist_entry);
 
     const char *pkginfo_content = "\x41\x50\x50\x4C\x3f\x3f\x3f\x3f";
 
