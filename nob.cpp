@@ -15,7 +15,9 @@
 
 #define EXECUTABLE BUILD_FOLDER "chess-engine-battel"
 
-Cmd cmd = {0};
+Cmd         cmd = {0};
+
+const char *cwd = get_current_dir_temp();
 
 typedef struct {
     char **items;
@@ -132,6 +134,26 @@ bool build_raylib(bool debug) {
   return cmd_run(&cmd);
 }
 
+bool build_ixwebsocket(bool debug) {
+  if (!mkdir_if_not_exists(BUILD_FOLDER "ixwebsocket")) { return false; }
+  cmd_append(&cmd, "cmake");
+  cmd_append(&cmd, "-DUSE_TLS=1");
+  cmd_append(&cmd, "-DUSE_OPEN_SSL=1");
+  cmd_append(&cmd, "-DUSE_ZLIB = 1");
+  cmd_append(&cmd, "--install-prefix",
+             temp_sprintf("%s%s", cwd, BUILD_FOLDER "ixwebsocket"));
+  cmd_append(&cmd, "-B", BUILD_FOLDER "ixwebsocket");
+  cmd_append(&cmd, "-S", THIRDPARTY_FOLDER "IXWebSocket");
+
+  if (!cmd_run(&cmd)) { return false; }
+
+  cmd_append(&cmd, "make");
+  cmd_append(&cmd, "-C", BUILD_FOLDER "ixwebsocket");
+  if (!cmd_run(&cmd)) { return false; }
+
+  return true;
+}
+
 int main(int argc, char **argv) {
   addon_init_logging();
   F_Args f_args = {0};
@@ -179,6 +201,7 @@ int main(int argc, char **argv) {
 
   if (compile) {
     if (!mkdir_if_not_exists(BUILD_FOLDER)) { return 1; }
+    if (!build_ixwebsocket(debug)) { return 1; }
     if (!build_raylib(debug)) { return 1; }
 
     if (!run_tools(debug)) { return 1; }
@@ -202,13 +225,18 @@ int main(int argc, char **argv) {
     cmd_append(&cmd, "-I", SOURCE_FOLDER);
     cmd_append(&cmd, "-I", BUILD_FOLDER "assets");
     cmd_append(&cmd, "-I", ".");
+    cmd_append(&cmd, "-L", BUILD_FOLDER "ixwebsocket");
     cmd_append(&cmd, "-L", BUILD_FOLDER "raylib");
     cmd_append(&cmd, "-lraylib");
+    cmd_append(&cmd, "-lixwebsocket");
     cmd_append(&cmd, "-lm");
+    cmd_append(&cmd, "-lz");
 #ifdef __APPLE__
 
     cmd_append(&cmd, "-mmacos-version-min=26.0");
 
+    cmd_append(&cmd, "-framework", "Security");
+    cmd_append(&cmd, "-framework", "Foundation");
     cmd_append(&cmd, "-framework", "OpenGL");
     cmd_append(&cmd, "-framework", "Cocoa");
     cmd_append(&cmd, "-framework", "IOKit");
@@ -221,10 +249,14 @@ int main(int argc, char **argv) {
     cmd_append(&cmd, "-lX11");
     cmd_append(&cmd, "-lGL");
     cmd_append(&cmd, "-lGLU");
+    cmd_append(&cmd, "-lssl");
+    cmd_append(&cmd, "-lcrypto");
 #elif defined(_WIN32)
     cmd_append(&cmd, "-lopengl32");
     cmd_append(&cmd, "-lgdi32");
     cmd_append(&cmd, "-lwinmm");
+    cmd_append(&cmd, "-lssl");
+    cmd_append(&cmd, "-lcrypto");
 // more platforms can be added here
 #endif
 
