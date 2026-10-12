@@ -11,6 +11,8 @@ repo_url = "https://github.com/comboompunktsucht/chess-engine-battel"
 repo_name = "comboompunktsucht/chess-engine-battel"
 edit_uri = "edit/main/docs/"
 
+site_dir = "build/docs"
+
 nav = [
   { "Get started" = "index.md" },
   { "Markdown in 5min" = "markdown.md" },
@@ -43,8 +45,8 @@ features = [
   "navigation.path",
   "navigation.prune",
   "navigation.sections",
-  "navigation.tabs",
-  "navigation.tabs.sticky",
+  #"navigation.tabs",
+  #"navigation.tabs.sticky",
   "navigation.top",
   "navigation.tracking",
   "search.highlight",
@@ -116,3 +118,7 @@ pymdownx.tabbed.alternate_style = true
 pymdownx.tabbed.combine_header_slug = true
 pymdownx.tasklist.custom_checkbox = true
 pymdownx.tilde = {}
+
+
+[project.plugins.offline]
+enabled = true
