@@ -9,6 +9,7 @@ copyright = "Copyright &copy; 2026 comboom.sucht"
 
 repo_url = "https://github.com/comboompunktsucht/chess-engine-battel"
 repo_name = "comboompunktsucht/chess-engine-battel"
+repo = "fontawesome/brands/github"
 edit_uri = "edit/main/docs/"
 
 site_dir = "build/docs"
@@ -17,6 +18,9 @@ nav = [
   { "Get started" = "index.md" },
   { "Markdown in 5min" = "markdown.md" },
 ]
+
+use_directory_urls = true
+dev_addr = "0.0.0.0:3000"
 
 # extra_css = ["stylesheets/extra.css"]
 # extra_javascript = ["javascripts/extra.js"]
@@ -63,6 +67,16 @@ logo = "assets/icon.png"
 # text = "Inter"
 # code = "Jetbrains Mono"
 
+[project.validation]
+invalid_links = true
+invalid_link_anchors = true
+unresolved_references = false
+unresolved_footnotes = false
+unused_definitions = false
+unused_footnotes = false
+shadowed_definitions = false
+shadowed_footnotes = false
+
 [[project.theme.palette]]
 media = "(prefers-color-scheme)"
 toggle.icon = "lucide/sun-moon"
@@ -79,6 +93,10 @@ media = "(prefers-color-scheme: dark)"
 scheme = "slate"
 toggle.icon = "lucide/moon"
 toggle.name = "Switch to system preference"
+
+[[project.theme.palette]]
+primary = "red"
+accent = "light green"
 
 # [[project.extra.social]]
 # icon = "fontawesome/brands/github"
