@@ -1,0 +1,40 @@
+name: Deploy to GitHub Pages
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
+    steps:
+      - uses: actions/checkout
+
+      - name: Setup Node.js
+        uses: actions/setup-node
+        with:
+          node-version: '26'
+
+      - name: Install OkiDoki
+        run: npm install -g okidoki
+
+      - name: Generate site
+        run: okidoki generate
+
+      - name: Setup Pages
+        uses: actions/configure-pages
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact
+        with:
+          path: './dist'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

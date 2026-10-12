@@ -6,6 +6,11 @@
 #include <stdlib.h>
 #include <string>
 
+// NEU: IXWebSocket Includes
+#include <ixwebsocket/IXConnectionState.h>
+#include <ixwebsocket/IXWebSocket.h>
+#include <ixwebsocket/IXWebSocketServer.h>
+
 #define RAYGUI_IMPLEMENTATION
 #include "raylib.h"
 #include "raymath.h"

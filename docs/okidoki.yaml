@@ -1,0 +1,35 @@
+# Okidoki Configuration
+
+# Site configuration
+site:
+  title: "comboom.sucht Chess Engine Battle"
+  description: "Ein Projekt, das die besten Schach-Engines gegeneinander antreten lässt."
+  baseUrl: "/"
+  favicon: "/icon.png"
+  logo: "/icon.png"
+  friendlyUrl: true
+  language: "de-DE"
+  theme:
+    light: "nord"
+    dark: "nord"
+
+# Build configuration
+build:
+  outputDir: "dist"
+  clean: true
+  minify: true
+
+# Search configuration
+search:
+  enabled: true
+  placeholder: "Durchsuche Dokumentation..."
+
+# Global variables
+globals:
+  version: "1.0.0"
+
+# Navigation configuration
+navigation:
+  sidebar: "sidebars.yaml"
+  topNav: true
+  footer: true

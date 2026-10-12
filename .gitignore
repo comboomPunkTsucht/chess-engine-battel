@@ -76,3 +76,5 @@ Testing/
 thirdparty/raylib/src/*
 thirdparty/raylib/
 thirdparty/raygui/
+
+docs/dist/
