@@ -90,9 +90,10 @@ toggle.name = "Switch to system preference"
 primary = "red"
 accent = "light green"
 
-# [[project.extra.social]]
-# icon = "fontawesome/brands/github"
-# link = "https://github.com/user/repo"
+[[project.extra.social]]
+icon = "fontawesome/brands/github"
+link = "https://github.com/comboompunktsucht/chess-engine-template"
+name = "Template repository"
 
 # [[project.extra.social]]
 # icon = "fontawesome/brands/mastodon"
