@@ -6,8 +6,8 @@ site:
   description: "Ein Projekt, das die besten Schach-Engines gegeneinander antreten lässt."
   url: "https://comboompunktsucht.github.io"
   baseUrl: "/chess-engine-battel/"
-  favicon: "/icon.png"
-  logo: "/icon.png"
+  favicon: "/chess-engine-battel/icon.png"
+  logo: "/chess-engine-battel/icon.png"
   friendlyUrl: true
   language: "de-DE"
   theme:
