@@ -1,0 +1,276 @@
+@media screen {
+  [data-md-color-scheme="slate"] {
+    color-scheme: dark;
+    --md-default-fg-color: #d8dee9;
+    --md-default-fg-color--light: rgba(216, 222, 233, 0.7);
+    --md-default-fg-color--lighter: rgba(216, 222, 233, 0.5);
+    --md-default-fg-color--lightest: rgba(216, 222, 233, 0.2);
+    --md-default-bg-color: #2e3440;
+    --md-default-bg-color--light: rgba(46, 52, 64, 0.7);
+    --md-default-bg-color--lighter: rgba(46, 52, 64, 0.5);
+    --md-default-bg-color--lightest: rgba(46, 52, 64, 0.2);
+    --md-code-fg-color: #eceff4;
+    --md-code-bg-color: #3b4252;
+    --md-code-bg-color--light: rgba(59, 66, 82, 0.9);
+    --md-code-bg-color--lighter: rgba(59, 66, 82, 0.54);
+    --md-code-hl-color: #81a1c1;
+    --md-code-hl-color--light: rgba(129, 161, 193, 0.2);
+    --md-code-hl-number-color: #b48ead;
+    --md-code-hl-special-color: #ebcb8b;
+    --md-code-hl-function-color: #88c0d0;
+    --md-code-hl-constant-color: #81a1c1;
+    --md-code-hl-keyword-color: #5e81ac;
+    --md-code-hl-string-color: #a3be8c;
+    --md-code-hl-name-color: var(--md-code-fg-color);
+    --md-code-hl-operator-color: var(--md-default-fg-color--light);
+    --md-code-hl-punctuation-color: var(--md-default-fg-color--light);
+    --md-code-hl-comment-color: #4c566a;
+    --md-code-hl-generic-color: var(--md-default-fg-color--light);
+    --md-code-hl-variable-color: var(--md-default-fg-color--light);
+    --md-typeset-color: var(--md-default-fg-color);
+    --md-typeset-a-color: #88c0d0;
+    --md-typeset-kbd-color: rgba(216, 222, 233, 0.12);
+    --md-typeset-kbd-accent-color: rgba(216, 222, 233, 0.2);
+    --md-typeset-kbd-border-color: #434c5e;
+    --md-typeset-mark-color: rgba(136, 192, 208, 0.3);
+    --md-typeset-table-color: rgba(236, 239, 244, 0.12);
+    --md-typeset-table-color--light: rgba(236, 239, 244, 0.035);
+    --md-admonition-fg-color: var(--md-default-fg-color);
+    --md-admonition-bg-color: var(--md-default-bg-color);
+    --md-footer-bg-color: #292e39;
+    --md-footer-bg-color--dark: #242933;
+    --md-shadow-z1:
+      0 0.2rem 0.5rem rgba(0, 0, 0, 0.2), 0 0 0.05rem rgba(255, 255, 255, 0.05);
+    --md-shadow-z2:
+      0 0.2rem 0.5rem rgba(0, 0, 0, 0.3), 0 0 0.05rem rgba(255, 255, 255, 0.1);
+    --md-shadow-z3:
+      0 0.5rem 2rem rgba(0, 0, 0, 0.5), 0 0 0.05rem rgba(0, 0, 0, 0.1);
+    --color-foreground: 216 222 233;
+    --color-background: 46 52 64;
+    --color-background-subtle: 59 66 82;
+    --color-backdrop: 46 52 64;
+  }
+
+  [data-md-color-scheme="slate"] .md-header__title,
+  [data-md-color-scheme="slate"] h1,
+  [data-md-color-scheme="slate"] h2,
+  [data-md-color-scheme="slate"] h3,
+  [data-md-color-scheme="slate"] h4,
+  [data-md-color-scheme="slate"] h5,
+  [data-md-color-scheme="slate"] h6 {
+    color: #eceff4;
+  }
+
+  [data-md-color-scheme="slate"] img[src$="#gh-light-mode-only"],
+  [data-md-color-scheme="slate"] img[src$="#only-light"] {
+    display: none;
+  }
+
+  [data-md-color-scheme="slate"][data-md-color-primary="pink"],
+  [data-md-color-scheme="slate"][data-md-color-primary="purple"],
+  [data-md-color-scheme="slate"][data-md-color-primary="deep-purple"] {
+    --md-typeset-a-color: #b48ead;
+  }
+
+  [data-md-color-scheme="slate"][data-md-color-primary="indigo"],
+  [data-md-color-scheme="slate"][data-md-color-primary="blue"],
+  [data-md-color-scheme="slate"][data-md-color-primary="black"],
+  [data-md-color-scheme="slate"][data-md-color-primary="blue-grey"],
+  [data-md-color-scheme="slate"][data-md-color-primary="grey"],
+  [data-md-color-scheme="slate"][data-md-color-primary="white"] {
+    --md-typeset-a-color: #81a1c1;
+  }
+
+  [data-md-color-scheme="slate"][data-md-color-primary="teal"],
+  [data-md-color-scheme="slate"][data-md-color-primary="cyan"] {
+    --md-typeset-a-color: #8fbcbb;
+  }
+
+  [data-md-color-scheme="slate"][data-md-color-primary="green"],
+  [data-md-color-scheme="slate"][data-md-color-primary="light-green"],
+  [data-md-color-scheme="slate"][data-md-color-primary="lime"] {
+    --md-typeset-a-color: #a3be8c;
+  }
+
+  [data-md-color-scheme="slate"][data-md-color-primary="deep-orange"],
+  [data-md-color-scheme="slate"][data-md-color-primary="orange"],
+  [data-md-color-scheme="slate"][data-md-color-primary="brown"] {
+    --md-typeset-a-color: #d08770;
+  }
+
+  [data-md-color-scheme="slate"][data-md-color-primary="yellow"],
+  [data-md-color-scheme="slate"][data-md-color-primary="amber"] {
+    --md-typeset-a-color: #ebcb8b;
+  }
+
+  [data-md-color-switching] *,
+  [data-md-color-switching] :after,
+  [data-md-color-switching] :before {
+    transition-duration: 0s !important;
+  }
+
+  [data-md-color-accent="red"],
+  [data-md-color-accent="pink"] {
+    --md-accent-fg-color: #bf616a;
+    --md-accent-fg-color--transparent: rgba(191, 97, 106, 0.1);
+    --md-accent-bg-color: #2e3440;
+    --md-accent-bg-color--light: rgba(46, 52, 64, 0.7);
+  }
+
+  [data-md-color-accent="blue"],
+  [data-md-color-accent="cyan"],
+  [data-md-color-accent="deep-purple"],
+  [data-md-color-accent="green"],
+  [data-md-color-accent="indigo"],
+  [data-md-color-accent="light-blue"],
+  [data-md-color-accent="light-green"],
+  [data-md-color-accent="purple"],
+  [data-md-color-accent="teal"] {
+    --md-accent-bg-color: #2e3440;
+    --md-accent-bg-color--light: rgba(46, 52, 64, 0.7);
+  }
+
+  [data-md-color-accent="purple"],
+  [data-md-color-accent="deep-purple"] {
+    --md-accent-fg-color: #b48ead;
+    --md-accent-fg-color--transparent: rgba(180, 142, 173, 0.1);
+  }
+
+  [data-md-color-accent="indigo"],
+  [data-md-color-accent="blue"],
+  [data-md-color-accent="light-blue"] {
+    --md-accent-fg-color: #81a1c1;
+    --md-accent-fg-color--transparent: rgba(129, 161, 193, 0.1);
+  }
+
+  [data-md-color-accent="cyan"],
+  [data-md-color-accent="teal"] {
+    --md-accent-fg-color: #8fbcbb;
+    --md-accent-fg-color--transparent: rgba(143, 188, 187, 0.1);
+  }
+
+  [data-md-color-accent="green"],
+  [data-md-color-accent="light-green"] {
+    --md-accent-fg-color: #a3be8c;
+    --md-accent-fg-color--transparent: rgba(163, 190, 140, 0.1);
+  }
+
+  [data-md-color-accent="lime"],
+  [data-md-color-accent="amber"],
+  [data-md-color-accent="orange"],
+  [data-md-color-accent="yellow"] {
+    --md-accent-bg-color: #2e3440;
+    --md-accent-bg-color--light: rgba(46, 52, 64, 0.7);
+  }
+
+  [data-md-color-accent="yellow"],
+  [data-md-color-accent="lime"] {
+    --md-accent-fg-color: #ebcb8b;
+    --md-accent-fg-color--transparent: rgba(235, 203, 139, 0.1);
+  }
+
+  [data-md-color-accent="amber"],
+  [data-md-color-accent="orange"],
+  [data-md-color-accent="deep-orange"] {
+    --md-accent-fg-color: #d08770;
+    --md-accent-fg-color--transparent: rgba(208, 135, 112, 0.1);
+  }
+
+  [data-md-color-primary="red"],
+  [data-md-color-primary="pink"] {
+    --md-primary-fg-color: #bf616a;
+    --md-primary-fg-color--light: #d08770;
+    --md-primary-fg-color--dark: #a54e56;
+  }
+
+  [data-md-color-primary="blue"],
+  [data-md-color-primary="cyan"],
+  [data-md-color-primary="deep-purple"],
+  [data-md-color-primary="green"],
+  [data-md-color-primary="indigo"],
+  [data-md-color-primary="light-blue"],
+  [data-md-color-primary="light-green"],
+  [data-md-color-primary="purple"],
+  [data-md-color-primary="teal"] {
+    --md-primary-bg-color: #2e3440;
+    --md-primary-bg-color--light: rgba(46, 52, 64, 0.7);
+  }
+
+  [data-md-color-primary="purple"],
+  [data-md-color-primary="deep-purple"] {
+    --md-primary-fg-color: #b48ead;
+    --md-primary-fg-color--light: #c09eb9;
+    --md-primary-fg-color--dark: #9d7796;
+  }
+
+  [data-md-color-primary="indigo"],
+  [data-md-color-primary="blue"],
+  [data-md-color-primary="light-blue"] {
+    --md-primary-fg-color: #81a1c1;
+    --md-primary-fg-color--light: #88c0d0;
+    --md-primary-fg-color--dark: #5e81ac;
+  }
+
+  [data-md-color-primary="cyan"],
+  [data-md-color-primary="teal"] {
+    --md-primary-fg-color: #8fbcbb;
+    --md-primary-fg-color--light: #9bc6c5;
+    --md-primary-fg-color--dark: #79a6a5;
+  }
+
+  [data-md-color-primary="green"],
+  [data-md-color-primary="light-green"],
+  [data-md-color-primary="lime"] {
+    --md-primary-fg-color: #a3be8c;
+    --md-primary-fg-color--light: #b0c99a;
+    --md-primary-fg-color--dark: #8fa878;
+  }
+
+  [data-md-color-primary="amber"],
+  [data-md-color-primary="orange"],
+  [data-md-color-primary="yellow"] {
+    --md-primary-bg-color: #2e3440;
+    --md-primary-bg-color--light: rgba(46, 52, 64, 0.7);
+  }
+
+  [data-md-color-primary="yellow"],
+  [data-md-color-primary="amber"] {
+    --md-primary-fg-color: #ebcb8b;
+    --md-primary-fg-color--light: #f1d59b;
+    --md-primary-fg-color--dark: #d8b877;
+  }
+
+  [data-md-color-primary="orange"],
+  [data-md-color-primary="deep-orange"],
+  [data-md-color-primary="brown"] {
+    --md-primary-fg-color: #d08770;
+    --md-primary-fg-color--light: #d89682;
+    --md-primary-fg-color--dark: #b8715c;
+    --md-primary-bg-color: #2e3440;
+    --md-primary-bg-color--light: rgba(46, 52, 64, 0.7);
+  }
+
+  [data-md-color-primary="grey"],
+  [data-md-color-primary="blue-grey"] {
+    --md-primary-fg-color: #4c566a;
+    --md-primary-fg-color--light: #434c5e;
+    --md-primary-fg-color--dark: #3b4252;
+    --md-primary-bg-color: #2e3440;
+    --md-primary-bg-color--light: rgba(46, 52, 64, 0.7);
+    --md-typeset-a-color: #88c0d0;
+  }
+
+  [data-md-color-primary="light-green"]:not([data-md-color-scheme="slate"]),
+  [data-md-color-primary="lime"]:not([data-md-color-scheme="slate"]) {
+    --md-typeset-a-color: #a3be8c;
+  }
+
+  [data-md-color-primary="yellow"]:not([data-md-color-scheme="slate"]),
+  [data-md-color-primary="amber"]:not([data-md-color-scheme="slate"]) {
+    --md-typeset-a-color: #ebcb8b;
+  }
+
+  [data-md-color-primary="orange"]:not([data-md-color-scheme="slate"]) {
+    --md-typeset-a-color: #d08770;
+  }
+}
