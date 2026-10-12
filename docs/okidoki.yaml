@@ -4,6 +4,7 @@
 site:
   title: "comboom.sucht Chess Engine Battle"
   description: "Ein Projekt, das die besten Schach-Engines gegeneinander antreten lässt."
+  url: "https://comboompunktsucht.github.io"
   baseUrl: "/chess-engine-battel/"
   favicon: "/icon.png"
   logo: "/icon.png"
