@@ -1,7 +1,7 @@
 [project]
 site_url = "https://comboompunktsucht.github.io"
 base_url = "/chess-engine-battel/"
-site_name = "comboom.sucht Chess Engine Battel"
+site_name = "comboom.sucht Chess Engine Battle"
 site_description = "Eine Patform für Battles zwischen Schach-Engines."
 # site_author = "Your name"
 
