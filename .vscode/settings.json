@@ -78,5 +78,8 @@
   "C_Cpp.default.recursiveIncludes.reduce": "default",
   "C_Cpp.formatting": "clangFormat",
   "C_Cpp.doxygen.generatedStyle": "/**",
-  "C_Cpp.autoAddFileAssociations": true
+  "C_Cpp.autoAddFileAssociations": true,
+  "files.associations": {
+    "atomic": "cpp"
+  }
 }

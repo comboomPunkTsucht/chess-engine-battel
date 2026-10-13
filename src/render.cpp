@@ -1,3 +1,4 @@
+#include <math.h>
 #include "game.h"
 #include "raylib.h"
 #include "nob_addons.h"
@@ -11,34 +12,25 @@ void Game::render(Game* game) {
   ClearBackground(NORD_BACKGROUND_COLOR);
   DrawFPS(1, 1);
 
-    for (int x = 0; x < DEFAULT_BOARD_DIMENSIONS; x++) {
-      for (int y = 0; y < DEFAULT_BOARD_DIMENSIONS; y++) {
-        DrawRectangleLines(x * space_size + x_start, y * space_size + y_start, space_size, space_size, GRAY);
-        
-        switch (game_state[x][y].type) {
-          case None:
-            break;
-          case Pawn:
-            DrawText("p", x * space_size + x_start, y * space_size + y_start + 4, space_size / 2, NORD_PRIMARY_COLOR);
-            break;
-          case Rook:
-            DrawText("r", x * space_size + x_start, y * space_size + y_start + 4, space_size / 2, NORD_PRIMARY_COLOR);
-            break;
-          case Knight:
-            DrawText("h", x * space_size + x_start, y * space_size + y_start + 4, space_size / 2, NORD_PRIMARY_COLOR);
-            break;
-          case Bishop:
-            DrawText("b", x * space_size + x_start, y * space_size + y_start + 4, space_size / 2, NORD_PRIMARY_COLOR);
-            break;
-          case Queen:
-            DrawText("q", x * space_size + x_start, y * space_size + y_start + 4, space_size / 2, NORD_PRIMARY_COLOR);
-            break;
-          case King:
-            DrawText("k", x * space_size + x_start, y * space_size + y_start + 4, space_size / 2, NORD_PRIMARY_COLOR);
-            break;
-          default:
-            DrawText("error", x * space_size + x_start, y * space_size + y_start + 4, space_size / 2, RED);
-            break;
+    for (uint32_t x = 0; x < DEFAULT_BOARD_DIMENSIONS; x++) {
+      for (uint32_t y = 0; y < DEFAULT_BOARD_DIMENSIONS; y++) {
+        int px = x * space_size + x_start;
+        int py = y * space_size + y_start;
+
+        DrawRectangleLines(px, py, space_size, space_size, GRAY);
+
+        uint32_t idx = x + y * DEFAULT_BOARD_DIMENSIONS;
+        Piece piece = game->board[idx];
+
+        switch (piece.type) {
+          case None:   break;
+          case Pawn:   DrawText("p", px + 4, py + 4, space_size / 2, NORD_PRIMARY_COLOR); break;
+          case Rook:   DrawText("r", px + 4, py + 4, space_size / 2, NORD_PRIMARY_COLOR); break;
+          case Knight: DrawText("kn", px + 4, py + 4, space_size / 2, NORD_PRIMARY_COLOR); break;
+          case Bishop: DrawText("b", px + 4, py + 4, space_size / 2, NORD_PRIMARY_COLOR); break;
+          case Queen:  DrawText("q", px + 4, py + 4, space_size / 2, NORD_PRIMARY_COLOR); break;
+          case King:   DrawText("kg", px + 4, py + 4, space_size / 2, NORD_PRIMARY_COLOR); break;
+          default:     DrawText("error", px + 4, py + 4, space_size / 2, RED); break;
         }
       }
     }

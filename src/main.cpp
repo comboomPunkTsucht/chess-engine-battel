@@ -22,10 +22,8 @@ int main(void) {
                  FLAG_WINDOW_ALWAYS_RUN);
   InitWindow(DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT,
              "Chess Engine Battle");
-
-  load();
-
   Game game = Game();
+  game.setup_board();
   game.main_loop();
 
   CloseWindow();

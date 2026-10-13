@@ -205,6 +205,10 @@ int main(int argc, char **argv) {
 
     clangpp(&cmd);
     cmd_append(&cmd, SOURCE_FOLDER "main.cpp");
+    cmd_append(&cmd, SOURCE_FOLDER "update.cpp");
+    cmd_append(&cmd, SOURCE_FOLDER "processInput.cpp");
+    cmd_append(&cmd, SOURCE_FOLDER "render.cpp");
+
     if (debug) {
       cmd_append(&cmd, "-g");
       // NEU: Zwingt Clang, die .o Datei zu behalten, damit dsymutil sie lesen
