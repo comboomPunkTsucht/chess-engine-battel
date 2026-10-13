@@ -1,4 +1,9 @@
+#define FLAG_IMPLEMENTATION
 #include "flag.h"
+
+#define NOB_IMPLEMENTATION
+#include "nob_addons.h"
+
 #include "game.h"
 #include "move.h"
 #include <algorithm>
