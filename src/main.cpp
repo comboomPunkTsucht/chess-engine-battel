@@ -46,6 +46,8 @@ typedef struct {
 
 piece game_state[8][8] = {(piece){none, 0, is_white}};
 
+void load(void) { SetTargetFPS(GetMonitorRefreshRate(GetCurrentMonitor())); }
+
 void interact(void) { }
 void render(void) {
   int space_size =
@@ -127,9 +129,9 @@ int main(void) {
   InitWindow(DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT,
              "Chess Engine Battle");
 
-  SetTargetFPS(GetMonitorRefreshRate(GetCurrentMonitor()));
+  load();
 
-  game_state[3][4].type = bishop;
+  game_state[3][4].type = Bishop;
 
   game();
 
