@@ -1,4 +1,4 @@
-// #include "assets.h"
+#include "assets.h"
 #include "move.h"
 #include <algorithm>
 #include <cstdlib>
@@ -47,7 +47,22 @@ typedef struct {
 piece game_state[DEFAULT_BOARD_DIMENSIONS][DEFAULT_BOARD_DIMENSIONS] = {
     (piece){PieceType::None, 0, CWHITE}};
 
-void load(void) { SetTargetFPS(GetMonitorRefreshRate(GetCurrentMonitor())); }
+Font main_font;
+Font bold_font;
+Font italic_font;
+
+void load(void) {
+  SetTargetFPS(GetMonitorRefreshRate(GetCurrentMonitor()));
+  main_font = LoadFontFromMemory(
+      ".ttf", Assets::CaskaydiaCoveNerdFontPropo_Regular_ttf,
+      Assets::CaskaydiaCoveNerdFontPropo_Regular_ttf_size, FONT_SIZE, NULL, 0);
+  bold_font = LoadFontFromMemory(
+      ".ttf", Assets::CaskaydiaCoveNerdFontPropo_Bold_ttf,
+      Assets::CaskaydiaCoveNerdFontPropo_Bold_ttf_size, FONT_SIZE, NULL, 0);
+  italic_font = LoadFontFromMemory(
+      ".ttf", Assets::CaskaydiaCoveNerdFontPropo_Italic_ttf,
+      Assets::CaskaydiaCoveNerdFontPropo_Italic_ttf_size, FONT_SIZE, NULL, 0);
+}
 
 void interact(void) { }
 void render(void) {

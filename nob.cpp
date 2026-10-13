@@ -201,7 +201,7 @@ int main(int argc, char **argv) {
     if (!build_ixwebsocket(debug)) { return 1; }
     if (!build_raylib(debug)) { return 1; }
 
-    // if (!run_tools(debug)) { return 1; }
+    if (!run_tools(debug)) { return 1; }
 
     clangpp(&cmd);
     cmd_append(&cmd, SOURCE_FOLDER "main.cpp");
