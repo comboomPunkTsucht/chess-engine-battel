@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include "raylib.h"
 
 enum PieceType : uint8_t {
     None = 0,
@@ -20,3 +21,5 @@ struct Piece {
     PieceType  type;
     PieceColor color;
 };
+
+static Texture2D chess_piece_textures = LoadTexture("assets/piece/All_pieces.png");

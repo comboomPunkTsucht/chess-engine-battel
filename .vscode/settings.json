@@ -82,6 +82,7 @@
   "files.associations": {
     "atomic": "cpp",
     "deque": "cpp",
-    "vector": "cpp"
+    "vector": "cpp",
+    "iostream": "cpp"
   }
 }

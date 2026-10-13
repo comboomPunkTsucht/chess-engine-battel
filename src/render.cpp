@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <math.h>
 
-void Game::render(Game *game) {
+void Game::render() {
   const int space_size =
       (std::min(DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT) * 0.9) /
       DEFAULT_BOARD_DIMENSIONS;
@@ -23,24 +23,24 @@ void Game::render(Game *game) {
       float px = x * space_size + x_start;
       float py = y * space_size + y_start;
 
-      DrawRectangleLines(px, py, space_size, space_size, NORD_FOREGROUND_COLOR);
+      DrawRectangleLines(px, py, space_size, space_size, WHITE);
 
       uint32_t idx = x + y * DEFAULT_BOARD_DIMENSIONS;
-      Piece    piece = game->board[idx];
+      Piece    piece = board[idx];
 
       switch (piece.type) {
         case None: break;
         default:
           if (piece.color == PLAYER_WHITE) {
             DrawTextureRec(
-                game->pieces,
+                chess_piece_textures,
                 (Rectangle){(float)(((float)piece.type - 1.0) * 20.0), 0.0,
                             20.0, 19.0},
                 (Vector2){px, py}, NORD_HIGHLIGHT_COLOR);
           }
           if (piece.color == PLAYER_BLACK) {
             DrawTextureRec(
-                game->pieces,
+                chess_piece_textures,
                 (Rectangle){(float)(((float)piece.type - 1.0) * 20.0), 19.0,
                             20.0, 19.0},
                 (Vector2){px, py}, NORD_PRIMARY_COLOR);
@@ -48,7 +48,6 @@ void Game::render(Game *game) {
 
           break;
       }
-      Rectangle hello;
     }
   }
   // DrawTexture(game->pieces, 1, 1, NORD_FOREGROUND_COLOR);

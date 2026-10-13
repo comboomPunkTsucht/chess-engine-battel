@@ -10,10 +10,8 @@ constexpr uint32_t DEFAULT_BOARD_DIMENSIONS = 8;
 
 class Game {
 private:
-    struct Piece board[DEFAULT_BOARD_DIMENSIONS * DEFAULT_BOARD_DIMENSIONS] = {None, PLAYER_WHITE};
+    struct Piece board[DEFAULT_BOARD_DIMENSIONS * DEFAULT_BOARD_DIMENSIONS] = {{ None, PLAYER_WHITE }};
     std::vector<Move> history;
-    Texture2D pieces = LoadTexture("assets/piece/All_pieces.png");
-
 
     PieceColor turn = PLAYER_WHITE;
 
