@@ -5,11 +5,6 @@ on:
     paths:
       - 'docs/**'
       - 'zensical.toml'
-  pull_request:
-    branches: [ main ]
-    paths:
-      - 'docs/**'
-      - 'zensical.toml'
   workflow_dispatch:
 permissions:
   contents: read
