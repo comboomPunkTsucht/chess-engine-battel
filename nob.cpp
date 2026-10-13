@@ -269,6 +269,7 @@ int main(int argc, char **argv) {
     cmd_append(&cmd, "-Wno-unused-value");
     cmd_append(&cmd, "-Wno-writable-strings");
     cmd_append(&cmd, "-Wno-unused-command-line-argument");
+    cmd_append(&cmd, "-Wno-missing-braces");
 
     cmd_append(&cmd, "-o", EXECUTABLE);
     if (!cmd_run(&cmd)) { return 1; }
