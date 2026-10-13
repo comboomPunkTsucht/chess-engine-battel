@@ -34,8 +34,8 @@
 #define FONT_SIZE 48
 
 enum piece_color {
-  WHITE,
-  BLACK,
+  CWHITE,
+  CBLACK,
 };
 
 typedef struct {
@@ -44,7 +44,7 @@ typedef struct {
     piece_color color;
 } piece;
 
-piece game_state[8][8] = {(piece){none, 0, is_white}};
+piece game_state[8][8] = {(piece){PieceType::None, 0, CWHITE}};
 
 void load(void) { SetTargetFPS(GetMonitorRefreshRate(GetCurrentMonitor())); }
 
@@ -61,12 +61,12 @@ void render(void) {
   float  font_size = std::max(floor(DEFAULT_SCREEN_WIDTH * 0.044 + 0.2),
                               floor(DEFAULT_SCREEN_HEIGHT * 0.025));
 
-  size_t temp_mark = temp_save()
+  size_t temp_mark = temp_save();
 
-      BeginDrawing();
-  temp_revind(temp_mark);
+  BeginDrawing();
+  temp_rewind(temp_mark);
   ClearBackground(NORD_BACKGROUND_COLOR);
-  DrawText(temp_sprintf("%s FPS", GetFPS()), 10, 10, font_size,
+  DrawText(temp_sprintf("%d FPS", GetFPS()), 10, 10, font_size,
            NORD_PRIMARY_COLOR);
 
   for (int x = 0; x < DEFAULT_BOARD_DIMENSIONS; x++) {
@@ -75,28 +75,28 @@ void render(void) {
                          space_size, space_size, GRAY);
 
       switch (game_state[x][y].type) {
-        case None: break;
-        case Pawn:
+        case PieceType::None: break;
+        case PieceType::Pawn:
           DrawText("p", x * space_size + x_start, y * space_size + y_start + 4,
                    space_size / 2, NORD_PRIMARY_COLOR);
           break;
-        case Rook:
+        case PieceType::Rook:
           DrawText("r", x * space_size + x_start, y * space_size + y_start + 4,
                    space_size / 2, NORD_PRIMARY_COLOR);
           break;
-        case Knight:
+        case PieceType::Knight:
           DrawText("h", x * space_size + x_start, y * space_size + y_start + 4,
                    space_size / 2, NORD_PRIMARY_COLOR);
           break;
-        case Bishop:
+        case PieceType::Bishop:
           DrawText("b", x * space_size + x_start, y * space_size + y_start + 4,
                    space_size / 2, NORD_PRIMARY_COLOR);
           break;
-        case Queen:
+        case PieceType::Queen:
           DrawText("q", x * space_size + x_start, y * space_size + y_start + 4,
                    space_size / 2, NORD_PRIMARY_COLOR);
           break;
-        case King:
+        case PieceType::King:
           DrawText("k", x * space_size + x_start, y * space_size + y_start + 4,
                    space_size / 2, NORD_PRIMARY_COLOR);
           break;
@@ -133,7 +133,7 @@ int main(void) {
 
   load();
 
-  game_state[3][4].type = Bishop;
+  game_state[3][4].type = PieceType::Bishop;
 
   game();
 
