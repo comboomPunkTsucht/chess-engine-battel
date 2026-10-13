@@ -58,12 +58,16 @@ void render(void) {
   int y_start =
       (DEFAULT_SCREEN_HEIGHT - (space_size * DEFAULT_BOARD_DIMENSIONS)) / 2;
 
+  float  font_size = std::max(floor(DEFAULT_SCREEN_WIDTH * 0.044 + 0.2),
+                              floor(DEFAULT_SCREEN_HEIGHT * 0.025));
+
   size_t temp_mark = temp_save()
 
       BeginDrawing();
   temp_revind(temp_mark);
   ClearBackground(NORD_BACKGROUND_COLOR);
-  DrawText(temp_sprintf("%s FPS", GetFPS()), 10, 10, 48, NORD_PRIMARY_COLOR);
+  DrawText(temp_sprintf("%s FPS", GetFPS()), 10, 10, font_size,
+           NORD_PRIMARY_COLOR);
 
   for (int x = 0; x < DEFAULT_BOARD_DIMENSIONS; x++) {
     for (int y = 0; y < DEFAULT_BOARD_DIMENSIONS; y++) {
@@ -98,7 +102,8 @@ void render(void) {
           break;
         default:
           DrawText("error", x * space_size + x_start,
-                   y * space_size + y_start + 4, space_size / 2, RED);
+                   y * space_size + y_start + 4, space_size / 2,
+                   NORD_ERROR_COLOR);
           break;
       }
     }
@@ -118,9 +123,6 @@ void game(void) {
 
 int main(void) {
   addon_init_logging();
-
-  float font_size = std::max(floor(DEFAULT_SCREEN_WIDTH * 0.044 + 0.2),
-                             floor(DEFAULT_SCREEN_HEIGHT * 0.025));
 
   SetConfigFlags(FLAG_MSAA_4X_HINT | FLAG_INTERLACED_HINT |
                  FLAG_WINDOW_HIGHDPI |
