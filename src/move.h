@@ -1,8 +1,9 @@
 #pragma once
 #include <cstdint>
 #include <cassert>
+#include "piece.h"
 
-enum class MoveType : uint8_t {
+enum MoveType : uint8_t {
     Normal = 0,
     DoublePush = 1,
     Capture = 2,
@@ -17,10 +18,6 @@ enum class MoveType : uint8_t {
     PromoCaptureBishop = 11,
     PromoCaptureRook = 12,
     PromoCaptureQueen = 13,
-};
-
-enum class PieceType : uint8_t {
-    None = 0, Pawn = 1, Knight = 2, Bishop = 3, Rook = 4, Queen = 5, King = 6
 };
 
 struct Move {
