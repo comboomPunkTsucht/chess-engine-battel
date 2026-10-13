@@ -72,7 +72,7 @@ void render(void) {
   for (int x = 0; x < DEFAULT_BOARD_DIMENSIONS; x++) {
     for (int y = 0; y < DEFAULT_BOARD_DIMENSIONS; y++) {
       DrawRectangleLines(x * space_size + x_start, y * space_size + y_start,
-                         space_size, space_size, NORD_FORGROUND_COLOR);
+                         space_size, space_size, NORD_FOREGROUND_COLOR);
 
       switch (game_state[x][y].type) {
         case none: break;
