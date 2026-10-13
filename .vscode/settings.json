@@ -80,6 +80,8 @@
   "C_Cpp.doxygen.generatedStyle": "/**",
   "C_Cpp.autoAddFileAssociations": true,
   "files.associations": {
-    "atomic": "cpp"
+    "atomic": "cpp",
+    "deque": "cpp",
+    "vector": "cpp"
   }
 }
