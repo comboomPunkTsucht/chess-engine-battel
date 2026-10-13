@@ -1,3 +1,7 @@
+---
+icon: simple/api
+---
+
 # API
 
 ## Abstract
