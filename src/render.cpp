@@ -37,14 +37,14 @@ void Game::render(Game *game) {
                 game->pieces,
                 (Rectangle){(float)(((float)piece.type - 1.0) * 20.0), 0.0,
                             20.0, 19.0},
-                (Vector2){px, py}, NORD_FOREGROUND_COLOR);
+                (Vector2){px, py}, NORD_HIGHLIGHT_COLOR);
           }
           if (piece.color == PLAYER_BLACK) {
             DrawTextureRec(
                 game->pieces,
                 (Rectangle){(float)(((float)piece.type - 1.0) * 20.0), 19.0,
                             20.0, 19.0},
-                (Vector2){px, py}, NORD_FOREGROUND_COLOR);
+                (Vector2){px, py}, NORD_PRIMARY_COLOR);
           }
 
           break;
