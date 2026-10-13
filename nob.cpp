@@ -93,7 +93,7 @@ bool build_tools(bool debug) {
   cmd_append(&cmd, "-Wno-writable-strings");
   cmd_append(&cmd, "-Wno-unused-command-line-argument");
 
-  cmd_append(&cmd, "-static-libclosure", "-static-libsan", "-static-openmp");
+  // cmd_append(&cmd, "-static-libclosure", "-static-libsan", "-static-openmp");
 
   cmd_append(&cmd, "-o", TOOLS_BUILD_FOLDER "assets2c");
   return cmd_run(&cmd);
