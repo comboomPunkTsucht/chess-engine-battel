@@ -80,7 +80,6 @@ bool build_tools(bool debug) {
   cmd_append(&cmd, "-lrt");
   cmd_append(&cmd, "-lpthread");
   cmd_append(&cmd, "-lX11");
-  cmd_append(&cmd, "-lWayland-client");
 #elif defined(_WIN32)
   cmd_append(&cmd, "-lwinmm");
 // more platforms can be added here
