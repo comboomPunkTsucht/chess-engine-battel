@@ -23,7 +23,7 @@ void Game::render() {
       float px = x * space_size + x_start;
       float py = y * space_size + y_start;
 
-      DrawRectangleLines(px, py, space_size, space_size, WHITE);
+      DrawRectangleLines(px, py, space_size, space_size, NORD_FOREGROUND_COLOR);
 
       uint32_t idx = x + y * DEFAULT_BOARD_DIMENSIONS;
       Piece    piece = board[idx];
