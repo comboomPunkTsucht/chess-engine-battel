@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <math.h>
 
-#NOB_IMPLEMENTATION
+#define NOB_IMPLEMENTATION
 #include "nob_addons.h"
 
 void Game::render(Game *game) {
