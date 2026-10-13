@@ -1,4 +1,5 @@
 // #include "assets.h"
+#include "move.h"
 #include <algorithm>
 #include <cstdlib>
 #include <math.h>
@@ -6,7 +7,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
-#include "move.h"
 
 // NEU: IXWebSocket Includes
 #include <ixwebsocket/IXConnectionState.h>
@@ -39,54 +39,68 @@ enum piece_color {
 };
 
 typedef struct {
-  PieceType type;
-  int step_counter;
-  piece_color color;
+    PieceType   type;
+    int         step_counter;
+    piece_color color;
 } piece;
 
 piece game_state[8][8] = {(piece){none, 0, is_white}};
 
 void interact(void) { }
 void render(void) {
-  int space_size = (std::min(DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT) * 0.9) / DEFAULT_BOARD_DIMENSIONS;
-  int x_start = (DEFAULT_SCREEN_WIDTH - (space_size * DEFAULT_BOARD_DIMENSIONS)) / 2;
-  int y_start = (DEFAULT_SCREEN_HEIGHT - (space_size * DEFAULT_BOARD_DIMENSIONS)) / 2;
-  
-  BeginDrawing();
-  ClearBackground(NORD_BACKGROUND_COLOR);
-  DrawFPS(1, 1);
+  int space_size =
+      (std::min(DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT) * 0.9) /
+      DEFAULT_BOARD_DIMENSIONS;
+  int x_start =
+      (DEFAULT_SCREEN_WIDTH - (space_size * DEFAULT_BOARD_DIMENSIONS)) / 2;
+  int y_start =
+      (DEFAULT_SCREEN_HEIGHT - (space_size * DEFAULT_BOARD_DIMENSIONS)) / 2;
 
-    for (int x = 0; x < DEFAULT_BOARD_DIMENSIONS; x++) {
-      for (int y = 0; y < DEFAULT_BOARD_DIMENSIONS; y++) {
-        DrawRectangleLines(x * space_size + x_start, y * space_size + y_start, space_size, space_size, GRAY);
-        
-        switch (game_state[x][y].type) {
-          case None:
-            break;
-          case Pawn:
-            DrawText("p", x * space_size + x_start, y * space_size + y_start + 4, space_size / 2, NORD_PRIMARY_COLOR);
-            break;
-          case Rook:
-            DrawText("r", x * space_size + x_start, y * space_size + y_start + 4, space_size / 2, NORD_PRIMARY_COLOR);
-            break;
-          case Knight:
-            DrawText("h", x * space_size + x_start, y * space_size + y_start + 4, space_size / 2, NORD_PRIMARY_COLOR);
-            break;
-          case Bishop:
-            DrawText("b", x * space_size + x_start, y * space_size + y_start + 4, space_size / 2, NORD_PRIMARY_COLOR);
-            break;
-          case Queen:
-            DrawText("q", x * space_size + x_start, y * space_size + y_start + 4, space_size / 2, NORD_PRIMARY_COLOR);
-            break;
-          case King:
-            DrawText("k", x * space_size + x_start, y * space_size + y_start + 4, space_size / 2, NORD_PRIMARY_COLOR);
-            break;
-          default:
-            DrawText("error", x * space_size + x_start, y * space_size + y_start + 4, space_size / 2, RED);
-            break;
-        }
+  size_t temp_mark = temp_save()
+
+      BeginDrawing();
+  temp_revind(temp_mark);
+  ClearBackground(NORD_BACKGROUND_COLOR);
+  DrawText("Chess Engine Battle", 10, 10, 48, NORD_PRIMARY_COLOR);
+
+  for (int x = 0; x < DEFAULT_BOARD_DIMENSIONS; x++) {
+    for (int y = 0; y < DEFAULT_BOARD_DIMENSIONS; y++) {
+      DrawRectangleLines(x * space_size + x_start, y * space_size + y_start,
+                         space_size, space_size, GRAY);
+
+      switch (game_state[x][y].type) {
+        case None: break;
+        case Pawn:
+          DrawText("p", x * space_size + x_start, y * space_size + y_start + 4,
+                   space_size / 2, NORD_PRIMARY_COLOR);
+          break;
+        case Rook:
+          DrawText("r", x * space_size + x_start, y * space_size + y_start + 4,
+                   space_size / 2, NORD_PRIMARY_COLOR);
+          break;
+        case Knight:
+          DrawText("h", x * space_size + x_start, y * space_size + y_start + 4,
+                   space_size / 2, NORD_PRIMARY_COLOR);
+          break;
+        case Bishop:
+          DrawText("b", x * space_size + x_start, y * space_size + y_start + 4,
+                   space_size / 2, NORD_PRIMARY_COLOR);
+          break;
+        case Queen:
+          DrawText("q", x * space_size + x_start, y * space_size + y_start + 4,
+                   space_size / 2, NORD_PRIMARY_COLOR);
+          break;
+        case King:
+          DrawText("k", x * space_size + x_start, y * space_size + y_start + 4,
+                   space_size / 2, NORD_PRIMARY_COLOR);
+          break;
+        default:
+          DrawText("error", x * space_size + x_start,
+                   y * space_size + y_start + 4, space_size / 2, RED);
+          break;
       }
     }
+  }
 
   EndDrawing();
 }
