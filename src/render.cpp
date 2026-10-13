@@ -1,5 +1,6 @@
 #include "game.h"
 #include "raylib.h"
+#include <algorithm>
 #include <math.h>
 
 #NOB_IMPLEMENTATION
