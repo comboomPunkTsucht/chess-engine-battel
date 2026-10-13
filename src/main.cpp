@@ -44,7 +44,8 @@ typedef struct {
     piece_color color;
 } piece;
 
-piece game_state[8][8] = {(piece){PieceType::None, 0, CWHITE}};
+piece game_state[DEFAULT_BOARD_DIMENSIONS][DEFAULT_BOARD_DIMENSIONS] = {
+    (piece){PieceType::None, 0, CWHITE}};
 
 void load(void) { SetTargetFPS(GetMonitorRefreshRate(GetCurrentMonitor())); }
 
