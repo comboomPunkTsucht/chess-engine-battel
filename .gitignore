@@ -42,6 +42,10 @@
 nob
 nob.old
 
+nop
+nop.old
+
+
 !tools/
 # Build directories
 build/
