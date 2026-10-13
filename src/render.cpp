@@ -1,10 +1,9 @@
 #include "game.h"
+#include "nord.h"
 #include "piece.h"
 #include "raylib.h"
 #include <algorithm>
 #include <math.h>
-
-#include "nord.h"
 
 void Game::render(Game *game) {
   const int space_size =
