@@ -1,5 +1,5 @@
 ---
-icon: simple/api
+icon: lucide/cuboid
 ---
 
 # API
