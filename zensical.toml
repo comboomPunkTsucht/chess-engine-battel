@@ -14,8 +14,8 @@ edit_uri = "edit/main/docs/"
 site_dir = "build/docs"
 
 nav = [
-  { "Get started" = "index.md" },
-  { "Markdown in 5min" = "markdown.md" },
+  { "About" = "index.md" },
+  { "Api" = "api.md" },
 ]
 
 use_directory_urls = true

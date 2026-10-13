@@ -1,3 +1,7 @@
+---
+icon: lucide/cuboid
+---
+
 # API
 
 ## Abstract
