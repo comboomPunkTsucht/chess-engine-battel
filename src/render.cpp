@@ -24,7 +24,7 @@ void Game::render(Game *game) {
       float px = x * space_size + x_start;
       float py = y * space_size + y_start;
 
-      DrawRectangleLines(px, py, space_size, space_size, GRAY);
+      DrawRectangleLines(px, py, space_size, space_size, NORD_FOREGROUND_COLOR);
 
       uint32_t idx = x + y * DEFAULT_BOARD_DIMENSIONS;
       Piece    piece = game->board[idx];
@@ -37,14 +37,14 @@ void Game::render(Game *game) {
                 game->pieces,
                 (Rectangle){(float)(((float)piece.type - 1.0) * 20.0), 0.0,
                             20.0, 19.0},
-                (Vector2){px, py}, WHITE);
+                (Vector2){px, py}, NORD_FOREGROUND_COLOR);
           }
           if (piece.color == PLAYER_BLACK) {
             DrawTextureRec(
                 game->pieces,
                 (Rectangle){(float)(((float)piece.type - 1.0) * 20.0), 19.0,
                             20.0, 19.0},
-                (Vector2){px, py}, WHITE);
+                (Vector2){px, py}, NORD_FOREGROUND_COLOR);
           }
 
           break;
@@ -52,6 +52,6 @@ void Game::render(Game *game) {
       Rectangle hello;
     }
   }
-  // DrawTexture(game->pieces, 1, 1, WHITE);
+  // DrawTexture(game->pieces, 1, 1, NORD_FOREGROUND_COLOR);
   EndDrawing();
 }
