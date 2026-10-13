@@ -61,7 +61,7 @@ void render(void) {
       BeginDrawing();
   temp_revind(temp_mark);
   ClearBackground(NORD_BACKGROUND_COLOR);
-  DrawText("Chess Engine Battle", 10, 10, 48, NORD_PRIMARY_COLOR);
+  DrawText(temp_sprintf("%s FPS", GetFPS()), 10, 10, 48, NORD_PRIMARY_COLOR);
 
   for (int x = 0; x < DEFAULT_BOARD_DIMENSIONS; x++) {
     for (int y = 0; y < DEFAULT_BOARD_DIMENSIONS; y++) {
