@@ -47,14 +47,14 @@ void Game::render() {
                 chess_piece_textures,
                 (Rectangle){(float)(((float)piece.type - 1.0) * 20.0), 19.0,
                             20.0, 19.0},
-                (Vector2){px, py}, get_Nord_Color_as_raylib_color(NORD3));
+                (Vector2){px, py}, get_Nord_Color_as_raylib_color(NORD4));
           }
           if (piece.color == PLAYER_BLACK) {
             DrawTextureRec(
                 chess_piece_textures,
                 (Rectangle){(float)(((float)piece.type - 1.0) * 20.0), 19.0,
                             20.0, 19.0},
-                (Vector2){px, py}, get_Nord_Color_as_raylib_color(NORD4));
+                (Vector2){px, py}, get_Nord_Color_as_raylib_color(NORD3));
           }
 
           break;
