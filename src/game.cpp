@@ -1,5 +1,6 @@
 #include "game.h"
 #include "global.h"
+#include "nob_addons.h"
 
 void Game::setup_board() {
   board[0].type = Rook;
@@ -94,4 +95,16 @@ void Game::initialization(void) {
   chess_piece_image = LoadImageFromMemory(".png", Assets::All_pieces_png,
                                           Assets::All_pieces_png_size);
   chess_piece_textures = LoadTextureFromImage(chess_piece_image);
+
+  main_font = LoadFontFromMemory(
+      ".ttf", Assets::CaskaydiaCoveNerdFontPropo_Regular_ttf,
+      Assets::CaskaydiaCoveNerdFontPropo_Regular_ttf_size, 20, NULL, 0);
+  bold_font = LoadFontFromMemory(
+      ".ttf", Assets::CaskaydiaCoveNerdFontPropo_Bold_ttf,
+      Assets::CaskaydiaCoveNerdFontPropo_Bold_ttf_size, 20, NULL, 0);
+  italic_font = LoadFontFromMemory(
+      ".ttf", Assets::CaskaydiaCoveNerdFontPropo_Italic_ttf,
+      Assets::CaskaydiaCoveNerdFontPropo_Italic_ttf_size, 20, NULL, 0);
+
+  temp_mark = temp_save();
 }
