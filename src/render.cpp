@@ -22,12 +22,21 @@ void Game::render() {
   DrawTextEx(main_font, temp_sprintf("%d FPS", GetFPS()), (Vector2){1, 1}, 20.0,
              2.0, NORD_PRIMARY_COLOR);
 
+  DrawRectangle(x_start - 1, y_start - 1, 8 * space_size + 2,
+                8 * space_size + 2, NORD_FOREGROUND_COLOR);
+
   for (uint32_t x = 0; x < DEFAULT_BOARD_DIMENSIONS; x++) {
     for (uint32_t y = 0; y < DEFAULT_BOARD_DIMENSIONS; y++) {
       float px = x * space_size + x_start;
       float py = y * space_size + y_start;
 
-      DrawRectangleLines(px, py, space_size, space_size, NORD_FOREGROUND_COLOR);
+      if ((x + y) % 2 == 0) {
+        DrawRectangle(px, py, space_size, space_size,
+                      get_Nord_Color_as_raylib_color(NORD1));
+      } else {
+        DrawRectangle(px, py, space_size, space_size,
+                      get_Nord_Color_as_raylib_color(NORD0));
+      }
 
       uint32_t idx = x + y * DEFAULT_BOARD_DIMENSIONS;
       Piece    piece = board[idx];
