@@ -1,5 +1,6 @@
 #pragma once
 #include "assets.h"
+#include "global.h"
 #include "raylib.h"
 #include <cstdint>
 
@@ -22,8 +23,3 @@ struct Piece {
     PieceType  type;
     PieceColor color;
 };
-
-static Image chess_piece_image = LoadImageFromMemory(
-    ".png", Assets::All_pieces_png, Assets::All_pieces_png_size);
-
-static Texture2D chess_piece_textures = LoadTextureFromImage(chess_piece_image);

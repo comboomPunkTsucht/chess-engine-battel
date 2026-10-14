@@ -31,6 +31,7 @@ int main(void) {
   InitWindow(DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT,
              "Chess Engine Battle");
   Game game = Game();
+  game.initialization();
   game.setup_board();
   game.main_loop();
 

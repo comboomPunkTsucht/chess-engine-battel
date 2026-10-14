@@ -1,31 +1,30 @@
 #pragma once
 
-#include <vector>
 #include "move.h"
 #include "raylib.h"
+#include <vector>
 
 constexpr uint32_t DEFAULT_SCREEN_WIDTH = 800;
 constexpr uint32_t DEFAULT_SCREEN_HEIGHT = 450;
 constexpr uint32_t DEFAULT_BOARD_DIMENSIONS = 8;
 
 class Game {
-private:
-    struct Piece board[DEFAULT_BOARD_DIMENSIONS * DEFAULT_BOARD_DIMENSIONS] = {{ None, PLAYER_WHITE }};
+  private:
+    struct Piece board[DEFAULT_BOARD_DIMENSIONS * DEFAULT_BOARD_DIMENSIONS] = {
+        {None, PLAYER_WHITE}};
     std::vector<Move> history;
 
-    PieceColor turn = PLAYER_WHITE;
+    PieceColor        turn = PLAYER_WHITE;
 
-public:
-    Game() {
-        history.reserve(sizeof(Move) * 128);
-    }
+  public:
+    Game() { history.reserve(sizeof(Move) * 128); }
 
     void main_loop() {
-        while (!WindowShouldClose()) {
-            processInput();
-            update();
-            render();
-        }
+      while (!WindowShouldClose()) {
+        processInput();
+        update();
+        render();
+      }
     }
 
     void processInput();
@@ -35,4 +34,6 @@ public:
     void setup_board();
 
     void doMove(Move move);
+
+    void initialization(void);
 };
