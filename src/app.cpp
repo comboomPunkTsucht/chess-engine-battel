@@ -40,9 +40,12 @@ void App::load_font() {
     font_size = getFontSize();
 
 #ifdef DEBUG_BUILD
-    main_font = LoadFont("assets/CaskaydiaCoveNerdFontPropo-Regular.ttf");
-    bold_font = LoadFont("assets/CaskaydiaCoveNerdFontPropo-Bold.ttf");
-    italic_font = LoadFont("assets/CaskaydiaCoveNerdFontPropo-Italic.ttf");
+    main_font = LoadFontEx("assets/CaskaydiaCoveNerdFontPropo-Regular.ttf",
+                           font_size, NULL, 0);
+    bold_font = LoadFontEx("assets/CaskaydiaCoveNerdFontPropo-Bold.ttf",
+                           font_size, NULL, 0);
+    italic_font = LoadFontEx("assets/CaskaydiaCoveNerdFontPropo-Italic.ttf",
+                             font_size, NULL, 0);
 
 #else
 
