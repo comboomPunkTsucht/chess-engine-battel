@@ -161,6 +161,7 @@ int main(int argc, char **argv) {
 
     bool  help = false;
     bool  compile = false;
+    bool  disable_optimization_in_main_program = false;
     bool  debug = false;
     char *debugger = (char *)"lldb";
     bool  run = false;
@@ -178,6 +179,10 @@ int main(int argc, char **argv) {
     flag_bool_var(&run, "r", false, "Run the project");
 
     flag_str_var(&debugger, "-debugger", "lldb", "The debugger to use");
+    flag_bool_var(&disable_optimization_in_main_program,
+                  "-disable-optimization", false,
+                  "Disable optimizations in the main program and must be used "
+                  "with -c/--compile");
 
     if (f_args.count == 1) {
         usage(stderr);
@@ -203,7 +208,9 @@ int main(int argc, char **argv) {
         if (!build_ixwebsocket(debug)) { return 1; }
         if (!build_raylib(debug)) { return 1; }
 
-        if (!run_tools(debug)) { return 1; }
+        if (!disable_optimization_in_main_program) {
+            if (!run_tools(debug)) { return 1; }
+        }
 
         clangpp(&cmd);
         cmd_append(&cmd, SOURCE_FOLDER "main.cpp");
@@ -221,10 +228,20 @@ int main(int argc, char **argv) {
             // NEU: Legt die .o Datei sauber im "build/"-Ordner ab anstatt im
             // Hauptverzeichnis
             cmd_append(&cmd, "-dumpdir", BUILD_FOLDER);
-            cmd_append(&cmd, "-DDEBUG_BUILD");
+            if (disable_optimization_in_main_program) {
+                cmd_append(&cmd, "-DDYNAMIC_ASSETS");
+                cmd_append(&cmd, "-O0");
+            } else {
+                cmd_append(&cmd, "-O3");
+            }
+
+        } else if (disable_optimization_in_main_program) {
+            cmd_append(&cmd, "-DDYNAMIC_ASSETS");
+            cmd_append(&cmd, "-O0");
         } else {
             cmd_append(&cmd, "-O3");
         }
+
         clangpp_flags(&cmd);
         cmd_append(&cmd, "-I", THIRDPARTY_INCLUDE_FOLDER);
         cmd_append(&cmd, "-I", TOOLS_SRC_FOLDER);
