@@ -83,6 +83,7 @@
     "atomic": "cpp",
     "deque": "cpp",
     "vector": "cpp",
-    "iostream": "cpp"
+    "iostream": "cpp",
+    "cmath": "cpp"
   }
 }

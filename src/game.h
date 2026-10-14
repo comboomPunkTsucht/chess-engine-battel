@@ -4,12 +4,7 @@
 #include "raylib.h"
 #include <vector>
 
-constexpr uint32_t DEFAULT_SCREEN_WIDTH = 800;
-constexpr uint32_t DEFAULT_SCREEN_HEIGHT = 450;
 constexpr uint32_t DEFAULT_BOARD_DIMENSIONS = 8;
-
-inline uint32_t    screen_width = DEFAULT_SCREEN_WIDTH;
-inline uint32_t    screen_height = DEFAULT_SCREEN_HEIGHT;
 
 class Game {
   private:
@@ -22,22 +17,8 @@ class Game {
   public:
     Game() { history.reserve(sizeof(Move) * 128); }
 
-    void main_loop() {
-      while (!WindowShouldClose()) {
-        processInput();
-        update();
-        render();
-      }
-    }
-
-    void processInput();
-    void update();
     void render();
 
     void setup_board();
-
     void doMove(Move move);
-
-    void initialization(void);
-    void load_font();
 };

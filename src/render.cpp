@@ -1,3 +1,4 @@
+#include "app.h"
 #include "game.h"
 #include "global.h"
 #include "nob_addons.h"
@@ -8,6 +9,10 @@
 #include <math.h>
 
 #include "nord.h"
+
+void App::render() {
+  mCurrentGame->Game::render();
+}
 
 void Game::render() {
   int space_size =
@@ -34,7 +39,7 @@ void Game::render() {
       }
 
       uint32_t idx = x + y * DEFAULT_BOARD_DIMENSIONS;
-      Piece    piece = board[idx];
+      Piece piece = board[idx];
 
       switch (piece.type) {
         case None: break;

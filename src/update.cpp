@@ -1,15 +1,15 @@
-#include "game.h"
+#include "app.h"
 #include "global.h"
 #include "nob_addons.h"
 #include <cmath>
 
-void Game::update() {
+void App::update() {
 
   temp_rewind(temp_mark);
   if (IsWindowResized()) {
     screen_width = GetScreenWidth();
     screen_height = GetScreenHeight();
 
-    Game::load_font();
+    App::load_font();
   }
 }
