@@ -12,6 +12,8 @@ inline size_t    temp_mark;
 
 inline float     font_size_factor = 0.044f;
 
-inline float     font_size =
-    std::max(std::floor(screen_width * font_size_factor + 0.2),
-             std::floor(screen_height * 0.025));
+inline float font_size = getFontSize();
+
+static float getFontSize() {
+    return std::max(std::floor(screen_width * font_size_factor + 0.2), std::floor(screen_height * 0.025));
+}
