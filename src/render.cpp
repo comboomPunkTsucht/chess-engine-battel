@@ -1,4 +1,5 @@
 #include "game.h"
+#include "global.h"
 #include "nord.h"
 #include "piece.h"
 #include "raylib.h"
@@ -33,14 +34,14 @@ void Game::render() {
         default:
           if (piece.color == PLAYER_WHITE) {
             DrawTextureRec(
-                *chess_piece_textures,
+                chess_piece_textures,
                 (Rectangle){(float)(((float)piece.type - 1.0) * 20.0), 0.0,
                             20.0, 19.0},
                 (Vector2){px, py}, NORD_HIGHLIGHT_COLOR);
           }
           if (piece.color == PLAYER_BLACK) {
             DrawTextureRec(
-                *chess_piece_textures,
+                chess_piece_textures,
                 (Rectangle){(float)(((float)piece.type - 1.0) * 20.0), 19.0,
                             20.0, 19.0},
                 (Vector2){px, py}, NORD_PRIMARY_COLOR);

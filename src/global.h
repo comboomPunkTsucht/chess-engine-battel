@@ -1,5 +1,6 @@
 #pragma once
 
-static Image     *chess_piece_image = NULL;
+#include "raylib.h"
 
-static Texture2D *chess_piece_textures = NULL;
+inline Image     chess_piece_image;
+inline Texture2D chess_piece_textures;
