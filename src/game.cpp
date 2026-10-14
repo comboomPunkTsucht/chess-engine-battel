@@ -91,6 +91,14 @@ void Game::doMove(Move move) {
 }
 
 void Game::initialization(void) {
+  SetTargetFPS(GetMonitorRefreshRate(GetCurrentMonitor()));
+
+#ifdef _WIN32
+
+  SetWindowIcon(
+      LoadImageFromMemory(".png", Assets::icon_png, Assets::icon_png_size));
+
+#endif
 
   chess_piece_image = LoadImageFromMemory(".png", Assets::All_pieces_png,
                                           Assets::All_pieces_png_size);
