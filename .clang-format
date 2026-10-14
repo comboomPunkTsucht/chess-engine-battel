@@ -171,7 +171,7 @@ IndentExternBlock: AfterExternBlock
 IndentGotoLabels: true
 IndentPPDirectives: None
 IndentRequiresClause: true
-IndentWidth: 2
+IndentWidth: 4
 IndentWrappedFunctionNames: true
 InsertBraces: true
 InsertNewlineAtEOF: true
@@ -282,7 +282,7 @@ StatementAttributeLikeMacros:
 StatementMacros:
   - Q_UNUSED
   - QT_REQUIRE_VERSION
-TabWidth: 2
+TabWidth: 4
 TableGenBreakInsideDAGArg: DontBreak
 UseTab: Never
 VerilogBreakBetweenInstancePorts: true

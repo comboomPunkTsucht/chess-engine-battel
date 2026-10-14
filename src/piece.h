@@ -17,9 +17,10 @@ enum PieceType : uint8_t {
 enum PieceColor {
   PLAYER_WHITE,
   PLAYER_BLACK,
+  PLAYER_NONE
 };
 
 struct Piece {
-    PieceType  type;
-    PieceColor color;
+  PieceType  type;
+  PieceColor color;
 };
