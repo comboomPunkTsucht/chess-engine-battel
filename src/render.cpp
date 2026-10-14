@@ -16,7 +16,7 @@ void Game::render() {
   int   y_start = (screen_height - (space_size * DEFAULT_BOARD_DIMENSIONS)) / 2;
   float font_size = std::max(std::floor(screen_width * font_size_factor + 0.2),
                              std::floor(screen_height * 0.025));
-  temp_rewind(temp_mark);
+
   BeginDrawing();
   ClearBackground(NORD_BACKGROUND_COLOR);
   DrawTextEx(main_font, temp_sprintf("%d FPS", GetFPS()), (Vector2){1, 1},
