@@ -19,8 +19,15 @@ void App::initialization(void) {
 
 #ifdef _WIN32
 
+#ifdef DEBUG_BUILD
+
+    SetWindowIcon(LoadImage("assets/icon.png"));
+
+#else
+
     SetWindowIcon(
         LoadImageFromMemory(".png", Assets::icon_png, Assets::icon_png_size));
+#endif
 
 #endif
 #ifdef DEBUG_BUILD
