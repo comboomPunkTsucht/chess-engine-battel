@@ -1,11 +1,12 @@
 #include "game.h"
 #include "global.h"
 #include "nob_addons.h"
-#include "nord.h"
 #include "piece.h"
 #include "raylib.h"
 #include <algorithm>
 #include <math.h>
+
+#include "nord.h"
 
 void Game::render() {
   const int space_size =
