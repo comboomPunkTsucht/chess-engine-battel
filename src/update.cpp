@@ -8,7 +8,7 @@ void Game::update() {
   if (IsWindowResized()) {
     screen_width = GetScreenWidth();
     screen_height = GetScreenHeight();
-  }
 
-  Game::load_font();
+    Game::load_font();
+  }
 }
