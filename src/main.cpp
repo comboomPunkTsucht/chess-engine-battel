@@ -21,12 +21,9 @@
 
 int main(void) {
   addon_init_logging();
-  const float font_size = std::max(floor(DEFAULT_SCREEN_WIDTH * 0.044 + 0.2),
-                                   floor(DEFAULT_SCREEN_HEIGHT * 0.025));
 
   SetConfigFlags(FLAG_MSAA_4X_HINT | FLAG_INTERLACED_HINT |
-                 FLAG_WINDOW_HIGHDPI |
-                 FLAG_VSYNC_HINT | /* FLAG_WINDOW_RESIZABLE | */
+                 FLAG_WINDOW_HIGHDPI | FLAG_VSYNC_HINT | FLAG_WINDOW_RESIZABLE |
                  FLAG_WINDOW_ALWAYS_RUN);
   InitWindow(DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT,
              "Chess Engine Battle");

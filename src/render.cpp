@@ -4,26 +4,27 @@
 #include "piece.h"
 #include "raylib.h"
 #include <algorithm>
+#include <cmath>
 #include <math.h>
 
 #include "nord.h"
 
 void Game::render() {
-  const int space_size =
-      (std::min(DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT) * 0.9) /
-      DEFAULT_BOARD_DIMENSIONS;
-  const int x_start =
-      (DEFAULT_SCREEN_WIDTH - (space_size * DEFAULT_BOARD_DIMENSIONS)) / 2;
-  const int y_start =
-      (DEFAULT_SCREEN_HEIGHT - (space_size * DEFAULT_BOARD_DIMENSIONS)) / 2;
+  int space_size =
+      (std::min(screen_width, screen_height) * 0.9) / DEFAULT_BOARD_DIMENSIONS;
+  int   x_start = (screen_width - (space_size * DEFAULT_BOARD_DIMENSIONS)) / 2;
+  int   y_start = (screen_height - (space_size * DEFAULT_BOARD_DIMENSIONS)) / 2;
+  float font_size = std::max(std::floor(screen_width * font_size_factor + 0.2),
+                             std::floor(screen_height * 0.025));
   temp_rewind(temp_mark);
   BeginDrawing();
   ClearBackground(NORD_BACKGROUND_COLOR);
-  DrawTextEx(main_font, temp_sprintf("%d FPS", GetFPS()), (Vector2){1, 1}, 20.0,
-             2.0, NORD_PRIMARY_COLOR);
+  DrawTextEx(main_font, temp_sprintf("%d FPS", GetFPS()), (Vector2){1, 1},
+             font_size, font_size / 10.0, NORD_PRIMARY_COLOR);
 
-  DrawRectangleLines(x_start - 1, y_start - 1, 8 * space_size + 2,
-                     8 * space_size + 2, NORD_FOREGROUND_COLOR);
+  DrawRectangleLines(
+      x_start - 1, y_start - 1, DEFAULT_BOARD_DIMENSIONS * space_size + 2,
+      DEFAULT_BOARD_DIMENSIONS * space_size + 2, NORD_FOREGROUND_COLOR);
 
   for (uint32_t x = 0; x < DEFAULT_BOARD_DIMENSIONS; x++) {
     for (uint32_t y = 0; y < DEFAULT_BOARD_DIMENSIONS; y++) {
