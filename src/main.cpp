@@ -1,4 +1,4 @@
-#include "game.h"
+#include "app.h"
 
 #define FLAG_IMPLEMENTATION
 #include "flag.h"
@@ -27,10 +27,11 @@ int main(void) {
                  FLAG_WINDOW_ALWAYS_RUN);
   InitWindow(DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT,
              "Chess Engine Battle");
-  Game game = Game();
-  game.initialization();
-  game.setup_board();
-  game.main_loop();
+  
+  App app = App();
+  app.initialization();
+  app.startGame();
+  app.main_loop();
 
   CloseWindow();
 

@@ -1,3 +1,4 @@
+#include "app.h"
 #include "game.h"
 #include "global.h"
 #include "nob_addons.h"
@@ -9,13 +10,16 @@
 
 #include "nord.h"
 
+void App::render() {
+  mCurrentGame->Game::render();
+}
+
 void Game::render() {
-  int space_size =
-      (std::min(screen_width, screen_height) * 0.9) / DEFAULT_BOARD_DIMENSIONS;
-  int   x_start = (screen_width - (space_size * DEFAULT_BOARD_DIMENSIONS)) / 2;
-  int   y_start = (screen_height - (space_size * DEFAULT_BOARD_DIMENSIONS)) / 2;
-  float font_size = std::max(std::floor(screen_width * font_size_factor + 0.2),
-                             std::floor(screen_height * 0.025));
+  const int space_size = (std::min(screen_width, screen_height) * 0.9) / DEFAULT_BOARD_DIMENSIONS;
+  const int x_start = (screen_width - (space_size * DEFAULT_BOARD_DIMENSIONS)) / 2;
+  const int y_start = (screen_height - (space_size * DEFAULT_BOARD_DIMENSIONS)) / 2;
+  const float font_size = std::max(std::floor(screen_width * font_size_factor + 0.2), std::floor(screen_height * 0.025));
+
   temp_rewind(temp_mark);
   BeginDrawing();
   ClearBackground(NORD_BACKGROUND_COLOR);
@@ -37,7 +41,7 @@ void Game::render() {
       }
 
       uint32_t idx = x + y * DEFAULT_BOARD_DIMENSIONS;
-      Piece    piece = board[idx];
+      Piece piece = board[idx];
 
       switch (piece.type) {
         case None: break;

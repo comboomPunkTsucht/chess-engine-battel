@@ -205,6 +205,7 @@ int main(int argc, char **argv) {
 
     clangpp(&cmd);
     cmd_append(&cmd, SOURCE_FOLDER "main.cpp");
+    cmd_append(&cmd, SOURCE_FOLDER "app.cpp");
     cmd_append(&cmd, SOURCE_FOLDER "game.cpp");
     cmd_append(&cmd, SOURCE_FOLDER "update.cpp");
     cmd_append(&cmd, SOURCE_FOLDER "processInput.cpp");

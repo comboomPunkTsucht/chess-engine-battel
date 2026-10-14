@@ -1,6 +1,6 @@
-#include "game.h"
+#include "app.h"
 
-void Game::processInput() {
+void App::processInput() {
     const Vector2 mouse = GetMousePosition();
     const int x = (int) mouse.x;
     const int y = (int) mouse.y;
