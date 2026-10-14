@@ -1,4 +1,5 @@
 #include "game.h"
+#include "global.h"
 #include "nord.h"
 #include "piece.h"
 #include "raylib.h"
