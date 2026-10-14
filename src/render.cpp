@@ -38,16 +38,16 @@ void Game::render() {
           if (piece.color == PLAYER_WHITE) {
             DrawTextureRec(
                 chess_piece_textures,
-                (Rectangle){(float)(((float)piece.type - 1.0) * 20.0), 0.0,
+                (Rectangle){(float)(((float)piece.type - 1.0) * 20.0), 19.0,
                             20.0, 19.0},
-                (Vector2){px, py}, NORD_HIGHLIGHT_COLOR);
+                (Vector2){px, py}, get_Nord_Color_as_raylib_color(NORD3));
           }
           if (piece.color == PLAYER_BLACK) {
             DrawTextureRec(
                 chess_piece_textures,
                 (Rectangle){(float)(((float)piece.type - 1.0) * 20.0), 19.0,
                             20.0, 19.0},
-                (Vector2){px, py}, NORD_PRIMARY_COLOR);
+                (Vector2){px, py}, get_Nord_Color_as_raylib_color(NORD4));
           }
 
           break;
