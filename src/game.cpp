@@ -1,6 +1,7 @@
 #include "game.h"
 #include "global.h"
 #include "nob_addons.h"
+#include <cmath>
 
 void Game::setup_board() {
   board[0].type = Rook;
@@ -104,15 +105,22 @@ void Game::initialization(void) {
                                           Assets::All_pieces_png_size);
   chess_piece_textures = LoadTextureFromImage(chess_piece_image);
 
-  main_font = LoadFontFromMemory(
-      ".ttf", Assets::CaskaydiaCoveNerdFontPropo_Regular_ttf,
-      Assets::CaskaydiaCoveNerdFontPropo_Regular_ttf_size, 20, NULL, 0);
-  bold_font = LoadFontFromMemory(
-      ".ttf", Assets::CaskaydiaCoveNerdFontPropo_Bold_ttf,
-      Assets::CaskaydiaCoveNerdFontPropo_Bold_ttf_size, 20, NULL, 0);
-  italic_font = LoadFontFromMemory(
-      ".ttf", Assets::CaskaydiaCoveNerdFontPropo_Italic_ttf,
-      Assets::CaskaydiaCoveNerdFontPropo_Italic_ttf_size, 20, NULL, 0);
+  Game::load_font();
 
   temp_mark = temp_save();
+}
+
+void Game::load_font() {
+  float font_size = std::max(std::floor(screen_width * font_size_factor + 0.2),
+                             std::floor(screen_height * 0.025));
+
+  main_font = LoadFontFromMemory(
+      ".ttf", Assets::CaskaydiaCoveNerdFontPropo_Regular_ttf,
+      Assets::CaskaydiaCoveNerdFontPropo_Regular_ttf_size, font_size, NULL, 0);
+  bold_font = LoadFontFromMemory(
+      ".ttf", Assets::CaskaydiaCoveNerdFontPropo_Bold_ttf,
+      Assets::CaskaydiaCoveNerdFontPropo_Bold_ttf_size, font_size, NULL, 0);
+  italic_font = LoadFontFromMemory(
+      ".ttf", Assets::CaskaydiaCoveNerdFontPropo_Italic_ttf,
+      Assets::CaskaydiaCoveNerdFontPropo_Italic_ttf_size, font_size, NULL, 0);
 }

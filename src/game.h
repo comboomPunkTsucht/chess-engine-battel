@@ -8,6 +8,9 @@ constexpr uint32_t DEFAULT_SCREEN_WIDTH = 800;
 constexpr uint32_t DEFAULT_SCREEN_HEIGHT = 450;
 constexpr uint32_t DEFAULT_BOARD_DIMENSIONS = 8;
 
+inline uint32_t    screen_width = DEFAULT_SCREEN_WIDTH;
+inline uint32_t    screen_height = DEFAULT_SCREEN_HEIGHT;
+
 class Game {
   private:
     struct Piece board[DEFAULT_BOARD_DIMENSIONS * DEFAULT_BOARD_DIMENSIONS] = {
@@ -36,4 +39,5 @@ class Game {
     void doMove(Move move);
 
     void initialization(void);
+    void load_font();
 };
