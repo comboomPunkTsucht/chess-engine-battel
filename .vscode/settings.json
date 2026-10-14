@@ -85,5 +85,6 @@
     "vector": "cpp",
     "iostream": "cpp",
     "cmath": "cpp"
-  }
+  },
+  "git.enableCommitSigning": true
 }
