@@ -1,5 +1,5 @@
 #include "app.h"
-#ifndef DEBUG_BUILD
+#ifndef DYNAMIC_ASSETS
 #include "assets.h"
 #endif
 #include "global.h"
@@ -19,7 +19,7 @@ void App::initialization(void) {
 
 #ifdef _WIN32
 
-#ifdef DEBUG_BUILD
+#ifdef DYNAMIC_ASSETS
 
     SetWindowIcon(LoadImage("assets/icon.png"));
 
@@ -30,7 +30,7 @@ void App::initialization(void) {
 #endif
 
 #endif
-#ifdef DEBUG_BUILD
+#ifdef DYNAMIC_ASSETS
     chess_piece_textures =
         LoadTexture("assets/piece/All_pieces.png"); // Lade das Sprite-Sheet von
                                                     // der Festplatte
@@ -46,7 +46,7 @@ void App::initialization(void) {
 void App::load_font() {
     font_size = getFontSize();
 
-#ifdef DEBUG_BUILD
+#ifdef DYNAMIC_ASSETS
     main_font = LoadFontEx("assets/CaskaydiaCoveNerdFontPropo-Regular.ttf",
                            font_size, NULL, 0);
     bold_font = LoadFontEx("assets/CaskaydiaCoveNerdFontPropo-Bold.ttf",
