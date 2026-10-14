@@ -25,7 +25,7 @@ void Game::setup_board() {
 
   for (int i = 16; i < 48; i++) {
     board[i].type = None;
-    board[i].color = PLAYER_WHITE;
+    board[i].color = PLAYER_NONE;
   }
 
   for (int i = 48; i < 56; i++) {
@@ -58,25 +58,41 @@ void Game::doMove(Move move) {
   Piece     moving = board[from];
   Piece     captured = board[to];
 
-  board[from] = {None, PLAYER_WHITE};
+  board[from] = {None, PLAYER_NONE};
 
   if (move.Type() == MoveType::EnPassant) {
     const int capturedPawnIdx = (moving.color == PLAYER_WHITE)
                                     ? (to - DEFAULT_BOARD_DIMENSIONS)
                                     : (to + DEFAULT_BOARD_DIMENSIONS);
-    board[capturedPawnIdx] = {None, PLAYER_WHITE};
+    board[capturedPawnIdx] = {None, PLAYER_NONE};
   }
 
   if (move.Type() == MoveType::CastleKing) {
     const int rookFrom = (moving.color == PLAYER_WHITE) ? 7 : 63;
     const int rookTo = (moving.color == PLAYER_WHITE) ? 5 : 61;
     board[rookTo] = board[rookFrom];
-    board[rookFrom] = {None, PLAYER_WHITE};
+    board[rookFrom] = {None, PLAYER_NONE};
   } else if (move.Type() == MoveType::CastleQueen) {
     const int rookFrom = (moving.color == PLAYER_WHITE) ? 0 : 56;
     const int rookTo = (moving.color == PLAYER_WHITE) ? 3 : 59;
     board[rookTo] = board[rookFrom];
-    board[rookFrom] = {None, PLAYER_WHITE};
+    board[rookFrom] = {None, PLAYER_NONE};
+  }
+
+  if (move.Type() == MoveType::CastleKing || move.Type() == MoveType::CastleQueen) {
+    if (turn == PLAYER_WHITE) {
+      whiteCastleKingSide = false;
+      whiteCastleQueenSide = false;
+    } else if (turn == PLAYER_BLACK) {
+      blackCastleKingSide = false;
+      blackCastleQueenSide = false;
+    }
+  }
+
+  if (move.Type() == MoveType::Normal || move.Type() == MoveType::CastleKing || move.Type() == MoveType::CastleQueen) {
+    ++fifty_move_counter; 
+  } else {
+    fifty_move_counter = 0;
   }
 
   if (move.Promo() != PieceType::None) { moving.type = move.Promo(); }

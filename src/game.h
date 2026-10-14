@@ -8,11 +8,17 @@ constexpr uint32_t DEFAULT_BOARD_DIMENSIONS = 8;
 
 class Game {
   private:
-    struct Piece board[DEFAULT_BOARD_DIMENSIONS * DEFAULT_BOARD_DIMENSIONS] = {
-        {None, PLAYER_WHITE}};
+    struct Piece board[DEFAULT_BOARD_DIMENSIONS * DEFAULT_BOARD_DIMENSIONS] = {{None, PLAYER_WHITE}};
     std::vector<Move> history;
 
-    PieceColor        turn = PLAYER_WHITE;
+    PieceColor turn = PLAYER_WHITE;
+    
+    bool whiteCastleKingSide = true;
+    bool whiteCastleQueenSide = true;
+    bool blackCastleKingSide = true;
+    bool blackCastleQueenSide = true;
+
+    int fifty_move_counter = 0;
 
   public:
     Game() { history.reserve(sizeof(Move) * 128); }
