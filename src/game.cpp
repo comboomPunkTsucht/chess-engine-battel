@@ -105,6 +105,12 @@ void Game::initialization(void) {
                                           Assets::All_pieces_png_size);
   chess_piece_textures = LoadTextureFromImage(chess_piece_image);
 
+  Game::load_font();
+
+  temp_mark = temp_save();
+}
+
+void Game::load_font() {
   float font_size = std::max(std::floor(screen_width * font_size_factor + 0.2),
                              std::floor(screen_height * 0.025));
 
@@ -117,6 +123,4 @@ void Game::initialization(void) {
   italic_font = LoadFontFromMemory(
       ".ttf", Assets::CaskaydiaCoveNerdFontPropo_Italic_ttf,
       Assets::CaskaydiaCoveNerdFontPropo_Italic_ttf_size, font_size, NULL, 0);
-
-  temp_mark = temp_save();
 }

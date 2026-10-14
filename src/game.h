@@ -39,4 +39,5 @@ class Game {
     void doMove(Move move);
 
     void initialization(void);
+    void load_font();
 };
