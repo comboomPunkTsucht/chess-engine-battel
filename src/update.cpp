@@ -5,6 +5,7 @@
 
 void Game::update() {
 
+  temp_rewind(temp_mark);
   if (IsWindowResized()) {
     screen_width = GetScreenWidth();
     screen_height = GetScreenHeight();

@@ -16,7 +16,7 @@ void Game::render() {
   int   y_start = (screen_height - (space_size * DEFAULT_BOARD_DIMENSIONS)) / 2;
   float font_size = std::max(std::floor(screen_width * font_size_factor + 0.2),
                              std::floor(screen_height * 0.025));
-  temp_rewind(temp_mark);
+
   BeginDrawing();
   ClearBackground(NORD_BACKGROUND_COLOR);
   DrawTextEx(main_font, temp_sprintf("%d FPS", GetFPS()), (Vector2){1, 1},
@@ -47,14 +47,14 @@ void Game::render() {
                 chess_piece_textures,
                 (Rectangle){(float)(((float)piece.type - 1.0) * 20.0), 19.0,
                             20.0, 19.0},
-                (Vector2){px, py}, get_Nord_Color_as_raylib_color(NORD3));
+                (Vector2){px, py}, get_Nord_Color_as_raylib_color(NORD4));
           }
           if (piece.color == PLAYER_BLACK) {
             DrawTextureRec(
                 chess_piece_textures,
                 (Rectangle){(float)(((float)piece.type - 1.0) * 20.0), 19.0,
                             20.0, 19.0},
-                (Vector2){px, py}, get_Nord_Color_as_raylib_color(NORD4));
+                (Vector2){px, py}, get_Nord_Color_as_raylib_color(NORD3));
           }
 
           break;
