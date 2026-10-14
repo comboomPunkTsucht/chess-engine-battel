@@ -111,8 +111,8 @@ void Game::initialization(void) {
 }
 
 void Game::load_font() {
-  float font_size = std::max(std::floor(screen_width * font_size_factor + 0.2),
-                             std::floor(screen_height * 0.025));
+  font_size = std::max(std::floor(screen_width * font_size_factor + 0.2),
+                       std::floor(screen_height * 0.025));
 
   main_font = LoadFontFromMemory(
       ".ttf", Assets::CaskaydiaCoveNerdFontPropo_Regular_ttf,
