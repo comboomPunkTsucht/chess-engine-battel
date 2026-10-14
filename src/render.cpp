@@ -1,5 +1,6 @@
 #include "game.h"
 #include "global.h"
+#include "nob_addons.h"
 #include "nord.h"
 #include "piece.h"
 #include "raylib.h"
@@ -14,10 +15,11 @@ void Game::render() {
       (DEFAULT_SCREEN_WIDTH - (space_size * DEFAULT_BOARD_DIMENSIONS)) / 2;
   const int y_start =
       (DEFAULT_SCREEN_HEIGHT - (space_size * DEFAULT_BOARD_DIMENSIONS)) / 2;
-
+  temp_rewind(temp_mark);
   BeginDrawing();
   ClearBackground(NORD_BACKGROUND_COLOR);
-  DrawFPS(1, 1);
+  DrawTextEx(main_font, temp_sprintf("%d FPS", GetFPS()), (Vector2){1, 1}, 20.0,
+             2.0, NORD_PRIMARY_COLOR);
 
   for (uint32_t x = 0; x < DEFAULT_BOARD_DIMENSIONS; x++) {
     for (uint32_t y = 0; y < DEFAULT_BOARD_DIMENSIONS; y++) {
