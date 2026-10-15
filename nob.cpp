@@ -12,20 +12,21 @@
 #define TOOLS_BUILD_FOLDER BUILD_FOLDER "tools/"
 #define THIRDPARTY_FOLDER "thirdparty/"
 #define THIRDPARTY_INCLUDE_FOLDER THIRDPARTY_FOLDER "include/"
+#define BUILD_EXECUTABLE BUILD_FOLDER "chess-engine-battel"
 #ifdef __APPLE__
 #define EXECUTABLE "./chess-engine-battel"
 #else
-#define EXECUTABLE BUILD_FOLDER "chess-engine-battel"
+#define EXECUTABLE Build_EXECUTABLE
 #endif
 
-Cmd			cmd = {0};
+Cmd cmd = {0};
 
 const char *cwd = get_current_dir_temp();
 
 typedef struct {
-		char **items;
-		size_t count;
-		size_t capacity;
+	char **items;
+	size_t count;
+	size_t capacity;
 
 } F_Args;
 
@@ -95,12 +96,12 @@ int main(int argc, char **argv) {
 	for (int i = 0; i < argc; ++i) { da_append(&f_args, strdup(argv[i])); }
 	NOB_GO_REBUILD_URSELF(argc, argv);
 
-	bool  help = false;
-	bool  compile = false;
-	bool  release = false;
-	bool  debug = false;
+	bool help = false;
+	bool compile = false;
+	bool release = false;
+	bool debug = false;
 	char *debugger = (char *)"lldb";
-	bool  run = false;
+	bool run = false;
 	flag_bool_var(&help, "-help", false, "Print this help to stdout and exit with 0");
 	flag_bool_var(&help, "h", false, "Print this help to stdout and exit with 0");
 	flag_bool_var(&compile, "-compile", false, "Compile the project");
@@ -217,7 +218,7 @@ int main(int argc, char **argv) {
 		cmd_append(&cmd, "-Wno-unused-command-line-argument");
 		cmd_append(&cmd, "-Wno-missing-braces");
 
-		cmd_append(&cmd, "-o", EXECUTABLE);
+		cmd_append(&cmd, "-o", BUILD_EXECUTABLE);
 		if (!cmd_run(&cmd)) { return 1; }
 	}
 
@@ -250,89 +251,89 @@ int main(int argc, char **argv) {
 		if (!copy_directory_recursively("assets", BUILD_FOLDER "chess-engine-battel.app/Contents/Resources")) { return 1; }
 
 		// 2. Executable in das MacOS-Verzeichnis kopieren
-		if (!copy_file(EXECUTABLE, BUILD_FOLDER "chess-engine-battel.app/Contents/MacOS/chess-engine-battel")) { return 1; }
+		if (!copy_file(BUILD_EXECUTABLE, BUILD_FOLDER "chess-engine-battel.app/Contents/MacOS/chess-engine-battel")) { return 1; }
 
 		// 3. DebugInfo
 		if (debug) {
 #ifdef __APPLE__
-			cmd_append(&cmd, "dsymutil", "-o", dysm_path, EXECUTABLE);
+			cmd_append(&cmd, "dsymutil", "-o", dysm_path, BUILD_EXECUTABLE);
 			if (!cmd_run(&cmd)) { return 1; }
 
 #endif
 		}
 
 		const char *debug_plist_entry = debug ? "   <key>CSResourcesFileMapped</key>\n"
-												"      <true/>\n"
-												"   <key>NSAppSleepDisabled</key>\n"
-												"      <true/>\n"
-											  : "";
+		                                        "      <true/>\n"
+		                                        "   <key>NSAppSleepDisabled</key>\n"
+		                                        "      <true/>\n"
+		                                      : "";
 
 		// 4. Info.plist schreiben (Fehler aus dem Originalcode behoben)
 		//        "   <key>DTCompiler</key>\n"
 		//        "      <string>com.apple.compilers.llvm.clang.1_0 </string>\n"
 		const char *plist_content = temp_sprintf(
-			"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-			"<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" "
-			"\"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
-			"<plist version=\"1.0\">\n"
-			"<dict>\n"
-			"   <key>BuildMachineOSBuild</key>\n"
-			"       <string>26A5416b</string>\n"
-			"   <key>CFBundleDevelopmentRegion</key>\n"
-			"       <string>en</string>\n"
-			"   <key>CFBundleDisplayName</key>\n"
-			"       <string>comboom.sucht Chess Battle</string>\n"
-			"   <key>CFBundleExecutable</key>\n"
-			"       <string>chess-engine-battel</string>\n"
-			"   <key>CFBundleIconFile</key>\n"
-			"       <string>AppIcon</string>\n"
-			"   <key>CFBundleIconName</key>\n"
-			"       <string>AppIcon</string>\n"
-			"   <key>CFBundleIdentifier</key>\n"
-			"      <string>dev.comboom.sucht.chess-engine-battel</string>\n"
-			"   <key>CFBundleInfoDictionaryVersion</key>\n"
-			"      <string>6.0</string>\n"
-			"   <key>CFBundleName</key>\n"
-			"      <string>comboom.sucht Chess Battle</string>\n"
-			"   <key>CFBundlePackageType</key>\n"
-			"      <string>APPL</string>\n"
-			"   <key>CFBundleShortVersionString</key>\n"
-			"      <string>0.0.1</string>\n"
-			"   <key>CFBundleSupportedPlatforms</key>\n"
-			"      <array>\n"
-			"         <string>MacOSX</string>\n"
-			"      </array>\n"
-			"   <key>CFBundleVersion</key>\n"
-			"      <string>0.0.1</string>\n"
-			"   <key>DTPlatformBuild</key>\n"
-			"      <string>26A5406c</string>\n"
-			"   <key>DTPlatformName</key>\n"
-			"      <string>macosx</string>\n"
-			"   <key>DTPlatformVersion</key>\n"
-			"      <string>27.0</string>\n"
-			"   <key>DTSDKBuild</key>\n"
-			"      <string>26A5406c</string>\n"
-			"   <key>DTSDKName</key>\n"
-			"      <string>macosx27.0</string>\n"
-			"   <key>DTXcode</key>\n"
-			"      <string>2700</string>\n"
-			"   <key>DTXcodeBuild</key>\n"
-			"      <string>27A5237l</string>\n"
-			"   <key>LSApplicationCategoryType</key>\n"
-			"      <string>public.app-category.games</string>\n"
-			"   <key>LSMinimumSystemVersion</key>\n"
-			"      <string>26.0</string>\n"
-			"   <key>LSUIElement</key>\n"
-			"      <true/>\n"
-			"   <key>NSHighResolutionCapable</key>\n"
-			"      <true/>\n"
-			"   <key>NSHumanReadableCopyright</key>\n"
-			"      <string>Copyright © 2026 comboom.sucht. Alle Rechte "
-			"vorbehalten.</string>\n"
-			"%s"
-			"   </dict>\n"
-			"   </plist>",
-			debug_plist_entry);
+		    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+		    "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" "
+		    "\"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
+		    "<plist version=\"1.0\">\n"
+		    "<dict>\n"
+		    "   <key>BuildMachineOSBuild</key>\n"
+		    "       <string>26A5416b</string>\n"
+		    "   <key>CFBundleDevelopmentRegion</key>\n"
+		    "       <string>en</string>\n"
+		    "   <key>CFBundleDisplayName</key>\n"
+		    "       <string>comboom.sucht Chess Battle</string>\n"
+		    "   <key>CFBundleExecutable</key>\n"
+		    "       <string>chess-engine-battel</string>\n"
+		    "   <key>CFBundleIconFile</key>\n"
+		    "       <string>AppIcon</string>\n"
+		    "   <key>CFBundleIconName</key>\n"
+		    "       <string>AppIcon</string>\n"
+		    "   <key>CFBundleIdentifier</key>\n"
+		    "      <string>dev.comboom.sucht.chess-engine-battel</string>\n"
+		    "   <key>CFBundleInfoDictionaryVersion</key>\n"
+		    "      <string>6.0</string>\n"
+		    "   <key>CFBundleName</key>\n"
+		    "      <string>comboom.sucht Chess Battle</string>\n"
+		    "   <key>CFBundlePackageType</key>\n"
+		    "      <string>APPL</string>\n"
+		    "   <key>CFBundleShortVersionString</key>\n"
+		    "      <string>0.0.1</string>\n"
+		    "   <key>CFBundleSupportedPlatforms</key>\n"
+		    "      <array>\n"
+		    "         <string>MacOSX</string>\n"
+		    "      </array>\n"
+		    "   <key>CFBundleVersion</key>\n"
+		    "      <string>0.0.1</string>\n"
+		    "   <key>DTPlatformBuild</key>\n"
+		    "      <string>26A5406c</string>\n"
+		    "   <key>DTPlatformName</key>\n"
+		    "      <string>macosx</string>\n"
+		    "   <key>DTPlatformVersion</key>\n"
+		    "      <string>27.0</string>\n"
+		    "   <key>DTSDKBuild</key>\n"
+		    "      <string>26A5406c</string>\n"
+		    "   <key>DTSDKName</key>\n"
+		    "      <string>macosx27.0</string>\n"
+		    "   <key>DTXcode</key>\n"
+		    "      <string>2700</string>\n"
+		    "   <key>DTXcodeBuild</key>\n"
+		    "      <string>27A5237l</string>\n"
+		    "   <key>LSApplicationCategoryType</key>\n"
+		    "      <string>public.app-category.games</string>\n"
+		    "   <key>LSMinimumSystemVersion</key>\n"
+		    "      <string>26.0</string>\n"
+		    "   <key>LSUIElement</key>\n"
+		    "      <true/>\n"
+		    "   <key>NSHighResolutionCapable</key>\n"
+		    "      <true/>\n"
+		    "   <key>NSHumanReadableCopyright</key>\n"
+		    "      <string>Copyright © 2026 comboom.sucht. Alle Rechte "
+		    "vorbehalten.</string>\n"
+		    "%s"
+		    "   </dict>\n"
+		    "   </plist>",
+		    debug_plist_entry);
 
 		const char *pkginfo_content = "\x41\x50\x50\x4C\x3f\x3f\x3f\x3f";
 
