@@ -56,7 +56,7 @@ bool build_tools(bool debug) {
         // Hauptverzeichnis
         cmd_append(&cmd, "-dumpdir", TOOLS_BUILD_FOLDER);
     } else {
-        cmd_append(&cmd, "-O3");
+        cmd_append(&cmd, "-O2");
     }
     clangpp_flags(&cmd);
     cmd_append(&cmd, "-I", THIRDPARTY_INCLUDE_FOLDER);
@@ -232,14 +232,14 @@ int main(int argc, char **argv) {
                 cmd_append(&cmd, "-DDYNAMIC_ASSETS");
                 cmd_append(&cmd, "-O0");
             } else {
-                cmd_append(&cmd, "-O3");
+                cmd_append(&cmd, "-O2");
             }
 
         } else if (disable_optimization_in_main_program) {
             cmd_append(&cmd, "-DDYNAMIC_ASSETS");
             cmd_append(&cmd, "-O0");
         } else {
-            cmd_append(&cmd, "-O3");
+            cmd_append(&cmd, "-O2");
         }
 
         clangpp_flags(&cmd);
