@@ -1,5 +1,4 @@
 #include "app.h"
-#endif
 #include "global.h"
 #include "raylib.h"
 #include <cmath>
