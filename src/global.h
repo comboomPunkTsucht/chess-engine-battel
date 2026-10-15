@@ -1,5 +1,11 @@
 #pragma once
 
+#ifdef __APPLE__
+#define ASSETS_PATH "../Resources/"
+#else
+#define ASSETS_PATH "assets/"
+#endif
+
 #include "raylib.h"
 #include <algorithm>
 #include <cmath>

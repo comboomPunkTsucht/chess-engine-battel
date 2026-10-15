@@ -12,8 +12,11 @@
 #define TOOLS_BUILD_FOLDER BUILD_FOLDER "tools/"
 #define THIRDPARTY_FOLDER "thirdparty/"
 #define THIRDPARTY_INCLUDE_FOLDER THIRDPARTY_FOLDER "include/"
-
+#ifdef __APPLE__
+#define EXECUTABLE "./chess-engine-battel"
+#else
 #define EXECUTABLE BUILD_FOLDER "chess-engine-battel"
+#endif
 
 Cmd			cmd = {0};
 
@@ -86,107 +89,96 @@ bool build_ixwebsocket(bool debug) {
 }
 
 int main(int argc, char **argv) {
-    addon_init_logging();
-    F_Args f_args = {0};
+	addon_init_logging();
+	F_Args f_args = {0};
 
-    for (int i = 0; i < argc; ++i) { da_append(&f_args, strdup(argv[i])); }
-    NOB_GO_REBUILD_URSELF(argc, argv);
+	for (int i = 0; i < argc; ++i) { da_append(&f_args, strdup(argv[i])); }
+	NOB_GO_REBUILD_URSELF(argc, argv);
 
-    bool  help = false;
-    bool  compile = false;
-    bool  disable_optimization_in_main_program = false;
-    bool  debug = false;
-    char *debugger = (char *)"lldb";
-    bool  run = false;
-    flag_bool_var(&help, "-help", false,
-                  "Print this help to stdout and exit with 0");
-    flag_bool_var(&help, "h", false,
-                  "Print this help to stdout and exit with 0");
-    flag_bool_var(&compile, "-compile", false, "Compile the project");
-    flag_bool_var(&compile, "c", false, "Compile the project");
+	bool  help = false;
+	bool  compile = false;
+	bool  release = false;
+	bool  debug = false;
+	char *debugger = (char *)"lldb";
+	bool  run = false;
+	flag_bool_var(&help, "-help", false, "Print this help to stdout and exit with 0");
+	flag_bool_var(&help, "h", false, "Print this help to stdout and exit with 0");
+	flag_bool_var(&compile, "-compile", false, "Compile the project");
+	flag_bool_var(&compile, "c", false, "Compile the project");
 
-    flag_bool_var(&debug, "-debug", false, "Build in debug mode");
-    flag_bool_var(&debug, "d", false, "Build in debug mode");
+	flag_bool_var(&debug, "-debug", false, "Build in debug mode");
+	flag_bool_var(&debug, "d", false, "Build in debug mode");
 
-    flag_bool_var(&run, "-run", false, "Run the project");
-    flag_bool_var(&run, "r", false, "Run the project");
+	flag_bool_var(&run, "-run", false, "Run the project");
+	flag_bool_var(&run, "r", false, "Run the project");
 
-    flag_str_var(&debugger, "-debugger", "lldb", "The debugger to use");
-    flag_bool_var(&disable_optimization_in_main_program,
-                  "-disable-optimization", false,
-                  "Disable optimizations in the main program and must be used "
-                  "with -c/--compile");
+	flag_str_var(&debugger, "-debugger", "lldb", "The debugger to use");
+	flag_bool_var(&release, "-release", false, "Build in release mode");
 
-    if (f_args.count == 1) {
-        usage(stderr);
-        exit(1);
-    }
+	if (f_args.count == 1) {
+		usage(stderr);
+		exit(1);
+	}
 
-    if (!flag_parse(f_args.count, f_args.items)) {
-        usage(stderr);
-        flag_print_error(stderr);
-        exit(1);
-    }
+	if (!flag_parse(f_args.count, f_args.items)) {
+		usage(stderr);
+		flag_print_error(stderr);
+		exit(1);
+	}
 
-    f_args.count = flag_rest_argc();
-    f_args.items = flag_rest_argv();
+	f_args.count = flag_rest_argc();
+	f_args.items = flag_rest_argv();
 
-    if (help) {
-        usage(stdout);
-        exit(0);
-    }
+	if (help) {
+		usage(stdout);
+		exit(0);
+	}
 
-    if (compile) {
-        if (!mkdir_if_not_exists(BUILD_FOLDER)) { return 1; }
-        if (!build_ixwebsocket(debug)) { return 1; }
-        if (!build_raylib(debug)) { return 1; }
+	if (compile) {
+		if (!mkdir_if_not_exists(BUILD_FOLDER)) { return 1; }
+		if (!build_ixwebsocket(debug)) { return 1; }
+		if (!build_raylib(debug)) { return 1; }
 
-        if (!disable_optimization_in_main_program) {
-            if (!run_tools(debug)) { return 1; }
-        }
+		clangpp(&cmd);
+		cmd_append(&cmd, SOURCE_FOLDER "main.cpp");
+		cmd_append(&cmd, SOURCE_FOLDER "app.cpp");
+		cmd_append(&cmd, SOURCE_FOLDER "game.cpp");
+		cmd_append(&cmd, SOURCE_FOLDER "update.cpp");
+		cmd_append(&cmd, SOURCE_FOLDER "processInput.cpp");
+		cmd_append(&cmd, SOURCE_FOLDER "render.cpp");
 
-        clangpp(&cmd);
-        cmd_append(&cmd, SOURCE_FOLDER "main.cpp");
-        cmd_append(&cmd, SOURCE_FOLDER "app.cpp");
-        cmd_append(&cmd, SOURCE_FOLDER "game.cpp");
-        cmd_append(&cmd, SOURCE_FOLDER "update.cpp");
-        cmd_append(&cmd, SOURCE_FOLDER "processInput.cpp");
-        cmd_append(&cmd, SOURCE_FOLDER "render.cpp");
+		if (debug) {
+			cmd_append(&cmd, "-g");
+			// NEU: Zwingt Clang, die .o Datei zu behalten, damit dsymutil sie
+			// lesen kann
+			cmd_append(&cmd, "-save-temps=obj");
+			// NEU: Legt die .o Datei sauber im "build/"-Ordner ab anstatt im
+			// Hauptverzeichnis
+			cmd_append(&cmd, "-dumpdir", BUILD_FOLDER);
+			if (!release) {
+				cmd_append(&cmd, "-O0");
+			} else {
+				cmd_append(&cmd, "-O3");
+			}
 
-        if (debug) {
-            cmd_append(&cmd, "-g");
-            // NEU: Zwingt Clang, die .o Datei zu behalten, damit dsymutil sie
-            // lesen kann
-            cmd_append(&cmd, "-save-temps=obj");
-            // NEU: Legt die .o Datei sauber im "build/"-Ordner ab anstatt im
-            // Hauptverzeichnis
-            cmd_append(&cmd, "-dumpdir", BUILD_FOLDER);
-            if (disable_optimization_in_main_program) {
-                cmd_append(&cmd, "-DDYNAMIC_ASSETS");
-                cmd_append(&cmd, "-O0");
-            } else {
-                cmd_append(&cmd, "-O2");
-            }
+		} else if (!release) {
+			cmd_append(&cmd, "-O0");
+		} else {
+			cmd_append(&cmd, "-O3");
+		}
 
-        } else if (disable_optimization_in_main_program) {
-            cmd_append(&cmd, "-DDYNAMIC_ASSETS");
-            cmd_append(&cmd, "-O0");
-        } else {
-            cmd_append(&cmd, "-O2");
-        }
-
-        clangpp_flags(&cmd);
-        cmd_append(&cmd, "-I", THIRDPARTY_INCLUDE_FOLDER);
-        cmd_append(&cmd, "-I", TOOLS_SRC_FOLDER);
-        cmd_append(&cmd, "-I", SOURCE_FOLDER);
-        cmd_append(&cmd, "-I", BUILD_FOLDER "assets");
-        cmd_append(&cmd, "-I", ".");
-        cmd_append(&cmd, "-L", BUILD_FOLDER "ixwebsocket");
-        cmd_append(&cmd, "-L", BUILD_FOLDER "raylib");
-        cmd_append(&cmd, "-lraylib");
-        cmd_append(&cmd, "-lixwebsocket");
-        cmd_append(&cmd, "-lm");
-        cmd_append(&cmd, "-lz");
+		clangpp_flags(&cmd);
+		cmd_append(&cmd, "-I", THIRDPARTY_INCLUDE_FOLDER);
+		cmd_append(&cmd, "-I", TOOLS_SRC_FOLDER);
+		cmd_append(&cmd, "-I", SOURCE_FOLDER);
+		cmd_append(&cmd, "-I", BUILD_FOLDER "assets");
+		cmd_append(&cmd, "-I", ".");
+		cmd_append(&cmd, "-L", BUILD_FOLDER "ixwebsocket");
+		cmd_append(&cmd, "-L", BUILD_FOLDER "raylib");
+		cmd_append(&cmd, "-lraylib");
+		cmd_append(&cmd, "-lixwebsocket");
+		cmd_append(&cmd, "-lm");
+		cmd_append(&cmd, "-lz");
 #ifdef __APPLE__
 
 		cmd_append(&cmd, "-mmacos-version-min=26.0");
@@ -231,13 +223,8 @@ int main(int argc, char **argv) {
 
 	if (debug && run) { cmd_append(&cmd, debugger); }
 
-	if (run) {
-		cmd_append(&cmd, EXECUTABLE);
-		if (!cmd_run(&cmd)) { return 1; }
-	}
-
 #if defined(__APPLE__)
-	if (compile && !run) {
+	if (compile) {
 		// Pfade sauber als Variablen definieren
 		const char *app_dir = BUILD_FOLDER "chess-engine-battel.app";
 		const char *contents_dir = BUILD_FOLDER "chess-engine-battel.app/Contents";
@@ -360,6 +347,14 @@ int main(int argc, char **argv) {
 		};
 	}
 #endif
+
+	if (run) {
+#ifdef __APPLE__
+		set_current_dir(BUILD_FOLDER "chess-engine-battel.app/Contents/MacOS");
+#endif
+		cmd_append(&cmd, EXECUTABLE);
+		if (!cmd_run(&cmd)) { return 1; }
+	}
 
 	return 0;
 }
