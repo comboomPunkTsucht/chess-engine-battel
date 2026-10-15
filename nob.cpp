@@ -12,8 +12,11 @@
 #define TOOLS_BUILD_FOLDER BUILD_FOLDER "tools/"
 #define THIRDPARTY_FOLDER "thirdparty/"
 #define THIRDPARTY_INCLUDE_FOLDER THIRDPARTY_FOLDER "include/"
-
+#ifdef __APPLE__
+#define EXECUTABLE "./chess-engine-battel"
+#else
 #define EXECUTABLE BUILD_FOLDER "chess-engine-battel"
+#endif
 
 Cmd			cmd = {0};
 
@@ -94,7 +97,7 @@ int main(int argc, char **argv) {
 
 	bool  help = false;
 	bool  compile = false;
-	bool  disable_optimization_in_main_program = false;
+	bool  release = false;
 	bool  debug = false;
 	char *debugger = (char *)"lldb";
 	bool  run = false;
@@ -110,9 +113,7 @@ int main(int argc, char **argv) {
 	flag_bool_var(&run, "r", false, "Run the project");
 
 	flag_str_var(&debugger, "-debugger", "lldb", "The debugger to use");
-	flag_bool_var(&disable_optimization_in_main_program, "-disable-optimization", false,
-				  "Disable optimizations in the main program and must be used "
-				  "with -c/--compile");
+	flag_bool_var(&release, "-release", false, "Build in release mode");
 
 	if (f_args.count == 1) {
 		usage(stderr);
@@ -154,13 +155,13 @@ int main(int argc, char **argv) {
 			// NEU: Legt die .o Datei sauber im "build/"-Ordner ab anstatt im
 			// Hauptverzeichnis
 			cmd_append(&cmd, "-dumpdir", BUILD_FOLDER);
-			if (disable_optimization_in_main_program) {
+			if (!release) {
 				cmd_append(&cmd, "-O0");
 			} else {
 				cmd_append(&cmd, "-O3");
 			}
 
-		} else if (disable_optimization_in_main_program) {
+		} else if (!release) {
 			cmd_append(&cmd, "-O0");
 		} else {
 			cmd_append(&cmd, "-O3");
@@ -222,13 +223,8 @@ int main(int argc, char **argv) {
 
 	if (debug && run) { cmd_append(&cmd, debugger); }
 
-	if (run) {
-		cmd_append(&cmd, EXECUTABLE);
-		if (!cmd_run(&cmd)) { return 1; }
-	}
-
 #if defined(__APPLE__)
-	if (compile && !run) {
+	if (compile) {
 		// Pfade sauber als Variablen definieren
 		const char *app_dir = BUILD_FOLDER "chess-engine-battel.app";
 		const char *contents_dir = BUILD_FOLDER "chess-engine-battel.app/Contents";
@@ -351,6 +347,14 @@ int main(int argc, char **argv) {
 		};
 	}
 #endif
+
+	if (run) {
+#ifdef __APPLE__
+		set_current_dir(BUILD_FOLDER "chess-engine-battel.app/Contents/MacOS");
+#endif
+		cmd_append(&cmd, EXECUTABLE);
+		if (!cmd_run(&cmd)) { return 1; }
+	}
 
 	return 0;
 }

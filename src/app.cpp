@@ -16,19 +16,19 @@ void App::initialization(void) {
 
 #ifdef _WIN32
 
-	SetWindowIcon(LoadImage("assets/icon.png"));
+	SetWindowIcon(LoadImage(ASSETS_PATH "icon.png"));
 
 #endif
-	chess_piece_textures = LoadTexture("assets/piece/All_pieces.png");
+	chess_piece_textures = LoadTexture(ASSETS_PATH "piece/All_pieces.png");
 	App::load_font();
 }
 
 void App::load_font() {
 	font_size = getFontSize();
 
-	main_font = LoadFontEx("assets/CaskaydiaCoveNerdFontPropo-Regular.ttf", font_size, NULL, 0);
-	bold_font = LoadFontEx("assets/CaskaydiaCoveNerdFontPropo-Bold.ttf", font_size, NULL, 0);
-	italic_font = LoadFontEx("assets/CaskaydiaCoveNerdFontPropo-Italic.ttf", font_size, NULL, 0);
+	main_font = LoadFontEx(ASSETS_PATH "CaskaydiaCoveNerdFontPropo-Regular.ttf", font_size, NULL, 0);
+	bold_font = LoadFontEx(ASSETS_PATH "CaskaydiaCoveNerdFontPropo-Bold.ttf", font_size, NULL, 0);
+	italic_font = LoadFontEx(ASSETS_PATH "CaskaydiaCoveNerdFontPropo-Italic.ttf", font_size, NULL, 0);
 }
 
 void App::startGame() {
