@@ -94,6 +94,9 @@ bool build_ixwebsocket(bool debug) {
 	cmd_append(&cmd, "-DUSE_OPEN_SSL=1");
 #ifdef _WIN32
 	cmd_append(&cmd, "-DUSE_ZLIB=0");
+	cmd_append(&cmd, "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded");
+	cmd_append(&cmd, "-DCMAKE_CXX_FLAGS_RELEASE=/MT /O2 /Ob2 /DNDEBUG");
+	cmd_append(&cmd, "-DCMAKE_C_FLAGS_RELEASE=/MT /O2 /Ob2 /DNDEBUG");
 #else
 	cmd_append(&cmd, "-DUSE_ZLIB=1");
 #endif
