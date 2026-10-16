@@ -12,11 +12,15 @@
 #define TOOLS_BUILD_FOLDER BUILD_FOLDER "tools/"
 #define THIRDPARTY_FOLDER "thirdparty/"
 #define THIRDPARTY_INCLUDE_FOLDER THIRDPARTY_FOLDER "include/"
+#ifdef _WIN32
+#define BUILD_EXECUTABLE BUILD_FOLDER "chess-engine-battel.exe"
+#else
 #define BUILD_EXECUTABLE BUILD_FOLDER "chess-engine-battel"
+#endif
 #ifdef __APPLE__
 #define EXECUTABLE "./chess-engine-battel"
 #else
-#define EXECUTABLE Build_EXECUTABLE
+#define EXECUTABLE BUILD_EXECUTABLE
 #endif
 
 Cmd cmd = {0};
