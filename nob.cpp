@@ -136,6 +136,8 @@ int main(int argc, char **argv) {
 	char *debugger = (char *)"lldb";
 	bool run = false;
 
+	char *install = NULL;
+
 	flag_bool_var(&help, "-help", false, "Print this help to stdout and exit with 0");
 	flag_bool_var(&help, "h", false, "Print this help to stdout and exit with 0");
 	flag_bool_var(&compile, "-compile", false, "Compile the project");
@@ -149,6 +151,8 @@ int main(int argc, char **argv) {
 
 	flag_str_var(&debugger, "-debugger", "lldb", "The debugger to use");
 	flag_bool_var(&release, "-release", false, "Build in release mode");
+
+	flag_str_var(&install, "-install", NULL, "Install the project at the specified path");
 
 #ifdef __linux__
 	flag_bool_var(&with_x11, "-with-x11", false, "Build with X11 support");
@@ -411,6 +415,19 @@ int main(int argc, char **argv) {
 		if (!copy_directory_recursively("assets", BUILD_FOLDER "assets")) { return 1; }
 	}
 #endif
+
+	if (install) {
+#ifdef __APPLE__
+		if (!nob_copy_directory_recursively(BUILD_FOLDER "chess-engine-battel.app", temp_sprintf("%s/chess-engine-battel.app", install))) {
+			return 1;
+		}
+#else
+
+		if (!mkdir_if_not_exists(install)) { return 1; }
+		if (!copy_directory_recursively(BUILD_FOLDER "assets", temp_sprintf("%s/assets", install))) { return 1; }
+		if (!copy_file(BUILD_EXECUTABLE, temp_sprintf("%s/%s", install, EXECUTABLE))) { return 1; }
+#endif
+	}
 
 	if (run) {
 #ifdef __APPLE__
