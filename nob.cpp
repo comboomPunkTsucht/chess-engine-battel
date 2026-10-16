@@ -209,7 +209,7 @@ int main(int argc, char **argv) {
 		cmd_append(&cmd, BUILD_FOLDER "raylib/libraylib.a");
 		cmd_append(&cmd, BUILD_FOLDER "ixwebsocket/Release/ixwebsocket.lib");
 		if (const char *lib = getenv("MINGW_LIBGCC")) { cmd_append(&cmd, lib); }
-		if (const char *lib = getenv("MINGW_LIBMINGWEX")) { cmd_append(&cmd, lib); }
+		cmd_append(&cmd, "-Wl,/alternatename:__chkstk_ms=__chkstk");
 		cmd_append(&cmd, "C:/Program Files/OpenSSL/lib/VC/x64/MD/libssl.lib");
 		cmd_append(&cmd, "C:/Program Files/OpenSSL/lib/VC/x64/MD/libcrypto.lib");
 #else
