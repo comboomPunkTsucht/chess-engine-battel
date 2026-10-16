@@ -14,12 +14,12 @@ void App::main_loop() {
 void App::initialization(void) {
 	SetTargetFPS(GetMonitorRefreshRate(GetCurrentMonitor()));
 
-#ifdef _WIN32
+#if defined(_WIN32) || (defined(__linux__) && defined(USE_X11))
 
-	SetWindowIcon(LoadImage(temp_sprintf("%s/logo.png", assetPath)));
+	SetWindowIcon(LoadImage(TextFormat("%s/logo.png", assetPath)));
 
 #endif
-	chess_piece_textures = LoadTexture(temp_sprintf("%s/piece/All_pieces.png", assetPath));
+	chess_piece_textures = LoadTexture(TextFormat("%s/piece/All_pieces.png", assetPath));
 	App::load_font();
 }
 

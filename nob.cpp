@@ -102,6 +102,11 @@ int main(int argc, char **argv) {
 	bool debug = false;
 	char *debugger = (char *)"lldb";
 	bool run = false;
+
+#ifdef __linux__
+	bool with_x11 = false;
+#endif
+
 	flag_bool_var(&help, "-help", false, "Print this help to stdout and exit with 0");
 	flag_bool_var(&help, "h", false, "Print this help to stdout and exit with 0");
 	flag_bool_var(&compile, "-compile", false, "Compile the project");
@@ -115,6 +120,10 @@ int main(int argc, char **argv) {
 
 	flag_str_var(&debugger, "-debugger", "lldb", "The debugger to use");
 	flag_bool_var(&release, "-release", false, "Build in release mode");
+
+#ifdef __linux__
+	flag_bool_var(&with_x11, "-with-x11", false, "Build with X11 support");
+#endif
 
 	if (f_args.count == 1) {
 		usage(stderr);
@@ -192,6 +201,14 @@ int main(int argc, char **argv) {
 		cmd_append(&cmd, "-framework", "CoreVideo");
 		cmd_append(&cmd, "-framework", "QuartzCore");
 #elif defined(__linux__)
+
+		if (with_x11) {
+			cmd_append(&cmd, "-lX11");
+			// Optional: Ein Makro an den Code übergeben, falls du im C++ Code
+			// #ifdef USE_X11 brauchst
+			cmd_append(&cmd, "-DUSE_X11");
+		}
+
 		cmd_append(&cmd, "-ldl");
 		cmd_append(&cmd, "-lrt");
 		cmd_append(&cmd, "-lpthread");
@@ -346,6 +363,10 @@ int main(int argc, char **argv) {
 			nob_log(ERROR, "Konnte PkgInfo nicht erstellen: %s", pkginfo_path);
 			return 1;
 		};
+	}
+#else
+	if (compile) {
+		if (!copy_directory_recursively("assets", BUILD_FOLDER "assets")) { return 1; }
 	}
 #endif
 
