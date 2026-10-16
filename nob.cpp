@@ -6,6 +6,8 @@
 #define FLAG_IMPLEMENTATION
 #include "flag.h"
 
+#define VERSION "0.0.2"
+
 #define BUILD_FOLDER "build/"
 #define SOURCE_FOLDER "src/"
 #define TOOLS_SRC_FOLDER "tools/"
@@ -361,13 +363,15 @@ int main(int argc, char **argv) {
 		    "   <key>CFBundlePackageType</key>\n"
 		    "      <string>APPL</string>\n"
 		    "   <key>CFBundleShortVersionString</key>\n"
-		    "      <string>0.0.1</string>\n"
+		    "      <string>" VERSION
+		    "</string>\n"
 		    "   <key>CFBundleSupportedPlatforms</key>\n"
 		    "      <array>\n"
 		    "         <string>MacOSX</string>\n"
 		    "      </array>\n"
 		    "   <key>CFBundleVersion</key>\n"
-		    "      <string>0.0.1</string>\n"
+		    "      <string>" VERSION
+		    "</string>\n"
 		    "   <key>DTPlatformBuild</key>\n"
 		    "      <string>26A5406c</string>\n"
 		    "   <key>DTPlatformName</key>\n"
