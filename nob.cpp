@@ -202,8 +202,15 @@ int main(int argc, char **argv) {
 		cmd_append(&cmd, "-I", BUILD_FOLDER "assets");
 		cmd_append(&cmd, "-I", ".");
 #ifdef _WIN32
+		cmd_append(&cmd, "-fuse-ld=lld");
 		cmd_append(&cmd, BUILD_FOLDER "raylib/libraylib.a");
 		cmd_append(&cmd, BUILD_FOLDER "ixwebsocket/Release/ixwebsocket.lib");
+		if (const char *mingw_rt = getenv("MINGW_RUNTIME_DIR")) {
+			cmd_append(&cmd, temp_sprintf("%s/libgcc.a", mingw_rt));
+			cmd_append(&cmd, temp_sprintf("%s/libmingwex.a", mingw_rt));
+		}
+		cmd_append(&cmd, "C:/Program Files/OpenSSL/lib/VC/x64/MD/libssl.lib");
+		cmd_append(&cmd, "C:/Program Files/OpenSSL/lib/VC/x64/MD/libcrypto.lib");
 #else
 		cmd_append(&cmd, "-L", BUILD_FOLDER "ixwebsocket");
 		cmd_append(&cmd, "-L", BUILD_FOLDER "raylib");
@@ -242,6 +249,12 @@ int main(int argc, char **argv) {
 		cmd_append(&cmd, "-lopengl32");
 		cmd_append(&cmd, "-lgdi32");
 		cmd_append(&cmd, "-lwinmm");
+		cmd_append(&cmd, "-luser32");
+		cmd_append(&cmd, "-lshell32");
+		cmd_append(&cmd, "-lws2_32");
+		cmd_append(&cmd, "-lcrypt32");
+		cmd_append(&cmd, "-lbcrypt");
+		cmd_append(&cmd, "-ladvapi32");
 // more platforms can be added here
 #endif
 
