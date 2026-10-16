@@ -52,7 +52,8 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y clang libgl-dev libglu1-mesa-dev pkg-config libwayland-dev libxkbcommon-dev wayland-protocols
+          sudo apt-get install -y clang g++ make cmake pkg-config libssl-dev zlib1g-dev \
+            libgl-dev libglu1-mesa-dev libwayland-dev libxkbcommon-dev wayland-protocols
 
           if [ "${{ matrix.name }}" = "linux-x11" ]; then
             sudo apt-get install -y libx11-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev
@@ -62,6 +63,10 @@ jobs:
         if: runner.os == 'Windows'
         shell: bash
         run: |
+          if ! command -v gcc > /dev/null 2>&1; then
+            echo "C:\msys64\mingw64\bin" >> "$GITHUB_PATH"
+            export PATH="/c/msys64/mingw64/bin:$PATH"
+          fi
           if ! command -v make > /dev/null 2>&1; then
             choco install make -y
           fi
@@ -69,11 +74,27 @@ jobs:
           make --version
           clang --version
 
+          GCC_LIB="$(gcc -print-file-name=libgcc.a)"
+          if [ -f "$GCC_LIB" ]; then
+            echo "MINGW_RUNTIME_DIR=$(cygpath -m "$(dirname "$GCC_LIB")")" >> "$GITHUB_ENV"
+          fi
+
       - name: nob kompilieren und Projekt bauen
         shell: bash
         run: |
           clang++ -o "nob${{ matrix.ext }}" nob.cpp
           "./nob${{ matrix.ext }}" -c --release ${{ matrix.nob_flags }}
+
+      - name: Binary-Abhängigkeiten prüfen
+        shell: bash
+        run: |
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            llvm-objdump -p "build/chess-engine-battel${{ matrix.ext }}" | grep "DLL Name" || true
+          elif [ "${{ runner.os }}" = "Linux" ]; then
+            ldd build/chess-engine-battel || true
+          else
+            otool -L build/chess-engine-battel.app/Contents/MacOS/chess-engine-battel || true
+          fi
 
       - name: Release Ordner vorbereiten
         shell: bash
@@ -89,6 +110,14 @@ jobs:
             cp -R build/assets "$STAGE/assets"
           fi
 
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            for dll in libssl-3-x64.dll libcrypto-3-x64.dll; do
+              if [ -f "C:/Program Files/OpenSSL/bin/$dll" ]; then
+                cp "C:/Program Files/OpenSSL/bin/$dll" "$STAGE/"
+              fi
+            done
+          fi
+
           cp LICENSE "$STAGE/LICENSE"
           ls -lR "$STAGE"
 
@@ -98,7 +127,7 @@ jobs:
         run: |
           set -euo pipefail
           STAGE="chess-engine-battel-${{ matrix.name }}"
-          tar -czf "${STAGE}.tar.gz" "$STAGE"
+          COPYFILE_DISABLE=1 tar -czf "${STAGE}.tar.gz" "$STAGE"
           ls -l "${STAGE}.tar.gz"
 
       - name: Archiv erstellen (zip)
