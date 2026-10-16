@@ -55,6 +55,21 @@ void print_list(const char **items, size_t count) {
 
 bool build_raylib(bool debug) {
 	if (!mkdir_if_not_exists(BUILD_FOLDER "raylib")) { return 1; }
+#ifdef _WIN32
+	(void)debug;
+	cmd_append(&cmd, "cmake");
+	cmd_append(&cmd, "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded");
+	cmd_append(&cmd, "-DBUILD_EXAMPLES=OFF");
+	cmd_append(&cmd, "-DCMAKE_C_FLAGS=/DWIN32 /D_WINDOWS /W3 -DSUPPORT_FILEFORMAT_FLAC=1 -DRLGL_SHOW_GL_DETAILS_INFO=1");
+	cmd_append(&cmd, "-B", BUILD_FOLDER "raylib");
+	cmd_append(&cmd, "-S", THIRDPARTY_FOLDER "raylib");
+	if (!cmd_run(&cmd)) { return false; }
+
+	cmd_append(&cmd, "cmake");
+	cmd_append(&cmd, "--build", BUILD_FOLDER "raylib");
+	cmd_append(&cmd, "--config", "Release");
+	return cmd_run(&cmd);
+#else
 
 	cmd_append(&cmd, "make", "-C", THIRDPARTY_FOLDER "raylib/src");
 	cmd_append(&cmd, "PLATFORM=PLATFORM_DESKTOP");
@@ -71,12 +86,12 @@ bool build_raylib(bool debug) {
 	if (debug) { cmd_append(&cmd, "EXTERNAL_CONFIG_FLAGS+=-DRLGL_ENABLE_OPENGL_DEBUG_CONTEXT=1"); }
 	cmd_append(&cmd, "EXTERNAL_CONFIG_FLAGS+=-DRLGL_SHOW_GL_DETAILS_INFO=1");
 #ifdef __linux__
+	cmd_append(&cmd, "GLFW_LINUX_ENABLE_WAYLAND=TRUE");
 	if (with_x11) {
 		cmd_append(&cmd, "GLFW_LINUX_ENABLE_X11=TRUE");
-		cmd_append(&cmd, "GLFW_LINUX_ENABLE_WAYLAND=FALSE");
+
 	} else {
 		cmd_append(&cmd, "GLFW_LINUX_ENABLE_X11=FALSE");
-		cmd_append(&cmd, "GLFW_LINUX_ENABLE_WAYLAND=TRUE");
 	}
 #endif
 #ifdef __APPLE__
@@ -85,6 +100,7 @@ bool build_raylib(bool debug) {
 	// cmd_append(&cmd, "EXTERNAL_CONFIG_FLAGS+=--dumpdir",
 	//           "EXTERNAL_CONFIG_FLAGS+=../../../build/raylib");
 	return cmd_run(&cmd);
+#endif
 }
 
 bool build_ixwebsocket(bool debug) {
@@ -206,10 +222,8 @@ int main(int argc, char **argv) {
 		cmd_append(&cmd, "-I", ".");
 #ifdef _WIN32
 		cmd_append(&cmd, "-fuse-ld=lld");
-		cmd_append(&cmd, BUILD_FOLDER "raylib/libraylib.a");
+		cmd_append(&cmd, BUILD_FOLDER "raylib/Release/raylib.lib");
 		cmd_append(&cmd, BUILD_FOLDER "ixwebsocket/Release/ixwebsocket.lib");
-		if (const char *lib = getenv("MINGW_LIBGCC")) { cmd_append(&cmd, lib); }
-		cmd_append(&cmd, "-Wl,/alternatename:__chkstk_ms=__chkstk");
 		cmd_append(&cmd, "C:/Program Files/OpenSSL/lib/VC/x64/MD/libssl.lib");
 		cmd_append(&cmd, "C:/Program Files/OpenSSL/lib/VC/x64/MD/libcrypto.lib");
 #else
@@ -257,6 +271,8 @@ int main(int argc, char **argv) {
 		cmd_append(&cmd, "-lcrypt32");
 		cmd_append(&cmd, "-lbcrypt");
 		cmd_append(&cmd, "-ladvapi32");
+		cmd_append(&cmd, "-lole32");
+		cmd_append(&cmd, "-lavrt");
 // more platforms can be added here
 #endif
 
