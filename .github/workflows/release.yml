@@ -59,26 +59,6 @@ jobs:
             sudo apt-get install -y libx11-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev
           fi
 
-      - name: Windows Abhängigkeiten installieren
-        if: runner.os == 'Windows'
-        shell: bash
-        run: |
-          if ! command -v gcc > /dev/null 2>&1; then
-            echo "C:\msys64\mingw64\bin" >> "$GITHUB_PATH"
-            export PATH="/c/msys64/mingw64/bin:$PATH"
-          fi
-          if ! command -v make > /dev/null 2>&1; then
-            choco install make -y
-          fi
-          gcc --version
-          make --version
-          clang --version
-
-          GCC_LIB="$(gcc -print-file-name=libgcc.a)"
-          if [ -f "$GCC_LIB" ]; then
-            echo "MINGW_LIBGCC=$(cygpath -m "$GCC_LIB")" >> "$GITHUB_ENV"
-          fi
-
       - name: nob kompilieren und Projekt bauen
         shell: bash
         run: |
