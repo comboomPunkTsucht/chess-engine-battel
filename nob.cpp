@@ -55,52 +55,44 @@ void print_list(const char **items, size_t count) {
 
 bool build_raylib(bool debug) {
 	if (!mkdir_if_not_exists(BUILD_FOLDER "raylib")) { return 1; }
+
+	bool raylib_debug = debug;
 #ifdef _WIN32
-	(void)debug;
+	raylib_debug = false;
+#endif
+	const char *build_type = raylib_debug ? "Debug" : "Release";
+
+	const char *c_flags = "-DSUPPORT_FILEFORMAT_FLAC=1 -DRLGL_SHOW_GL_DETAILS_INFO=1";
+	if (raylib_debug) { c_flags = temp_sprintf("%s -DRLGL_ENABLE_OPENGL_DEBUG_CONTEXT=1", c_flags); }
+#ifdef _WIN32
+	c_flags = temp_sprintf("/DWIN32 /D_WINDOWS /W3 %s", c_flags);
+#endif
+
 	cmd_append(&cmd, "cmake");
-	cmd_append(&cmd, "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded");
 	cmd_append(&cmd, "-DBUILD_EXAMPLES=OFF");
-	cmd_append(&cmd, "-DCMAKE_C_FLAGS=/DWIN32 /D_WINDOWS /W3 -DSUPPORT_FILEFORMAT_FLAC=1 -DRLGL_SHOW_GL_DETAILS_INFO=1");
+	cmd_append(&cmd, "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded");
+	cmd_append(&cmd, temp_sprintf("-DCMAKE_BUILD_TYPE=%s", build_type));
+	cmd_append(&cmd, temp_sprintf("-DCMAKE_C_FLAGS=%s", c_flags));
+#ifdef __APPLE__
+	cmd_append(&cmd, "-DCMAKE_OSX_DEPLOYMENT_TARGET=26.0");
+#endif
+#ifdef __linux__
+	cmd_append(&cmd, "-DGLFW_BUILD_WAYLAND=ON");
+	if (with_x11) {
+		cmd_append(&cmd, "-DGLFW_BUILD_X11=ON");
+	} else {
+		cmd_append(&cmd, "-DGLFW_BUILD_X11=OFF");
+	}
+#endif
+	cmd_append(&cmd, temp_sprintf("-DCMAKE_ARCHIVE_OUTPUT_DIRECTORY=%s/%s", cwd, BUILD_FOLDER "raylib"));
 	cmd_append(&cmd, "-B", BUILD_FOLDER "raylib");
 	cmd_append(&cmd, "-S", THIRDPARTY_FOLDER "raylib");
 	if (!cmd_run(&cmd)) { return false; }
 
 	cmd_append(&cmd, "cmake");
 	cmd_append(&cmd, "--build", BUILD_FOLDER "raylib");
-	cmd_append(&cmd, "--config", "Release");
+	cmd_append(&cmd, "--config", build_type);
 	return cmd_run(&cmd);
-#else
-
-	cmd_append(&cmd, "make", "-C", THIRDPARTY_FOLDER "raylib/src");
-	cmd_append(&cmd, "PLATFORM=PLATFORM_DESKTOP");
-	cmd_append(&cmd, "RAYLIB_LIBTYPE=STATIC");
-	if (debug) {
-		cmd_append(&cmd, "RAYLIB_BUILD_MODE=DEBUG");
-	} else {
-		cmd_append(&cmd, "RAYLIB_BUILD_MODE=RELEASE");
-	}
-	cmd_append(&cmd, "RAYLIB_MODULE_RAYGUI=TRUE");
-	cmd_append(&cmd, "RAYLIB_MODULE_RAYGUI_PATH=../../raygui/src");
-	cmd_append(&cmd, "RAYLIB_RELEASE_PATH=../../../build/raylib");
-	cmd_append(&cmd, "EXTERNAL_CONFIG_FLAGS=-DSUPPORT_FILEFORMAT_FLAC=1");
-	if (debug) { cmd_append(&cmd, "EXTERNAL_CONFIG_FLAGS+=-DRLGL_ENABLE_OPENGL_DEBUG_CONTEXT=1"); }
-	cmd_append(&cmd, "EXTERNAL_CONFIG_FLAGS+=-DRLGL_SHOW_GL_DETAILS_INFO=1");
-#ifdef __linux__
-	cmd_append(&cmd, "GLFW_LINUX_ENABLE_WAYLAND=TRUE");
-	if (with_x11) {
-		cmd_append(&cmd, "GLFW_LINUX_ENABLE_X11=TRUE");
-
-	} else {
-		cmd_append(&cmd, "GLFW_LINUX_ENABLE_X11=FALSE");
-	}
-#endif
-#ifdef __APPLE__
-	cmd_append(&cmd, "EXTERNAL_CONFIG_FLAGS+=-mmacos-version-min=26.0");
-#endif
-	// cmd_append(&cmd, "EXTERNAL_CONFIG_FLAGS+=--dumpdir",
-	//           "EXTERNAL_CONFIG_FLAGS+=../../../build/raylib");
-	return cmd_run(&cmd);
-#endif
 }
 
 bool build_ixwebsocket(bool debug) {
