@@ -18,7 +18,7 @@ void Game::render() {
 	const int x_start = layout.x_start;
 	const int y_start = layout.y_start;
 
-	const float piece_size = space_size * 0.7f;
+	const float piece_size = floor(space_size * 0.7f);
 
 	BeginDrawing();
 	ClearBackground(NORD_BACKGROUND_COLOR);

@@ -9,9 +9,9 @@
 inline const char *appDir = GetApplicationDirectory();
 // Baut den Pfad relativ zur ausführbaren Datei zusammen
 #ifdef __APPLE__
-inline const char *assetPath = temp_sprintf("%s/../Resources/", appDir);
+inline const char *assetPath = TextFormat("%s/../Resources/", appDir);
 #else
-inline const char *assetPath = temp_sprintf("%s/assets/", appDir);
+inline const char *assetPath = TextFormat("%s/assets/", appDir);
 #endif
 
 constexpr uint32_t DEFAULT_SCREEN_WIDTH = 800;
