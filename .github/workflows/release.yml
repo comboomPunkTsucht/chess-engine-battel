@@ -1,0 +1,93 @@
+name: Release (Linux, macOS, Windows)
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    name: Build ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            name: linux-x11
+            x11: ON
+            ext: ""
+            archive_ext: ".tar.gz"
+
+          - os: ubuntu-latest
+            name: linux-wayland
+            x11: OFF
+            ext: ""
+            archive_ext: ".tar.gz"
+
+          - os: macos-latest
+            name: macos
+            x11: OFF
+            ext: ".app"
+            archive_ext: ".tar.gz"
+
+          - os: windows-latest
+            name: windows
+            x11: OFF
+            ext: ".exe"
+            archive_ext: ".zip"
+
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Linux Abhängigkeiten installieren
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang
+
+          if [ "${{ matrix.x11 }}" = "ON" ]; then
+            sudo apt-get install -y libx11-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev
+          else
+            sudo apt-get install -y libwayland-dev libxkbcommon-dev wayland-protocols
+          fi
+
+      - name: nob kompilieren und Projekt bauen
+        shell: bash
+        env:
+          USE_X11: ${{ matrix.x11 }}
+        run: |
+          clang++ -o nob${{ matrix.ext }} nob.cpp
+          ./nob${{ matrix.ext }} -c --release
+
+      - name: Artefakt umbenennen und archivieren
+        shell: bash
+        run: |
+          # Passe 'dchess-engine-battel' an den Output-Namen deines nob-Builds an
+          BINARY_NAME="dchess-engine-battel${{ matrix.ext }}"
+          RELEASE_NAME="dchess-engine-battel-${{ matrix.name }}${{ matrix.ext }}"
+          ARCHIVE_NAME="dchess-engine-battel-${{ matrix.name }}${{ matrix.archive_ext }}"
+
+          mv "$BINARY_NAME" "$RELEASE_NAME"
+
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            # -r packt den assets-Ordner rekursiv mit in die ZIP-Datei
+            zip -r "$ARCHIVE_NAME" "$RELEASE_NAME" assets/
+          elif [ "${{ runner.os }}" = "Linux" ]; then
+            # tar packt den assets-Ordner automatisch mit ein
+            tar -czvf "$ARCHIVE_NAME" "$RELEASE_NAME" assets/
+          else
+            # macOS
+              tar -czvf "$ARCHIVE_NAME" "$RELEASE_NAME"
+          fi
+
+      - name: Release erstellen und Assets hochladen
+        uses: softprops/action-gh-release@v1
+        with:
+          files: dchess-engine-battel-${{ matrix.name }}${{ matrix.archive_ext }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
