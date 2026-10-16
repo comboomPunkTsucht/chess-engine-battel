@@ -244,6 +244,7 @@ int main(int argc, char **argv) {
 		cmd_append(&cmd, "-lssl");
 		cmd_append(&cmd, "-lcrypto");
 #elif defined(_WIN32)
+		cmd_append(&cmd, "-DNOMINMAX");
 		cmd_append(&cmd, "-lopengl32");
 		cmd_append(&cmd, "-lgdi32");
 		cmd_append(&cmd, "-lwinmm");
