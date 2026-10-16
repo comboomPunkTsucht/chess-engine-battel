@@ -76,7 +76,11 @@ jobs:
 
           GCC_LIB="$(gcc -print-file-name=libgcc.a)"
           if [ -f "$GCC_LIB" ]; then
-            echo "MINGW_RUNTIME_DIR=$(cygpath -m "$(dirname "$GCC_LIB")")" >> "$GITHUB_ENV"
+            echo "MINGW_LIBGCC=$(cygpath -m "$GCC_LIB")" >> "$GITHUB_ENV"
+          fi
+          MINGWEX_LIB="$(gcc -print-file-name=libmingwex.a)"
+          if [ -f "$MINGWEX_LIB" ]; then
+            echo "MINGW_LIBMINGWEX=$(cygpath -m "$MINGWEX_LIB")" >> "$GITHUB_ENV"
           fi
 
       - name: nob kompilieren und Projekt bauen

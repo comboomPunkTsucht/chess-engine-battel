@@ -205,10 +205,8 @@ int main(int argc, char **argv) {
 		cmd_append(&cmd, "-fuse-ld=lld");
 		cmd_append(&cmd, BUILD_FOLDER "raylib/libraylib.a");
 		cmd_append(&cmd, BUILD_FOLDER "ixwebsocket/Release/ixwebsocket.lib");
-		if (const char *mingw_rt = getenv("MINGW_RUNTIME_DIR")) {
-			cmd_append(&cmd, temp_sprintf("%s/libgcc.a", mingw_rt));
-			cmd_append(&cmd, temp_sprintf("%s/libmingwex.a", mingw_rt));
-		}
+		if (const char *lib = getenv("MINGW_LIBGCC")) { cmd_append(&cmd, lib); }
+		if (const char *lib = getenv("MINGW_LIBMINGWEX")) { cmd_append(&cmd, lib); }
 		cmd_append(&cmd, "C:/Program Files/OpenSSL/lib/VC/x64/MD/libssl.lib");
 		cmd_append(&cmd, "C:/Program Files/OpenSSL/lib/VC/x64/MD/libcrypto.lib");
 #else
