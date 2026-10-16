@@ -4,6 +4,10 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -16,26 +20,26 @@ jobs:
         include:
           - os: ubuntu-latest
             name: linux-x11
-            x11: ON
             ext: ""
+            nob_flags: "--with-x11"
             archive_ext: ".tar.gz"
 
           - os: ubuntu-latest
             name: linux-wayland
-            x11: OFF
             ext: ""
+            nob_flags: ""
             archive_ext: ".tar.gz"
 
           - os: macos-latest
-            name: macos
-            x11: OFF
-            ext: ".app"
+            name: macos-arm64
+            ext: ""
+            nob_flags: ""
             archive_ext: ".tar.gz"
 
           - os: windows-latest
-            name: windows
-            x11: OFF
+            name: windows-x86_64
             ext: ".exe"
+            nob_flags: ""
             archive_ext: ".zip"
 
     steps:
@@ -48,46 +52,97 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y clang
+          sudo apt-get install -y clang libgl-dev libglu1-mesa-dev pkg-config
 
-          if [ "${{ matrix.x11 }}" = "ON" ]; then
+          if [ "${{ matrix.name }}" = "linux-x11" ]; then
             sudo apt-get install -y libx11-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev
+                libwayland-dev
+                libxkbcommon-dev
+                wayland-protocols
           else
             sudo apt-get install -y libwayland-dev libxkbcommon-dev wayland-protocols
           fi
 
+      - name: Windows Abhängigkeiten installieren
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          if ! command -v make > /dev/null 2>&1; then
+            choco install make -y
+          fi
+          gcc --version
+          make --version
+          clang --version
+
       - name: nob kompilieren und Projekt bauen
         shell: bash
-        env:
-          USE_X11: ${{ matrix.x11 }}
         run: |
-          clang++ -o nob${{ matrix.ext }} nob.cpp
-          ./nob${{ matrix.ext }} -c --release
+          clang++ -o "nob${{ matrix.ext }}" nob.cpp
+          "./nob${{ matrix.ext }}" -c --release ${{ matrix.nob_flags }}
 
-      - name: Artefakt umbenennen und archivieren
+      - name: Release Ordner vorbereiten
         shell: bash
         run: |
-          # Passe 'dchess-engine-battel' an den Output-Namen deines nob-Builds an
-          BINARY_NAME="dchess-engine-battel${{ matrix.ext }}"
-          RELEASE_NAME="dchess-engine-battel-${{ matrix.name }}${{ matrix.ext }}"
-          ARCHIVE_NAME="dchess-engine-battel-${{ matrix.name }}${{ matrix.archive_ext }}"
+          set -euo pipefail
+          STAGE="chess-engine-battel-${{ matrix.name }}"
+          mkdir -p "$STAGE"
 
-          mv "$BINARY_NAME" "$RELEASE_NAME"
-
-          if [ "${{ runner.os }}" = "Windows" ]; then
-            # -r packt den assets-Ordner rekursiv mit in die ZIP-Datei
-            zip -r "$ARCHIVE_NAME" "$RELEASE_NAME" assets/
-          elif [ "${{ runner.os }}" = "Linux" ]; then
-            # tar packt den assets-Ordner automatisch mit ein
-            tar -czvf "$ARCHIVE_NAME" "$RELEASE_NAME" assets/
+          if [ "${{ runner.os }}" = "macOS" ]; then
+            cp -R build/chess-engine-battel.app "$STAGE/"
           else
-            # macOS
-              tar -czvf "$ARCHIVE_NAME" "$RELEASE_NAME"
+            cp "build/chess-engine-battel${{ matrix.ext }}" "$STAGE/"
+            cp -R build/assets "$STAGE/assets"
           fi
 
-      - name: Release erstellen und Assets hochladen
-        uses: softprops/action-gh-release@v1
+          cp LICENSE "$STAGE/LICENSE"
+          ls -lR "$STAGE"
+
+      - name: Archiv erstellen (tar.gz)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          set -euo pipefail
+          STAGE="chess-engine-battel-${{ matrix.name }}"
+          tar -czf "${STAGE}.tar.gz" "$STAGE"
+          ls -l "${STAGE}.tar.gz"
+
+      - name: Archiv erstellen (zip)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $stage = "chess-engine-battel-${{ matrix.name }}"
+          Compress-Archive -Path $stage -DestinationPath "$stage.zip" -Force
+          Get-Item "$stage.zip"
+
+      - name: Artefakt hochladen
+        uses: actions/upload-artifact@v4
         with:
-          files: dchess-engine-battel-${{ matrix.name }}${{ matrix.archive_ext }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          name: chess-engine-battel-${{ matrix.name }}
+          path: chess-engine-battel-${{ matrix.name }}${{ matrix.archive_ext }}
+          if-no-files-found: error
+
+  release:
+    name: Release erstellen
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Artefakte herunterladen
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Checksums erstellen
+        working-directory: dist
+        run: |
+          sha256sum * > SHA256SUMS.txt
+          ls -l
+          cat SHA256SUMS.txt
+
+      - name: Release veröffentlichen
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          generate_release_notes: true

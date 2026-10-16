@@ -27,6 +27,10 @@ Cmd cmd = {0};
 
 const char *cwd = get_current_dir_temp();
 
+#ifdef __linux__
+bool with_x11 = false;
+#endif
+
 typedef struct {
 	char **items;
 	size_t count;
@@ -66,6 +70,15 @@ bool build_raylib(bool debug) {
 	cmd_append(&cmd, "EXTERNAL_CONFIG_FLAGS=-DSUPPORT_FILEFORMAT_FLAC=1");
 	if (debug) { cmd_append(&cmd, "EXTERNAL_CONFIG_FLAGS+=-DRLGL_ENABLE_OPENGL_DEBUG_CONTEXT=1"); }
 	cmd_append(&cmd, "EXTERNAL_CONFIG_FLAGS+=-DRLGL_SHOW_GL_DETAILS_INFO=1");
+#ifdef __linux__
+	if (with_x11) {
+		cmd_append(&cmd, "GLFW_LINUX_ENABLE_X11=TRUE");
+		cmd_append(&cmd, "GLFW_LINUX_ENABLE_WAYLAND=FALSE");
+	} else {
+		cmd_append(&cmd, "GLFW_LINUX_ENABLE_X11=FALSE");
+		cmd_append(&cmd, "GLFW_LINUX_ENABLE_WAYLAND=TRUE");
+	}
+#endif
 #ifdef __APPLE__
 	cmd_append(&cmd, "EXTERNAL_CONFIG_FLAGS+=-mmacos-version-min=26.0");
 #endif
@@ -79,15 +92,20 @@ bool build_ixwebsocket(bool debug) {
 	cmd_append(&cmd, "cmake");
 	cmd_append(&cmd, "-DUSE_TLS=1");
 	cmd_append(&cmd, "-DUSE_OPEN_SSL=1");
-	cmd_append(&cmd, "-DUSE_ZLIB = 1");
+#ifdef _WIN32
+	cmd_append(&cmd, "-DUSE_ZLIB=0");
+#else
+	cmd_append(&cmd, "-DUSE_ZLIB=1");
+#endif
 	cmd_append(&cmd, "--install-prefix", temp_sprintf("%s%s", cwd, BUILD_FOLDER "ixwebsocket"));
 	cmd_append(&cmd, "-B", BUILD_FOLDER "ixwebsocket");
 	cmd_append(&cmd, "-S", THIRDPARTY_FOLDER "IXWebSocket");
 
 	if (!cmd_run(&cmd)) { return false; }
 
-	cmd_append(&cmd, "make");
-	cmd_append(&cmd, "-C", BUILD_FOLDER "ixwebsocket");
+	cmd_append(&cmd, "cmake");
+	cmd_append(&cmd, "--build", BUILD_FOLDER "ixwebsocket");
+	cmd_append(&cmd, "--config", "Release");
 	if (!cmd_run(&cmd)) { return false; }
 
 	return true;
@@ -106,10 +124,6 @@ int main(int argc, char **argv) {
 	bool debug = false;
 	char *debugger = (char *)"lldb";
 	bool run = false;
-
-#ifdef __linux__
-	bool with_x11 = false;
-#endif
 
 	flag_bool_var(&help, "-help", false, "Print this help to stdout and exit with 0");
 	flag_bool_var(&help, "h", false, "Print this help to stdout and exit with 0");
@@ -187,12 +201,17 @@ int main(int argc, char **argv) {
 		cmd_append(&cmd, "-I", SOURCE_FOLDER);
 		cmd_append(&cmd, "-I", BUILD_FOLDER "assets");
 		cmd_append(&cmd, "-I", ".");
+#ifdef _WIN32
+		cmd_append(&cmd, BUILD_FOLDER "raylib/libraylib.a");
+		cmd_append(&cmd, BUILD_FOLDER "ixwebsocket/Release/ixwebsocket.lib");
+#else
 		cmd_append(&cmd, "-L", BUILD_FOLDER "ixwebsocket");
 		cmd_append(&cmd, "-L", BUILD_FOLDER "raylib");
 		cmd_append(&cmd, "-lraylib");
 		cmd_append(&cmd, "-lixwebsocket");
 		cmd_append(&cmd, "-lm");
 		cmd_append(&cmd, "-lz");
+#endif
 #ifdef __APPLE__
 
 		cmd_append(&cmd, "-mmacos-version-min=26.0");
@@ -212,11 +231,9 @@ int main(int argc, char **argv) {
 			// #ifdef USE_X11 brauchst
 			cmd_append(&cmd, "-DUSE_X11");
 		}
-
 		cmd_append(&cmd, "-ldl");
 		cmd_append(&cmd, "-lrt");
 		cmd_append(&cmd, "-lpthread");
-		cmd_append(&cmd, "-lX11");
 		cmd_append(&cmd, "-lGL");
 		cmd_append(&cmd, "-lGLU");
 		cmd_append(&cmd, "-lssl");
@@ -225,8 +242,6 @@ int main(int argc, char **argv) {
 		cmd_append(&cmd, "-lopengl32");
 		cmd_append(&cmd, "-lgdi32");
 		cmd_append(&cmd, "-lwinmm");
-		cmd_append(&cmd, "-lssl");
-		cmd_append(&cmd, "-lcrypto");
 // more platforms can be added here
 #endif
 
