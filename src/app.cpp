@@ -1,7 +1,6 @@
 #include "app.h"
 #include "global.h"
 #include "raylib.h"
-#include <cmath>
 
 void App::main_loop() {
 	while (!WindowShouldClose()) {
@@ -12,6 +11,12 @@ void App::main_loop() {
 }
 
 void App::initialization(void) {
+
+	server_uri = setServerUri();
+
+	SetConfigFlags(FLAG_MSAA_4X_HINT | FLAG_INTERLACED_HINT | FLAG_WINDOW_HIGHDPI | FLAG_VSYNC_HINT | FLAG_WINDOW_RESIZABLE | FLAG_WINDOW_ALWAYS_RUN);
+	InitWindow(DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT, "Chess Engine Battle");
+
 	SetTargetFPS(GetMonitorRefreshRate(GetCurrentMonitor()));
 
 #if defined(_WIN32) || (defined(__linux__) && defined(USE_X11))
@@ -36,3 +41,6 @@ void App::startGame() {
 	mCurrentGame = new Game();
 	mCurrentGame->setup_board();
 }
+
+void App::setWebsocketServerAddress(const char *address = "0.0.0.0") { }
+void App::setWebsocketServerPort(uint16_t port = 14318) { }

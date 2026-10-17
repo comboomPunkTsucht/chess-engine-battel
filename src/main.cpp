@@ -1,39 +1,63 @@
 #include "app.h"
+#include "global.h"
 
 #define FLAG_IMPLEMENTATION
 #include "flag.h"
 
+#include "raylib.h" // must be included befor nob_addons.h bcause it loads logging initialization
+
 #define NOB_IMPLEMENTATION
 #include "nob_addons.h"
 
-#include "move.h"
-#include <algorithm>
 #include <cstdlib>
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string>
 
 // #include <ixwebsocket/IXConnectionState.h>
 // #include <ixwebsocket/IXWebSocket.h>
 // #include <ixwebsocket/IXWebSocketServer.h>
 
-int main(void) {
-  addon_init_logging();
+void usage(FILE *stream) {
+	fprintf(stream, "Usage: ./nob [OPTIONS]\n");
+	fprintf(stream, "OPTIONS:\n");
+	flag_print_options(stream);
+}
 
-  SetConfigFlags(FLAG_MSAA_4X_HINT | FLAG_INTERLACED_HINT |
-                 FLAG_WINDOW_HIGHDPI | FLAG_VSYNC_HINT | FLAG_WINDOW_RESIZABLE |
-                 FLAG_WINDOW_ALWAYS_RUN);
-  InitWindow(DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT,
-             "Chess Engine Battle");
-  
-  App app = App();
-  app.initialization();
-  app.startGame();
-  app.main_loop();
+int main(int argc, char **argv) {
+	addon_init_logging();
 
-  CloseWindow();
+	bool help = false;
 
-  return 0;
+	flag_bool_var(&help, "-h", false, "Show this help message");
+	flag_bool_var(&help, "--help", false, "Show this help message");
+
+	flag_str_var(&server_address, "-server-address", server_address, "The address of the websocket server to connect to");
+	flag_str_var(&server_address, "a", server_address, "The address of the websocket server to connect to");
+	flag_uint64_var(&server_port, "-server-port", server_port, "The port of the websocket server to connect to");
+	flag_uint64_var(&server_port, "p", server_port, "The port of the websocket server to connect to");
+
+	if (!flag_parse(argc, argv)) {
+		usage(stderr);
+		flag_print_error(stderr);
+		exit(1);
+	}
+
+	argc = flag_rest_argc();
+	argv = flag_rest_argv();
+
+	if (help) {
+		usage(stdout);
+		exit(0);
+	}
+
+	App app = App();
+	app.initialization();
+	app.startGame();
+	app.main_loop();
+
+	CloseWindow();
+
+	return 0;
 }
