@@ -20,7 +20,7 @@
 // #include <ixwebsocket/IXWebSocketServer.h>
 
 void usage(FILE *stream) {
-	fprintf(stream, "Usage: ./nob [OPTIONS]\n");
+	fprintf(stream, "Usage: ./chess-engine-battel [OPTIONS]\n");
 	fprintf(stream, "OPTIONS:\n");
 	flag_print_options(stream);
 }
