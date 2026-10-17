@@ -4,17 +4,20 @@
 #include <cstdint>
 
 class App {
-    public:
-        Game *mCurrentGame;
+public:
+	Game *mCurrentGame;
 
-        void main_loop();
-        void processInput();
-        void update();
-        void render();
+	void main_loop();
+	void processInput();
+	void update();
+	void render();
 
-        void initialization(void);
-        void startGame();
+	void initialization(void);
+	void startGame();
 
-    private:
-        void load_font();
+	void setWebsocketServerAddress(const char *address);
+	void setWebsocketServerPort(uint16_t port);
+
+private:
+	void load_font();
 };

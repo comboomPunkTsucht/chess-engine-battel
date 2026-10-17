@@ -33,3 +33,15 @@ inline float font_size_factor = 0.044f;
 inline float font_size = getFontSize();
 
 static float getFontSize() { return std::max(std::floor(screen_width * font_size_factor + 0.2), std::floor(screen_height * 0.025)); }
+
+static const char *setServerUri();
+
+inline char *server_address = "0.0.0.0";
+inline uint64_t server_port = 14318;
+inline const char *server_uri = nullptr;
+
+static const char *setServerUri() {
+	const char *uri = TextFormat("ws://%s:%d", server_address, server_port);
+	nob_log(INFO, "Websocket server URI: %s", uri);
+	return uri;
+}
