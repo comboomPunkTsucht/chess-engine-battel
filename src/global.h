@@ -1,6 +1,5 @@
 #pragma once
 
-#include "ixwebsocket/IXWebSocketHttpHeaders.h"
 #include "nob_addons.h"
 #include "raylib.h"
 #include <algorithm>
@@ -46,7 +45,3 @@ static const char *setServerUri() {
 	nob_log(INFO, "Websocket server URI: %s", uri);
 	return uri;
 }
-
-// inline ix::WebSocket player1_socket;
-
-// inline ix::WebSocket player2_socket;

@@ -49,7 +49,6 @@ int main(int argc, char **argv) {
 	}
 
 	App app = App();
-	app.initialization();
 	app.startGame();
 	app.main_loop();
 

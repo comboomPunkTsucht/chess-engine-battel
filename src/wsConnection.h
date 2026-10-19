@@ -1,22 +1,33 @@
 #pragma once
 
 #include "global.h"
+#include "move.h"
 #include "nob_addons.h"
-#include <ixwebsocket/IXConnectionState.h>
-#include <ixwebsocket/IXWebSocket.h>
+#include <functional>
 #include <ixwebsocket/IXWebSocketServer.h>
+#include <map>
+#include <memory>
 
 class WSConnection {
 public:
 	WSConnection();
 	~WSConnection();
 
-	void connect();
-	void disconnect();
-	void send(const char *message);
-	const char *receive();
+	void startServer();
+	void stopServer();
+
+	// Broadcast an alle verbundenen Engines (z.B. um den gegnerischen Zug mitzuteilen)
+	void broadcast(const std::string &message);
+
+	// Callback, um die UI / das Spiel zu aktualisieren, wenn eine Engine einen Zug macht
+	void setOnMoveReceivedCallback(std::function<void(Move)> callback);
 
 private:
-	ix::WebSocket ceb_websocket;
 	ix::WebSocketServer ceb_websocket_server;
+	std::function<void(Move)> onMoveReceived;
+
+	// Speichert die Verbindungen (maximal 2 Engines)
+	std::map<std::shared_ptr<ix::ConnectionState>, int> connected_engines;
 };
+
+inline WSConnection *wsConnection = nullptr;

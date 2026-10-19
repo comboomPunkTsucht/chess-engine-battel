@@ -5,6 +5,8 @@
 
 class App {
 public:
+	App();
+	~App();
 	Game *mCurrentGame;
 
 	void main_loop();
@@ -12,7 +14,6 @@ public:
 	void update();
 	void render();
 
-	void initialization(void);
 	void startGame();
 
 	void setWebsocketServerAddress(const char *address);
