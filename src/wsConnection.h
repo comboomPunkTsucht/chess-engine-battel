@@ -19,4 +19,4 @@ public:
 private:
 	ix::WebSocket ceb_websocket;
 	ix::WebSocketServer ceb_websocket_server;
-}
+};

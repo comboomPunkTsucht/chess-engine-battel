@@ -47,6 +47,6 @@ static const char *setServerUri() {
 	return uri;
 }
 
-inline ix::Socket player1_socket;
+// inline ix::WebSocket player1_socket;
 
-inline ix::Socket player2_socket;
+// inline ix::WebSocket player2_socket;

@@ -124,6 +124,74 @@ bool build_ixwebsocket(bool debug) {
 	return true;
 }
 
+bool get_cflags_from_pkg_config(const char *package) {
+	Cmd temp = {0};
+	cmd_append(&temp, "pkg-config");
+	cmd_append(&temp, "--cflags");
+	cmd_append(&temp, package);
+	if (!cmd_run(&temp, .stdout_path = BUILD_FOLDER "cflags.temp.txt")) { return false; }
+
+	String_Builder cflags = {0};
+	if (!read_entire_file(BUILD_FOLDER "cflags.temp.txt", &cflags)) { return false; }
+
+	String_Builder flag = {0};
+	for (size_t i = 0; i < cflags.count; ++i) {
+		char c = cflags.items[i];
+		if (c == ' ' || c == '\n') {
+			if (flag.count > 0) {
+				da_append(&flag, '\0');
+				// FIX: Den String für cmd duplizieren, damit er nicht überschrieben wird
+				cmd_append(&cmd, temp_strdup(flag.items));
+				flag.count = 0;
+			}
+		} else {
+			da_append(&flag, c);
+		}
+	}
+	if (flag.count > 0) {
+		da_append(&flag, '\0');
+		cmd_append(&cmd, temp_strdup(flag.items));
+	}
+
+	da_free(flag);
+	da_free(cflags);
+	return true;
+}
+
+bool get_libs_from_pkg_config(const char *package) {
+	Cmd temp = {0};
+	cmd_append(&temp, "pkg-config");
+	cmd_append(&temp, "--libs");
+	cmd_append(&temp, package);
+	if (!cmd_run(&temp, .stdout_path = BUILD_FOLDER "libs.temp.txt")) { return false; }
+
+	String_Builder libs = {0};
+	if (!read_entire_file(BUILD_FOLDER "libs.temp.txt", &libs)) { return false; }
+
+	String_Builder flag = {0};
+	for (size_t i = 0; i < libs.count; ++i) {
+		char c = libs.items[i];
+		if (c == ' ' || c == '\n') {
+			if (flag.count > 0) {
+				da_append(&flag, '\0');
+				// FIX: Den String für cmd duplizieren
+				cmd_append(&cmd, temp_strdup(flag.items));
+				flag.count = 0;
+			}
+		} else {
+			da_append(&flag, c);
+		}
+	}
+	if (flag.count > 0) {
+		da_append(&flag, '\0');
+		cmd_append(&cmd, temp_strdup(flag.items));
+	}
+
+	da_free(flag);
+	da_free(libs);
+	return true;
+}
+
 int main(int argc, char **argv) {
 	addon_init_logging();
 	F_Args f_args = {0};
@@ -191,6 +259,7 @@ int main(int argc, char **argv) {
 		cmd_append(&cmd, SOURCE_FOLDER "update.cpp");
 		cmd_append(&cmd, SOURCE_FOLDER "processInput.cpp");
 		cmd_append(&cmd, SOURCE_FOLDER "render.cpp");
+		cmd_append(&cmd, SOURCE_FOLDER "wsConnection.cpp");
 
 		if (debug) {
 			cmd_append(&cmd, "-g");
@@ -218,6 +287,7 @@ int main(int argc, char **argv) {
 		cmd_append(&cmd, "-I", SOURCE_FOLDER);
 		cmd_append(&cmd, "-I", BUILD_FOLDER "assets");
 		cmd_append(&cmd, "-I", ".");
+
 #ifdef _WIN32
 		cmd_append(&cmd, "-fuse-ld=lld");
 		cmd_append(&cmd, BUILD_FOLDER "raylib/Release/raylib.lib");
@@ -225,6 +295,8 @@ int main(int argc, char **argv) {
 		cmd_append(&cmd, "C:/Program Files/OpenSSL/lib/VC/x64/MD/libssl.lib");
 		cmd_append(&cmd, "C:/Program Files/OpenSSL/lib/VC/x64/MD/libcrypto.lib");
 #else
+		// Da wir raylib und ixwebsocket selbst lokal bauen,
+		// müssen wir sie manuell verlinken.
 		cmd_append(&cmd, "-L", BUILD_FOLDER "ixwebsocket");
 		cmd_append(&cmd, "-L", BUILD_FOLDER "raylib");
 		cmd_append(&cmd, "-lraylib");
@@ -232,10 +304,13 @@ int main(int argc, char **argv) {
 		cmd_append(&cmd, "-lm");
 		cmd_append(&cmd, "-lz");
 #endif
-#ifdef __APPLE__
 
+#ifdef __APPLE__
+		if (!get_cflags_from_pkg_config("openssl")) { return 1; }
+		if (!get_libs_from_pkg_config("openssl")) { return 1; }
 		cmd_append(&cmd, "-mmacos-version-min=26.0");
 
+		// macOS Frameworks besitzen keine pkg-config Dateien
 		cmd_append(&cmd, "-framework", "Security");
 		cmd_append(&cmd, "-framework", "Foundation");
 		cmd_append(&cmd, "-framework", "OpenGL");
@@ -243,21 +318,28 @@ int main(int argc, char **argv) {
 		cmd_append(&cmd, "-framework", "IOKit");
 		cmd_append(&cmd, "-framework", "CoreVideo");
 		cmd_append(&cmd, "-framework", "QuartzCore");
-#elif defined(__linux__)
 
+#elif defined(__linux__)
 		if (with_x11) {
-			cmd_append(&cmd, "-lX11");
-			// Optional: Ein Makro an den Code übergeben, falls du im C++ Code
-			// #ifdef USE_X11 brauchst
+			// Zieht automatisch -lX11 und ggf. nötige Includes
+			if (!get_cflags_from_pkg_config("x11")) { return 1; }
+			if (!get_libs_from_pkg_config("x11")) { return 1; }
 			cmd_append(&cmd, "-DUSE_X11");
 		}
+
+		if (!get_cflags_from_pkg_config("openssl")) { return 1; }
+		if (!get_libs_from_pkg_config("openssl")) { return 1; }
+		// Ersetzt manuelles -lGL und -lGLU
+		if (!get_cflags_from_pkg_config("gl")) { return 1; }
+		if (!get_libs_from_pkg_config("gl")) { return 1; }
+		if (!get_cflags_from_pkg_config("glu")) { return 1; }
+		if (!get_libs_from_pkg_config("glu")) { return 1; }
+
+		// Standard POSIX/C-Libraries bleiben hardcoded
 		cmd_append(&cmd, "-ldl");
 		cmd_append(&cmd, "-lrt");
 		cmd_append(&cmd, "-lpthread");
-		cmd_append(&cmd, "-lGL");
-		cmd_append(&cmd, "-lGLU");
-		cmd_append(&cmd, "-lssl");
-		cmd_append(&cmd, "-lcrypto");
+
 #elif defined(_WIN32)
 		cmd_append(&cmd, "-DNOMINMAX");
 		cmd_append(&cmd, "-lopengl32");
@@ -271,7 +353,6 @@ int main(int argc, char **argv) {
 		cmd_append(&cmd, "-ladvapi32");
 		cmd_append(&cmd, "-lole32");
 		cmd_append(&cmd, "-lavrt");
-// more platforms can be added here
 #endif
 
 		cmd_append(&cmd, "-Wno-unused-function");
