@@ -7,7 +7,7 @@ class App {
 public:
 	App();
 	~App();
-	Game *mCurrentGame;
+	Game *mCurrentGame = nullptr;
 
 	void main_loop();
 	void processInput();
