@@ -26,7 +26,7 @@
       "includePath": [
         "${workspaceFolder}/**",
         "${workspaceFolder}/thirdparty/include",
-        "${workspaceFolder}/thirdparty/IXWebSocket",
+        "${workspaceFolder}/thirdparty/IXWebSocket/",
         "${workspaceFolder}/src",
         "${workspaceFolder}/tools"
       ],

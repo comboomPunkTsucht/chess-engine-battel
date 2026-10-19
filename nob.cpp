@@ -285,7 +285,7 @@ int main(int argc, char **argv) {
 		cmd_append(&cmd, "-I", THIRDPARTY_INCLUDE_FOLDER);
 		// FIX: Windows kann dem Ordner-Symlink thirdparty/include/ixwebsocket
 		// nicht folgen, daher direkt auf das Submodul zeigen.
-		cmd_append(&cmd, "-I", THIRDPARTY_FOLDER "IXWebSocket/ixwebsocket");
+		cmd_append(&cmd, "-I", THIRDPARTY_FOLDER "IXWebSocket");
 		cmd_append(&cmd, "-I", TOOLS_SRC_FOLDER);
 		cmd_append(&cmd, "-I", SOURCE_FOLDER);
 		cmd_append(&cmd, "-I", BUILD_FOLDER "assets");
