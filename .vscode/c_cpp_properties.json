@@ -26,6 +26,7 @@
       "includePath": [
         "${workspaceFolder}/**",
         "${workspaceFolder}/thirdparty/include",
+        "${workspaceFolder}/thirdparty/IXWebSocket",
         "${workspaceFolder}/src",
         "${workspaceFolder}/tools"
       ],
@@ -50,6 +51,7 @@
       "includePath": [
         "${workspaceFolder}/**",
         "${workspaceFolder}/thirdparty/include",
+        "${workspaceFolder}/thirdparty/IXWebSocket",
         "${workspaceFolder}/src",
         "${workspaceFolder}/tools"
       ],
@@ -70,6 +72,7 @@
       "includePath": [
         "${workspaceFolder}/**",
         "${workspaceFolder}/thirdparty/include",
+        "${workspaceFolder}/thirdparty/IXWebSocket",
         "${workspaceFolder}/src",
         "${workspaceFolder}/tools"
       ],
@@ -90,6 +93,7 @@
       "includePath": [
         "${workspaceFolder}/**",
         "${workspaceFolder}/thirdparty/include",
+        "${workspaceFolder}/thirdparty/IXWebSocket",
         "${workspaceFolder}/src",
         "${workspaceFolder}/tools"
       ],
@@ -111,6 +115,7 @@
       "includePath": [
         "${workspaceFolder}/**",
         "${workspaceFolder}/thirdparty/include",
+        "${workspaceFolder}/thirdparty/IXWebSocket",
         "${workspaceFolder}/src",
         "${workspaceFolder}/tools"
       ],
