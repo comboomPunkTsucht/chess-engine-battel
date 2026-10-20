@@ -282,10 +282,7 @@ int main(int argc, char **argv) {
 		}
 
 		clangpp_flags(&cmd);
-
-#ifndef __APPLE__
-		cmd_append(&cmd, "-static", "-static-libgcc", "-static-libstdc++");
-#endif
+		cmd_append(&cmd, "-static-libgcc", "-static-libstdc++");
 
 		// FIX: Windows kann dem Ordner-Symlink thirdparty/include/ixwebsocket
 		// nicht folgen, daher direkt auf das Submodul zeigen.
@@ -297,6 +294,8 @@ int main(int argc, char **argv) {
 		cmd_append(&cmd, "-I", ".");
 
 #ifdef _WIN32
+		cmd_append(&cmd, "-static");
+		cmd_append(&cmd, "-static-libclosure", "-static-libsan", "-static-openmp");
 		cmd_append(&cmd, "-fuse-ld=lld");
 		cmd_append(&cmd, BUILD_FOLDER "raylib/Release/raylib.lib");
 		cmd_append(&cmd, BUILD_FOLDER "ixwebsocket/Release/ixwebsocket.lib");
