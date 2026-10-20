@@ -282,8 +282,6 @@ int main(int argc, char **argv) {
 		}
 
 		clangpp_flags(&cmd);
-		cmd_append(&cmd, "-static-libgcc", "-static-libstdc++");
-
 		// FIX: Windows kann dem Ordner-Symlink thirdparty/include/ixwebsocket
 		// nicht folgen, daher direkt auf das Submodul zeigen.
 		cmd_append(&cmd, "-I", THIRDPARTY_FOLDER "IXWebSocket");
@@ -295,7 +293,7 @@ int main(int argc, char **argv) {
 
 #ifdef _WIN32
 		cmd_append(&cmd, "-static");
-		cmd_append(&cmd, "-static-libclosure", "-static-libsan", "-static-openmp");
+		cmd_append(&cmd, "-static-libgcc", "-static-libstdc++");
 		cmd_append(&cmd, "-fuse-ld=lld");
 		cmd_append(&cmd, BUILD_FOLDER "raylib/Release/raylib.lib");
 		cmd_append(&cmd, BUILD_FOLDER "ixwebsocket/Release/ixwebsocket.lib");
@@ -329,6 +327,7 @@ int main(int argc, char **argv) {
 		cmd_append(&cmd, "-framework", "QuartzCore");
 
 #elif defined(__linux__)
+		cmd_append(&cmd, "-static-libgcc", "-static-libstdc++");
 		if (with_x11) {
 			// Zieht automatisch -lX11 und ggf. nötige Includes
 			if (!get_cflags_from_pkg_config("x11")) { return 1; }
