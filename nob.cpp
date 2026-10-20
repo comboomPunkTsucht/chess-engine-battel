@@ -283,6 +283,10 @@ int main(int argc, char **argv) {
 
 		clangpp_flags(&cmd);
 
+#ifndef __APPLE__
+		cmd_append(&cmd, "-static", "-static-libgcc", "-static-libstdc++");
+#endif
+
 		// FIX: Windows kann dem Ordner-Symlink thirdparty/include/ixwebsocket
 		// nicht folgen, daher direkt auf das Submodul zeigen.
 		cmd_append(&cmd, "-I", THIRDPARTY_FOLDER "IXWebSocket");
@@ -312,7 +316,9 @@ int main(int argc, char **argv) {
 #ifdef __APPLE__
 		if (!get_cflags_from_pkg_config("openssl")) { return 1; }
 		if (!get_libs_from_pkg_config("openssl")) { return 1; }
+
 		cmd_append(&cmd, "-mmacos-version-min=26.0");
+		cmd_append(&cmd, "-static-libclosure", "-static-libsan", "-static-openmp");
 
 		// macOS Frameworks besitzen keine pkg-config Dateien
 		cmd_append(&cmd, "-framework", "Security");
