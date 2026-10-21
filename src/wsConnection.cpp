@@ -30,6 +30,7 @@ void WSConnection::startServer() {
 		    } else if (msg->type == ix::WebSocketMessageType::Message) {
 			    // Eine Engine hat einen Zug gesendet!
 
+			    nob_log(INFO, "Move received from Engine %d: %s", connected_engines[connectionState], msg->str.c_str());
 			    // 1. Zug an die ANDERE Engine weiterleiten (damit sie weiß, was passiert ist)
 			    for (auto client : ceb_websocket_server.getClients()) {
 				    if (client.get() != &webSocket) { client->send(msg->str); }
