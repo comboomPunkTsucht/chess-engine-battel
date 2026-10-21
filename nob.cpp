@@ -487,6 +487,12 @@ int main(int argc, char **argv) {
 		    "      <string>Copyright © 2026 comboom.sucht. Alle Rechte "
 		    "vorbehalten.</string>\n"
 		    "%s"
+		    "   <key>UIAppFonts</key>\n"
+		    "      <array>\n"
+		    "         <string>CaskaydiaCoveNerdFontPropo-Bold.ttf</string>\n"
+		    "         <string>CaskaydiaCoveNerdFontPropo-Italic.ttf</string>\n"
+		    "         <string>CaskaydiaCoveNerdFontPropo-Regular.ttf</string>\n"
+		    "      </array>\n"
 		    "   </dict>\n"
 		    "   </plist>",
 		    debug_plist_entry);
