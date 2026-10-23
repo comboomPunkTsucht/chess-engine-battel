@@ -1,6 +1,27 @@
 {
   "configurations": [
     {
+      "name": "macos-clang-arm64",
+      "includePath": [
+        "${workspaceFolder}/**"
+      ],
+      "defines": [
+        "RAYGUI_IMPLEMENTATION",
+        "NOB_IMPLEMENTATION",
+        "FLAG_IMPLEMENTATION",
+        "HT_IMPLEMENTATION",
+        "SUPPORT_FILEFORMAT_FLAC=1"
+      ],
+      "macFrameworkPath": [
+        "/System/Library/Frameworks",
+        "/Library/Frameworks"
+      ],
+      "compilerPath": "/opt/homebrew/bin/clang",
+      "cStandard": "c99",
+      "cppStandard": "c++26",
+      "intelliSenseMode": "macos-clang-arm64"
+    },
+    {
       "name": "linux-clang-x64",
       "includePath": [
         "${workspaceFolder}/**"
