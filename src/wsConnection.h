@@ -1,6 +1,5 @@
 #pragma once
 
-#include "global.h"
 #include "move.h"
 #include "nob_addons.h"
 #include <functional>
@@ -8,9 +7,11 @@
 #include <map>
 #include <memory>
 
+class App;
+
 class WSConnection {
 public:
-	WSConnection();
+	WSConnection(App *app);
 	~WSConnection();
 
 	void startServer();

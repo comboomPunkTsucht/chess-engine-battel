@@ -1,10 +1,12 @@
 #include "wsConnection.h"
-#include "global.h"
+#include "app.h"
 #include "nob_addons.h"
 #include <string>
 
+App *app_ = nullptr;
+
 // Der Server wird direkt mit dem konfigurierten Port und der Adresse aus global.h initialisiert
-WSConnection::WSConnection() : ceb_websocket_server(server_port, server_address) { }
+WSConnection::WSConnection(App *app) : ceb_websocket_server(app->getWebsocketServerPort(), app->getWebsocketServerAddress()) { app_ = app; }
 
 WSConnection::~WSConnection() { stopServer(); }
 
@@ -53,7 +55,7 @@ void WSConnection::startServer() {
 
 	ceb_websocket_server.start();
 	// server_uri wird in app.cpp / global.h via setServerUri() generiert
-	nob_log(INFO, "Engine Server is running! Engines should connect to: %s", server_uri);
+	nob_log(INFO, "Engine Server is running! Engines should connect to: %s", app_->getWebsocketServerUri());
 }
 
 void WSConnection::stopServer() { ceb_websocket_server.stop(); }
