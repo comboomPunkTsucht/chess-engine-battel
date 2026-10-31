@@ -2,6 +2,7 @@
 #include "global.h"
 #include "raylib.h"
 #include "wsConnection.h"
+#include <cstring>
 
 void App::main_loop() {
 	while (!WindowShouldClose()) {
@@ -52,5 +53,11 @@ void App::startGame() {
 	mCurrentGame->setup_board();
 }
 
-void App::setWebsocketServerAddress(const char *address = "0.0.0.0") { }
-void App::setWebsocketServerPort(uint16_t port = 14318) { }
+void App::setWebsocketServerAddress(const char *address = "0.0.0.0") {
+	strcpy(server_address, address);
+	setServerUri();
+}
+void App::setWebsocketServerPort(uint16_t port = 14318) {
+	server_port = port;
+	setServerUri();
+}
