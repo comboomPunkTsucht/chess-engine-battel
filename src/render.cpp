@@ -1,6 +1,6 @@
 #include "app.h"
 #include "game.h"
-#include "global.h"
+
 #include "nob_addons.h"
 #include "piece.h"
 #include "raylib.h"
@@ -10,10 +10,10 @@
 
 #include "nord.h"
 
-void App::render() { mCurrentGame->Game::render(); }
+void App::render() { mCurrentGame->Game::render(this); }
 
-void Game::render() {
-	const BoardLayout layout = Game::computeLayout();
+void Game::render(App *app) {
+	const BoardLayout layout = Game::computeLayout(app);
 	const int space_size = layout.space_size;
 	const int x_start = layout.x_start;
 	const int y_start = layout.y_start;
@@ -22,8 +22,6 @@ void Game::render() {
 
 	BeginDrawing();
 	ClearBackground(NORD_BACKGROUND_COLOR);
-	DrawTextEx(App::get_font(App::FONT_REGULAR, 20.0f), temp_sprintf("%d FPS", GetFPS()), (Vector2){1, 1}, App::getFontSize(20.0f),
-	           App::getFontSize(20.0f) / 10.0, NORD_PRIMARY_COLOR);
 
 	DrawRectangleLines(x_start - 1, y_start - 1, DEFAULT_BOARD_DIMENSIONS * space_size + 2, DEFAULT_BOARD_DIMENSIONS * space_size + 2,
 	                   NORD_FOREGROUND_COLOR);
@@ -57,13 +55,13 @@ void Game::render() {
 				case None: break;
 				default:
 					if (piece.color == PLAYER_WHITE) {
-						DrawTexturePro(chess_piece_textures, sourceRec, destRec, (Vector2){0, 0}, // Ursprung (oben links relativ zu destRec)
-						               0.0f,                                                      // Keine Rotation
+						DrawTexturePro(app->chess_piece_textures, sourceRec, destRec, (Vector2){0, 0}, // Ursprung (oben links relativ zu destRec)
+						               0.0f,                                                           // Keine Rotation
 						               get_Nord_Color_as_raylib_color(NORD4));
 					}
 					if (piece.color == PLAYER_BLACK) {
-						DrawTexturePro(chess_piece_textures, sourceRec, destRec, (Vector2){0, 0}, // Ursprung (oben links relativ zu destRec)
-						               0.0f,                                                      // Keine Rotation
+						DrawTexturePro(app->chess_piece_textures, sourceRec, destRec, (Vector2){0, 0}, // Ursprung (oben links relativ zu destRec)
+						               0.0f,                                                           // Keine Rotation
 						               get_Nord_Color_as_raylib_color(NORD3));
 					}
 
@@ -72,5 +70,14 @@ void Game::render() {
 		}
 	}
 	// DrawTexture(game->pieces, 1, 1, NORD_FOREGROUND_COLOR);
+
+	DrawTextEx(App::get_font(App::FONT_REGULAR, 20.0f), temp_sprintf("%d FPS", GetFPS()), (Vector2){1, 1}, App::getFontSize(20.0f),
+	           App::getFontSize(20.0f) / 10.0, NORD_PRIMARY_COLOR);
+
+	DrawTextEx(App::get_font(App::FONT_REGULAR, 20.0f), temp_sprintf("Target FPS: %d", app->targetFPS),
+	           (Vector2){1, 1 + App::getFontSize(20.0f) + 10}, App::getFontSize(20.0f), App::getFontSize(20.0f) / 10.0, NORD_PRIMARY_COLOR);
+
+	DrawTextEx(App::get_font(App::FONT_REGULAR, 20.0f), temp_sprintf("VSync: %s", app->vsync_enabled ? "ON" : "OFF"),
+	           (Vector2){1, 1 + 2 * App::getFontSize(20.0f) + 20}, App::getFontSize(20.0f), App::getFontSize(20.0f) / 10.0, NORD_PRIMARY_COLOR);
 	EndDrawing();
 }

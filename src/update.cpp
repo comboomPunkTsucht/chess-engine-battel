@@ -1,5 +1,5 @@
 #include "app.h"
-#include "global.h"
+
 #include "nob_addons.h"
 #include "raylib.h"
 #include <cmath>

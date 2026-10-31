@@ -1,4 +1,5 @@
 #include "game.h"
+#include "app.h"
 
 void Game::setup_board() {
 	board[0].type = Rook;
@@ -55,8 +56,8 @@ void Game::doMove(Move move) {
 	const int from = move.From();
 	const int to = move.To();
 
-	Piece	  moving = board[from];
-	Piece	  captured = board[to];
+	Piece moving = board[from];
+	Piece captured = board[to];
 
 	board[from] = {None, PLAYER_NONE};
 
@@ -102,10 +103,10 @@ void Game::doMove(Move move) {
 	turn = (turn == PLAYER_WHITE) ? PLAYER_BLACK : PLAYER_WHITE;
 }
 
-BoardLayout Game::computeLayout() {
+BoardLayout Game::computeLayout(App *app) {
 	BoardLayout l;
-	l.space_size = (std::min(screen_width, screen_height) * 0.9) / DEFAULT_BOARD_DIMENSIONS;
-	l.x_start = (screen_width - l.space_size * DEFAULT_BOARD_DIMENSIONS) / 2;
-	l.y_start = (screen_height - l.space_size * DEFAULT_BOARD_DIMENSIONS) / 2;
+	l.space_size = (std::min(app->screen_width, app->screen_height) * 0.9) / DEFAULT_BOARD_DIMENSIONS;
+	l.x_start = (app->screen_width - l.space_size * DEFAULT_BOARD_DIMENSIONS) / 2;
+	l.y_start = (app->screen_height - l.space_size * DEFAULT_BOARD_DIMENSIONS) / 2;
 	return l;
 }

@@ -1,5 +1,4 @@
 #include "app.h"
-#include "global.h"
 
 #define FLAG_IMPLEMENTATION
 #include "flag.h"
@@ -25,6 +24,8 @@ int main(int argc, char **argv) {
 	addon_init_logging();
 
 	bool help = false;
+	char *server_address = "0.0.0.0";
+	uint64_t server_port = 14318;
 
 	flag_bool_var(&help, "-h", false, "Show this help message");
 	flag_bool_var(&help, "--help", false, "Show this help message");
@@ -49,6 +50,8 @@ int main(int argc, char **argv) {
 	}
 
 	App app = App();
+	app.setWebsocketServerAddress(server_address);
+	app.setWebsocketServerPort(server_port);
 	app.startGame();
 	app.main_loop();
 

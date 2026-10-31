@@ -1,8 +1,9 @@
 #pragma once
-
 #include "move.h"
 #include "raylib.h"
 #include <vector>
+
+class App;
 
 constexpr uint32_t DEFAULT_BOARD_DIMENSIONS = 8;
 
@@ -34,10 +35,10 @@ private:
 public:
 	Game() { history.reserve(sizeof(Move) * 128); }
 
-	void render();
+	void render(App *app);
 
 	void setup_board();
 	void doMove(Move move);
 
-	static BoardLayout computeLayout();
+	static BoardLayout computeLayout(App *app);
 };
