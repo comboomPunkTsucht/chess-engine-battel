@@ -3,6 +3,7 @@
 #include "nob_addons.h"
 #include "raylib.h"
 #include "wsConnection.h"
+#include <cmath>
 #include <cstring>
 
 #define HT_IMPLEMENTATION
