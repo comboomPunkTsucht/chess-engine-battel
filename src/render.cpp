@@ -22,7 +22,8 @@ void Game::render() {
 
 	BeginDrawing();
 	ClearBackground(NORD_BACKGROUND_COLOR);
-	DrawTextEx(main_font, temp_sprintf("%d FPS", GetFPS()), (Vector2){1, 1}, font_size, font_size / 10.0, NORD_PRIMARY_COLOR);
+	DrawTextEx(App::get_font(App::FONT_REGULAR, 20.0f), temp_sprintf("%d FPS", GetFPS()), (Vector2){1, 1}, App::getFontSize(20.0f),
+	           App::getFontSize(20.0f) / 10.0, NORD_PRIMARY_COLOR);
 
 	DrawRectangleLines(x_start - 1, y_start - 1, DEFAULT_BOARD_DIMENSIONS * space_size + 2, DEFAULT_BOARD_DIMENSIONS * space_size + 2,
 	                   NORD_FOREGROUND_COLOR);
@@ -32,7 +33,11 @@ void Game::render() {
 			float px = x * space_size + x_start;
 			float py = y * space_size + y_start;
 
-			if ((x + y) % 2 == 0) { DrawRectangle(px, py, space_size, space_size, get_Nord_Color_as_raylib_color(NORD1)); }
+			if ((x + y) % 2 == 0) {
+				DrawRectangle(px, py, space_size, space_size, get_Nord_Color_as_raylib_color(NORD1));
+			} else {
+				DrawRectangle(px, py, space_size, space_size, NORD_BACKGROUND_COLOR);
+			}
 
 			uint32_t idx = x + y * DEFAULT_BOARD_DIMENSIONS;
 			Piece piece = board[idx];

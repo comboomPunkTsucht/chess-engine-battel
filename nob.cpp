@@ -71,6 +71,8 @@ bool build_raylib(bool debug) {
 #endif
 
 	cmd_append(&cmd, "cmake");
+	cmd_append(&cmd, "-DPLATFORM=RGFW");
+	cmd_append(&cmd, "-DOPENGL_VERSION=4.3");
 	cmd_append(&cmd, "-DBUILD_EXAMPLES=OFF");
 	cmd_append(&cmd, "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded");
 	cmd_append(&cmd, temp_sprintf("-DCMAKE_BUILD_TYPE=%s", build_type));
