@@ -111,6 +111,9 @@ bool build_ixwebsocket(bool debug) {
 	cmd_append(&cmd, "cmake");
 	cmd_append(&cmd, "-DUSE_TLS=1");
 	cmd_append(&cmd, "-DUSE_OPEN_SSL=1");
+#ifdef __APPLE__
+	cmd_append(&cmd, "-DCMAKE_OSX_DEPLOYMENT_TARGET=27.0");
+#endif
 #ifdef _WIN32
 	cmd_append(&cmd, "-DUSE_ZLIB=0");
 	cmd_append(&cmd, "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded");
