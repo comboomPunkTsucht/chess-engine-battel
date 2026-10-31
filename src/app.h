@@ -5,14 +5,15 @@
 
 class App {
 public:
-	Game *mCurrentGame;
+	App();
+	~App();
+	Game *mCurrentGame = nullptr;
 
 	void main_loop();
 	void processInput();
 	void update();
 	void render();
 
-	void initialization(void);
 	void startGame();
 
 	void setWebsocketServerAddress(const char *address);

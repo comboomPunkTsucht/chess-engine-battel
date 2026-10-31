@@ -15,10 +15,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// #include <ixwebsocket/IXConnectionState.h>
-// #include <ixwebsocket/IXWebSocket.h>
-// #include <ixwebsocket/IXWebSocketServer.h>
-
 void usage(FILE *stream) {
 	fprintf(stream, "Usage: ./chess-engine-battel [OPTIONS]\n");
 	fprintf(stream, "OPTIONS:\n");
@@ -53,7 +49,6 @@ int main(int argc, char **argv) {
 	}
 
 	App app = App();
-	app.initialization();
 	app.startGame();
 	app.main_loop();
 

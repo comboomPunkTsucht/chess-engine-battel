@@ -1,6 +1,7 @@
 #include "app.h"
 #include "global.h"
 #include "raylib.h"
+#include "wsConnection.h"
 
 void App::main_loop() {
 	while (!WindowShouldClose()) {
@@ -10,9 +11,18 @@ void App::main_loop() {
 	}
 }
 
-void App::initialization(void) {
+App::~App() {
+	wsConnection->stopServer();
+	delete wsConnection;
+}
+
+App::App() {
 
 	server_uri = setServerUri();
+
+	wsConnection = new WSConnection();
+
+	wsConnection->startServer();
 
 	SetConfigFlags(FLAG_MSAA_4X_HINT | FLAG_INTERLACED_HINT | FLAG_WINDOW_HIGHDPI | FLAG_VSYNC_HINT | FLAG_WINDOW_RESIZABLE | FLAG_WINDOW_ALWAYS_RUN);
 	InitWindow(DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT, "Chess Engine Battle");
