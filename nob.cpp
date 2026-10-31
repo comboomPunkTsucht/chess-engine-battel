@@ -71,14 +71,23 @@ bool build_raylib(bool debug) {
 #endif
 
 	cmd_append(&cmd, "cmake");
+#if defined(__linux__)
+	cmd_append(&cmd, "-DPLATFORM=Desktop");
+#elif defined(_WIN32)
+	cmd_append(&cmd, "-DPLATFORM=Win32");
+#else
+	cmd_append(&cmd, "-DPLATFORM=RGFW");
+#endif
+	cmd_append(&cmd, "-DOPENGL_VERSION=4.3");
 	cmd_append(&cmd, "-DBUILD_EXAMPLES=OFF");
 	cmd_append(&cmd, "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded");
 	cmd_append(&cmd, temp_sprintf("-DCMAKE_BUILD_TYPE=%s", build_type));
 	cmd_append(&cmd, temp_sprintf("-DCMAKE_C_FLAGS=%s", c_flags));
 #ifdef __APPLE__
-	cmd_append(&cmd, "-DCMAKE_OSX_DEPLOYMENT_TARGET=26.0");
+	cmd_append(&cmd, "-DCMAKE_OSX_DEPLOYMENT_TARGET=27.0");
 #endif
 #ifdef __linux__
+
 	cmd_append(&cmd, "-DGLFW_BUILD_WAYLAND=ON");
 	if (with_x11) {
 		cmd_append(&cmd, "-DGLFW_BUILD_X11=ON");
@@ -314,7 +323,7 @@ int main(int argc, char **argv) {
 		if (!get_cflags_from_pkg_config("openssl")) { return 1; }
 		if (!get_libs_from_pkg_config("openssl")) { return 1; }
 
-		cmd_append(&cmd, "-mmacos-version-min=26.0");
+		cmd_append(&cmd, "-mmacos-version-min=27.0");
 		cmd_append(&cmd, "-static-libclosure", "-static-libsan", "-static-openmp");
 
 		// macOS Frameworks besitzen keine pkg-config Dateien
@@ -332,6 +341,10 @@ int main(int argc, char **argv) {
 			// Zieht automatisch -lX11 und ggf. nötige Includes
 			if (!get_cflags_from_pkg_config("x11")) { return 1; }
 			if (!get_libs_from_pkg_config("x11")) { return 1; }
+			if (!get_cflags_from_pkg_config("xext")) { return 1; }
+			if (!get_libs_from_pkg_config("xext")) { return 1; }
+			if (!get_cflags_from_pkg_config("xrandr")) { return 1; }
+			if (!get_libs_from_pkg_config("xrandr")) { return 1; }
 			cmd_append(&cmd, "-DUSE_X11");
 		}
 
