@@ -82,12 +82,6 @@ App::~App() {
 
 App::App() {
 
-	setServerUri();
-
-	wsConnection = new WSConnection(this);
-
-	wsConnection->startServer();
-
 	App::targetFPS = GetMonitorRefreshRate(GetCurrentMonitor());
 
 	SetConfigFlags(FLAG_MSAA_4X_HINT | FLAG_INTERLACED_HINT | FLAG_VSYNC_HINT | FLAG_WINDOW_HIGHDPI | FLAG_WINDOW_RESIZABLE | FLAG_WINDOW_ALWAYS_RUN);
@@ -103,6 +97,10 @@ App::App() {
 
 #endif
 	App::chess_piece_textures = LoadTexture(TextFormat("%s/piece/All_pieces.png", App::assetPath));
+
+	setServerUri();
+
+	wsConnection = new WSConnection(this);
 }
 
 Font App::get_font(FontType type, float font_size) {
@@ -127,9 +125,15 @@ Font App::get_font(FontType type, float font_size) {
 }
 
 void App::startGame() {
+	wsConnection->startServer();
 	delete mCurrentGame;
 	mCurrentGame = new Game();
 	mCurrentGame->setup_board();
+}
+
+void restartWebsocketServer() {
+	wsConnection->stopServer();
+	wsConnection->startServer();
 }
 
 void App::setWebsocketServerAddress(const char *address = "0.0.0.0") {

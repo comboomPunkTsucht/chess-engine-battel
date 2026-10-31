@@ -29,6 +29,8 @@ public:
 	uint16_t getWebsocketServerPort() { return server_port; }
 	const char *getWebsocketServerUri() { return server_uri; }
 
+	void restartWebsocketServer();
+
 	typedef enum { FONT_REGULAR, FONT_BOLD, FONT_ITALIC } FontType;
 	static Font get_font(FontType type, float font_size);
 	static float getFontSize(float size_factor);
