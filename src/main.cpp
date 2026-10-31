@@ -55,7 +55,5 @@ int main(int argc, char **argv) {
 	app.startGame();
 	app.main_loop();
 
-	CloseWindow();
-
 	return 0;
 }
