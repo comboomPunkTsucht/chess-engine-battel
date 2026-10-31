@@ -47,6 +47,7 @@ public:
 	static Texture2D chess_piece_textures;
 
 private:
+	bool exit_requested = false;
 	static const float font_size_factor;
 
 	static const char *server_address;

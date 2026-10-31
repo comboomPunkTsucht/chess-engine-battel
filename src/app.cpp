@@ -73,12 +73,14 @@ void App::main_loop() {
 		processInput();
 		update();
 		render();
+		if (exit_requested) { break; }
 	}
 }
 
 App::~App() {
 	wsConnection->stopServer();
 	delete wsConnection;
+	CloseWindow();
 }
 
 App::App() {

@@ -15,7 +15,7 @@ void App::processMouseInput() {
 void App::processKeyboardInput() {
 	if (IsKeyPressed(KEY_ESCAPE) || (IsKeyPressed(KEY_Q) && (IsKeyDown(KEY_LEFT_SUPER) || IsKeyDown(KEY_RIGHT_SUPER) || IsKeyDown(KEY_LEFT_CONTROL) ||
 	                                                         IsKeyDown(KEY_RIGHT_CONTROL)))) {
-		CloseWindow();
+		exit_requested = true;
 	}
 
 	if (IsKeyPressed(KEY_F11)) {
