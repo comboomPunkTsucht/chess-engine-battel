@@ -72,7 +72,9 @@ bool build_raylib(bool debug) {
 
 	cmd_append(&cmd, "cmake");
 #if defined(__linux__)
-	cmd_append(&cmd, "-DPLATFORM=GLFW");
+	cmd_append(&cmd, "-DPLATFORM=Desktop");
+#elif defined(_WIN32)
+	cmd_append(&cmd, "-DPLATFORM=Win32");
 #else
 	cmd_append(&cmd, "-DPLATFORM=RGFW");
 #endif
