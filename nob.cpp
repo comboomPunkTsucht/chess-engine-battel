@@ -82,11 +82,7 @@ bool build_raylib(bool debug) {
 	cmd_append(&cmd, temp_sprintf("-DCMAKE_BUILD_TYPE=%s", build_type));
 	cmd_append(&cmd, temp_sprintf("-DCMAKE_C_FLAGS=%s", c_flags));
 #ifdef __APPLE__
-	cmd_append(&cmd, "-DCMAKE_OSX_DEPLOYMENT_TARGET=26.0");
-	if (debug) {
-		cmd_append(&cmd, "-DENABLE_ASAN=ON");
-		cmd_append(&cmd, "-DENABLE_MSAN=ON");
-	}
+	cmd_append(&cmd, "-DCMAKE_OSX_DEPLOYMENT_TARGET=27.0");
 #endif
 #ifdef __linux__
 
@@ -325,7 +321,7 @@ int main(int argc, char **argv) {
 		if (!get_cflags_from_pkg_config("openssl")) { return 1; }
 		if (!get_libs_from_pkg_config("openssl")) { return 1; }
 
-		cmd_append(&cmd, "-mmacos-version-min=26.0");
+		cmd_append(&cmd, "-mmacos-version-min=27.0");
 		cmd_append(&cmd, "-static-libclosure", "-static-libsan", "-static-openmp");
 
 		// macOS Frameworks besitzen keine pkg-config Dateien
