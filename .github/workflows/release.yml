@@ -3,7 +3,10 @@ name: Release (Linux, macOS, Windows)
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
+  pull_request:
+    branches:
+      - "*"
   workflow_dispatch:
 
 permissions:
