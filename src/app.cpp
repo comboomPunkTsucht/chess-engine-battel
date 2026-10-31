@@ -1,8 +1,18 @@
 #include "app.h"
 #include "global.h"
+#include "nob_addons.h"
 #include "raylib.h"
 #include "wsConnection.h"
 #include <cstring>
+
+#define HT_IMPLEMENTATION
+#include "ht.h"
+
+typedef struct {
+	float size;
+	App::FontType type;
+} HT_Font;
+Ht(HT_Font, Font) ht_Fonts = {0};
 
 const float App::font_size_factor = 0.015625f;
 
@@ -72,15 +82,24 @@ App::App() {
 }
 
 Font App::get_font(FontType type, float font_size) {
-	switch (type) {
-		case FONT_REGULAR:
-			return LoadFontEx(temp_sprintf("%s/CaskaydiaCoveNerdFontPropo-Regular.ttf", assetPath), getFontSize(font_size), NULL, 0);
-			break;
-		case FONT_BOLD: return LoadFontEx(temp_sprintf("%s/CaskaydiaCoveNerdFontPropo-Bold.ttf", assetPath), getFontSize(font_size), NULL, 0); break;
-		case FONT_ITALIC:
-			return LoadFontEx(temp_sprintf("%s/CaskaydiaCoveNerdFontPropo-Italic.ttf", assetPath), getFontSize(font_size), NULL, 0);
-			break;
+	if (ht_find(&ht_Fonts, (HT_Font){getFontSize(font_size), type}) == NULL) {
+		HT_Font new_font = {getFontSize(font_size), type};
+		switch (type) {
+			case FONT_REGULAR:
+				*ht_put(&ht_Fonts, new_font) =
+				    LoadFontEx(temp_sprintf("%s/CaskaydiaCoveNerdFontPropo-Regular.ttf", assetPath), getFontSize(font_size), NULL, 0);
+				break;
+			case FONT_BOLD:
+				*ht_put(&ht_Fonts, new_font) =
+				    LoadFontEx(temp_sprintf("%s/CaskaydiaCoveNerdFontPropo-Bold.ttf", assetPath), getFontSize(font_size), NULL, 0);
+				break;
+			case FONT_ITALIC:
+				*ht_put(&ht_Fonts, new_font) =
+				    LoadFontEx(temp_sprintf("%s/CaskaydiaCoveNerdFontPropo-Italic.ttf", assetPath), getFontSize(font_size), NULL, 0);
+				break;
+		}
 	}
+	return *ht_find(&ht_Fonts, (HT_Font){getFontSize(font_size), type});
 }
 
 void App::startGame() {
