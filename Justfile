@@ -2,6 +2,9 @@
 
 default: build
 
+# tauri CLI: prefer standalone `tauri` (npm), fall back to `cargo tauri`
+tauri := `command -v tauri >/dev/null 2>&1 && echo tauri || echo "cargo tauri"`
+
 # --- build / run ---
 
 build:
@@ -16,27 +19,30 @@ run *args:
 run-release *args:
     cargo run --release -- {{args}}
 
-# --- package (cargo-bundle: macOS .app/.dmg, Linux .deb/.AppImage, Windows .msi) ---
+# --- package (tauri-cli: macOS .app/.dmg, Linux .deb/.AppImage, Windows .msi/.nsis) ---
 
 # Build + bundle (debug profile, host platform defaults)
 bundle:
-    cargo bundle
+    cargo build
+    {{tauri}} bundle --ci --no-binary-patching
 
 # Build + bundle (release profile, host platform defaults)
 bundle-release:
-    cargo bundle --release
+    cargo build --release
+    {{tauri}} bundle --ci --no-binary-patching
 
-# Explicit formats (pass after -- e.g. `just bundle-fmt -- -f deb`)
+# Explicit formats (pass after -- e.g. `just bundle-fmt -- -b deb`)
 bundle-fmt *args:
-    cargo bundle {{args}}
+    cargo build --release
+    {{tauri}} bundle --ci --no-binary-patching {{args}}
 
 # Open the packaged app (debug, macOS only)
 open: bundle
-    open "target/debug/bundle/osx/Chess Engine Battle.app"
+    open "target/debug/bundle/macos/Chess Engine Battle.app"
 
 # Open the packaged app (release, macOS only)
 open-release: bundle-release
-    open "target/release/bundle/osx/Chess Engine Battle.app"
+    open "target/release/bundle/macos/Chess Engine Battle.app"
 
 # --- quality ---
 

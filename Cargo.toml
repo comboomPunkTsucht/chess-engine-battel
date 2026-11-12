@@ -5,32 +5,6 @@ edition = "2024"
 description = "Chess engine battle visualizer (GPUI + Axum)"
 authors = ["mahd"]
 
-[package.metadata.bundle]
-name = "Chess Engine Battle"
-identifier = "app.comboompunktsucht.chess-engine-battel"
-icon = ["assets/AppIcon.icns", "assets/icon.png"]
-category = "public.app-category.games"
-short_description = "Chess engine battle visualizer"
-long_description = """
-Chess engine battle visualizer connecting two engines over WebSocket.
-"""
-deb_depends = [
-  "libgl1",
-  "libxkbcommon0",
-  "libwayland-client0",
-  "libx11-6",
-  "libxcursor1",
-  "libxrandr2",
-  "libxi6",
-  "libssl3",
-]
-
-[package.metadata.bundle.osx]
-minimum_system_version = "13.0"
-
-[package.metadata.bundle.linux]
-use_terminal = false
-
 [dependencies]
 axum = { version = "*", features = [
   "default",
@@ -60,7 +34,7 @@ gpui = { version = "*", features = [
   "default",
   "filedescriptor",
   "font-kit",
-  "inspector",
+  #"inspector",
   "leak-detection",
   "macos-blade",
   "objc2",
@@ -70,7 +44,7 @@ gpui = { version = "*", features = [
   "runtime_shaders",
   "scap",
   "screen-capture",
-  "test-support",
+  #"test-support",
   "wayland",
   "wayland-backend",
   "wayland-client",
@@ -136,7 +110,6 @@ tokio = { version = "*", features = [
   "windows-sys",
 ] }
 libz-sys = { version = "*", features = ["static"] }
-git2 = { version = "*", features = ["vendored-libgit2"] }
 
 [build-dependencies]
 png = "*"

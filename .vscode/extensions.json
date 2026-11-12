@@ -5,6 +5,8 @@
     "vadimcn.vscode-lldb",
     "JScearcy.rust-doc-viewer",
     "panicbit.cargo",
-    "tamasfe.even-better-toml"
+    "tamasfe.even-better-toml",
+    "katjanakosic.vscode-json5",
+    "mrmlnc.vscode-json5"
   ]
 }
