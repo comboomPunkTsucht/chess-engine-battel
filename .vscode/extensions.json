@@ -1,9 +1,10 @@
 {
   "recommendations": [
-    "ms-vscode.cpptools",
-    "franneck94.c-cpp-runner",
+    "zensical.zensical-studio",
+    "rust-lang.rust-analyzer",
     "vadimcn.vscode-lldb",
-    "discretegames.f5anything",
-    "zensical.zensical-studio"
+    "JScearcy.rust-doc-viewer",
+    "panicbit.cargo",
+    "tamasfe.even-better-toml"
   ]
 }

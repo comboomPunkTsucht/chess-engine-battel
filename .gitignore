@@ -84,3 +84,8 @@ thirdparty/raygui/
 site/
 
 .temp/
+
+
+# Added by cargo
+
+/target

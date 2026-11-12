@@ -1,0 +1,131 @@
+[package]
+name = "chess-engine-battel"
+version = "0.0.1"
+edition = "2024"
+description = "Chess engine battle visualizer (GPUI + Axum)"
+
+[package.metadata.bundle]
+name = "Chess Engine Battle"
+identifier = "app.comboompunktsucht.chess-engine-battel"
+icon = ["assets/AppIcon.icns", "assets/icon.png"]
+resources = [
+  "assets/piece",
+  "assets/CaskaydiaCoveNerdFontPropo-Regular.ttf",
+  "assets/CaskaydiaCoveNerdFontPropo-Bold.ttf",
+  "assets/CaskaydiaCoveNerdFontPropo-Italic.ttf",
+]
+category = "public.app-category.games"
+short_description = "Chess engine battle visualizer"
+long_description = """
+Chess engine battle visualizer connecting two engines over WebSocket.
+"""
+
+[dependencies]
+axum = { version = "*", features = [
+  "default",
+  "form",
+  "http2",
+  "json",
+  "macros",
+  "matched-path",
+  "multipart",
+  "original-uri",
+  "query",
+  "tokio",
+  "tower-log",
+  "tracing",
+  "ws",
+] }
+gpui = { version = "*", features = [
+  "as-raw-xcb-connection",
+  "ashpd",
+  "backtrace",
+  "blade-graphics",
+  "blade-macros",
+  "blade-util",
+  "bytemuck",
+  "calloop-wayland-source",
+  "cosmic-text",
+  "default",
+  "filedescriptor",
+  "font-kit",
+  "inspector",
+  "leak-detection",
+  "macos-blade",
+  "objc2",
+  "objc2-metal",
+  "open",
+  "rand",
+  "runtime_shaders",
+  "scap",
+  "screen-capture",
+  "test-support",
+  "wayland",
+  "wayland-backend",
+  "wayland-client",
+  "wayland-cursor",
+  "wayland-protocols",
+  "wayland-protocols-plasma",
+  "windows-manifest",
+  "x11",
+  "x11-clipboard",
+  "x11rb",
+  "xim",
+  "xkbcommon",
+] }
+clap = { version = "*", features = [
+  "cargo",
+  "color",
+  #"debug",
+  "default",
+  "deprecated",
+  "derive",
+  "env",
+  "error-context",
+  "help",
+  "std",
+  "string",
+  "suggestions",
+  "unicode",
+  #"unstable-derive-ui-tests",
+  #"unstable-doc",
+  #"unstable-ext",
+  #"unstable-markdown",
+  #"unstable-styles",
+  #"unstable-v5",
+  "usage",
+  "wrap_help",
+] }
+tokio = { version = "*", features = [
+  "bytes",
+  "default",
+  "fs",
+  "full",
+  "io-std",
+  "io-uring",
+  "io-util",
+  "libc",
+  "macros",
+  "mio",
+  "net",
+  "parking_lot",
+  "process",
+  "rt",
+  "rt-multi-thread",
+  "schedule-latency",
+  "signal",
+  "signal-hook-registry",
+  "socket2",
+  "sync",
+  "taskdump",
+  "test-util",
+  "time",
+  "tokio-macros",
+  "tracing",
+  "windows-sys",
+] }
+libz-sys = { version = "*", features = ["static"] }
+git2 = { version = "*", features = ["vendored-libgit2"] }
+
+[build-dependencies]
+png = "*"
