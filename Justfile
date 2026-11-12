@@ -16,23 +16,27 @@ run *args:
 run-release *args:
     cargo run --release -- {{args}}
 
-# --- package ---
+# --- package (cargo-bundle: macOS .app/.dmg, Linux .deb/.AppImage, Windows .msi) ---
 
-# Build + produce Chess Engine Battle.app (debug profile)
+# Build + bundle (debug profile, host platform defaults)
 bundle:
     cargo bundle
 
-# Build + produce .app (release profile)
+# Build + bundle (release profile, host platform defaults)
 bundle-release:
     cargo bundle --release
 
-# Open the packaged app (debug bundle)
-open: bundle
-    open "target/debug/bundle/dmg/Chess Engine Battle.app"
+# Explicit formats (pass after -- e.g. `just bundle-fmt -- -f deb`)
+bundle-fmt *args:
+    cargo bundle {{args}}
 
-# Open the packaged app (release bundle)
+# Open the packaged app (debug, macOS only)
+open: bundle
+    open "target/debug/bundle/osx/Chess Engine Battle.app"
+
+# Open the packaged app (release, macOS only)
 open-release: bundle-release
-    open "target/release/bundle/dmg/Chess Engine Battle.app"
+    open "target/release/bundle/osx/Chess Engine Battle.app"
 
 # --- quality ---
 
@@ -54,4 +58,4 @@ kill:
 
 clean:
     cargo clean
-    rm -rf "target/debug/bundle" "target/release/bundle"
+    rm -rf target/debug/bundle target/release/bundle

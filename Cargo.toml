@@ -3,22 +3,33 @@ name = "chess-engine-battel"
 version = "0.0.1"
 edition = "2024"
 description = "Chess engine battle visualizer (GPUI + Axum)"
+authors = ["mahd"]
 
 [package.metadata.bundle]
 name = "Chess Engine Battle"
 identifier = "app.comboompunktsucht.chess-engine-battel"
 icon = ["assets/AppIcon.icns", "assets/icon.png"]
-resources = [
-  "assets/piece",
-  "assets/CaskaydiaCoveNerdFontPropo-Regular.ttf",
-  "assets/CaskaydiaCoveNerdFontPropo-Bold.ttf",
-  "assets/CaskaydiaCoveNerdFontPropo-Italic.ttf",
-]
 category = "public.app-category.games"
 short_description = "Chess engine battle visualizer"
 long_description = """
 Chess engine battle visualizer connecting two engines over WebSocket.
 """
+deb_depends = [
+  "libgl1",
+  "libxkbcommon0",
+  "libwayland-client0",
+  "libx11-6",
+  "libxcursor1",
+  "libxrandr2",
+  "libxi6",
+  "libssl3",
+]
+
+[package.metadata.bundle.osx]
+minimum_system_version = "13.0"
+
+[package.metadata.bundle.linux]
+use_terminal = false
 
 [dependencies]
 axum = { version = "*", features = [
