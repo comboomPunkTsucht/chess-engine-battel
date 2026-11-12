@@ -63,8 +63,8 @@ jobs:
           sudo apt-get install -y \
             clang g++ make cmake pkg-config \
             zlib1g-dev \
-            libxkbcommon-dev libwayland-dev wayland-protocols \
-            libx11-dev libxcursor-dev libxrandr-dev libxi-dev \
+            libxkbcommon-dev libxkbcommon-x11-dev libwayland-dev wayland-protocols \
+            libx11-dev libx11-xcb-dev libxcursor-dev libxrandr-dev libxi-dev \
             libgl-dev libglu1-mesa-dev
 
       - name: Bundle (Release)

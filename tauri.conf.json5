@@ -7,7 +7,6 @@
     targets: ["app", "deb", "appimage", "dmg", "msi", "nsis"],
     icon: [
       "assets/AppIcon.icns",
-      "Logo-chess/AppIcon.icon",
       "assets/icon.png",
       "assets/icon.ico",
     ],
@@ -22,8 +21,10 @@
         depends: [
           "libgl1",
           "libxkbcommon0",
+          "libxkbcommon-x11-0",
           "libwayland-client0",
           "libx11-6",
+          "libx11-xcb1",
           "libxcursor1",
           "libxrandr2",
           "libxi6",
