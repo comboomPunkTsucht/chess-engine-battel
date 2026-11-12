@@ -2,11 +2,18 @@
 name = "chess-engine-battel"
 version = "0.0.1"
 edition = "2024"
-description = "Chess engine battle visualizer (GPUI + Axum)"
+description = "Chess engine battle visualizer (Bevy + egui_dock + Axum)"
 authors = ["mahd"]
 
 [dependencies]
-axum = { version = "*", features = [
+# gui
+bevy = "0.20.1"
+bevy_egui = "0.43.1"
+egui = "0.36"
+egui_dock = "0.21.1"
+# networking
+crossbeam-channel = "0.5.17"
+axum = { version = "0.8.9", features = [
   "default",
   "form",
   "http2",
@@ -21,67 +28,7 @@ axum = { version = "*", features = [
   "tracing",
   "ws",
 ] }
-gpui = { version = "*", features = [
-  "as-raw-xcb-connection",
-  "ashpd",
-  "backtrace",
-  "blade-graphics",
-  "blade-macros",
-  "blade-util",
-  "bytemuck",
-  "calloop-wayland-source",
-  "cosmic-text",
-  "default",
-  "filedescriptor",
-  "font-kit",
-  #"inspector",
-  "leak-detection",
-  "macos-blade",
-  "objc2",
-  "objc2-metal",
-  "open",
-  "rand",
-  "runtime_shaders",
-  "scap",
-  "screen-capture",
-  #"test-support",
-  "wayland",
-  "wayland-backend",
-  "wayland-client",
-  "wayland-cursor",
-  "wayland-protocols",
-  "wayland-protocols-plasma",
-  "windows-manifest",
-  "x11",
-  "x11-clipboard",
-  "x11rb",
-  "xim",
-  "xkbcommon",
-] }
-clap = { version = "*", features = [
-  "cargo",
-  "color",
-  #"debug",
-  "default",
-  "deprecated",
-  "derive",
-  "env",
-  "error-context",
-  "help",
-  "std",
-  "string",
-  "suggestions",
-  "unicode",
-  #"unstable-derive-ui-tests",
-  #"unstable-doc",
-  #"unstable-ext",
-  #"unstable-markdown",
-  #"unstable-styles",
-  #"unstable-v5",
-  "usage",
-  "wrap_help",
-] }
-tokio = { version = "*", features = [
+tokio = { version = "1.54.1", features = [
   "bytes",
   "default",
   "fs",
@@ -109,7 +56,31 @@ tokio = { version = "*", features = [
   "tracing",
   "windows-sys",
 ] }
-libz-sys = { version = "*", features = ["static"] }
+# cli
+clap = { version = "4", features = [
+  "cargo",
+  "color",
+  #"debug",
+  "default",
+  "deprecated",
+  "derive",
+  "env",
+  "error-context",
+  "help",
+  "std",
+  "string",
+  "suggestions",
+  "unicode",
+  #"unstable-derive-ui-tests",
+  #"unstable-doc",
+  #"unstable-ext",
+  #"unstable-markdown",
+  #"unstable-styles",
+  #"unstable-v5",
+  "usage",
+  "wrap_help",
+] }
+
 
 [build-dependencies]
 png = "*"

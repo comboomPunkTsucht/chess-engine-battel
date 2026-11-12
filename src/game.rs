@@ -1,9 +1,11 @@
+use bevy::prelude::Resource;
+
 use crate::moves::{Move, MoveType};
 use crate::piece::{Piece, PieceColor, PieceType};
 
 pub const BOARD_DIM: usize = 8;
 
-#[derive(Debug, Clone)]
+#[derive(Resource, Debug, Clone)]
 pub struct GameState {
     pub board: [Piece; BOARD_DIM * BOARD_DIM],
     pub history: Vec<Move>,

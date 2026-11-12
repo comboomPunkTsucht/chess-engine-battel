@@ -99,14 +99,15 @@ fn emit_piece_sprites() {
 fn decode_png_rgba8(path: &Path) -> (u32, u32, Vec<u8>) {
     let file = fs::File::open(path)
         .unwrap_or_else(|err| panic!("open {}: {err}", path.display()));
-    let mut decoder = png::Decoder::new(file);
+    // png 0.18 requires `BufRead + Seek`; `File` only implements `Seek`.
+    let mut decoder = png::Decoder::new(std::io::BufReader::new(file));
     decoder.set_transformations(
         png::Transformations::EXPAND | png::Transformations::ALPHA | png::Transformations::STRIP_16,
     );
     let mut reader = decoder
         .read_info()
         .unwrap_or_else(|err| panic!("read info {}: {err}", path.display()));
-    let mut buf = vec![0u8; reader.output_buffer_size()];
+    let mut buf = vec![0u8; reader.output_buffer_size().expect("buffer size")];
     let info = reader
         .next_frame(&mut buf)
         .unwrap_or_else(|err| panic!("decode {}: {err}", path.display()));

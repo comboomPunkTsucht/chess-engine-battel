@@ -1,4 +1,4 @@
-# Chess Engine Battle — Rust (gpui + axum)
+# Chess Engine Battle — Rust (bevy + bevy_egui + axum)
 
 default: build
 
