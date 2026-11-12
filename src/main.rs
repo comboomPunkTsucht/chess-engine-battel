@@ -1,3 +1,4 @@
+mod bridge;
 mod game;
 mod moves;
 mod nord;
@@ -5,17 +6,21 @@ mod piece;
 mod server;
 mod ui;
 
-use std::borrow::Cow;
 use std::net::SocketAddr;
 
+use bevy::app::AppExit;
+use bevy::ecs::message::MessageWriter;
+use bevy::prelude::*;
+use bevy::window::{MonitorSelection, PresentMode, WindowMode, WindowResolution};
+use bevy_egui::{EguiContexts, EguiPlugin, EguiPrimaryContextPass, EguiPreUpdateSet};
 use clap::Parser;
-use gpui::{App, AppContext, Application, TitlebarOptions, WindowBounds, WindowOptions, px, size};
-use tokio::sync::mpsc::unbounded_channel;
+use crossbeam_channel::unbounded;
 
-use ui::BattleView;
+use crate::game::GameState;
+use crate::server::ServerControl;
 
-const WINDOW_WIDTH: f32 = 1280.0;
-const WINDOW_HEIGHT: f32 = 720.0;
+const WINDOW_WIDTH: f32 = 1280f32;
+const WINDOW_HEIGHT: f32 = 720f32;
 const WINDOW_TITLE: &str = "Chess Engine Battle";
 
 #[derive(Parser)]
@@ -44,52 +49,97 @@ fn main() {
             std::process::exit(1);
         });
 
-    let server_uri = format!("ws://{addr}");
-    eprintln!("[server] Websocket server URI: {server_uri}");
+    let (tx, rx) = unbounded();
+    let server = ServerControl::start(addr, tx);
+    let controls = ui::controls::ControlsState {
+        uri_text: format!("ws://{}", server.addr),
+        ..Default::default()
+    };
 
-    let (move_tx, move_rx) = unbounded_channel();
-    let _server = server::spawn_engine_server(addr, move_tx);
-
-    Application::new().run(move |cx: &mut App| {
-        let fonts: Vec<Cow<'static, [u8]>> = vec![
-            Cow::Borrowed(
-                include_bytes!("../assets/CaskaydiaCoveNerdFontPropo-Regular.ttf").as_slice(),
-            ),
-            Cow::Borrowed(
-                include_bytes!("../assets/CaskaydiaCoveNerdFontPropo-Bold.ttf").as_slice(),
-            ),
-            Cow::Borrowed(
-                include_bytes!("../assets/CaskaydiaCoveNerdFontPropo-Italic.ttf").as_slice(),
-            ),
-        ];
-        if let Err(err) = cx.text_system().add_fonts(fonts) {
-            eprintln!("[ui] failed to register fonts: {err}");
-        }
-
-        cx.on_window_closed(|cx| {
-            if cx.windows().is_empty() {
-                cx.quit();
-            }
-        })
-        .detach();
-
-        cx.open_window(
-            WindowOptions {
-                window_bounds: Some(WindowBounds::centered(
-                    size(px(WINDOW_WIDTH), px(WINDOW_HEIGHT)),
-                    cx,
-                )),
-                titlebar: Some(TitlebarOptions {
-                    title: Some(WINDOW_TITLE.into()),
-                    ..Default::default()
-                }),
-                window_min_size: Some(size(px(WINDOW_WIDTH), px(WINDOW_HEIGHT))),
-                ..Default::default()
-            },
-            move |_, cx| cx.new(|cx| BattleView::new(move_rx, server_uri, cx)),
+    App::new()
+        .add_plugins(DefaultPlugins.set(WindowPlugin {
+            primary_window: Some(Window {
+                title: WINDOW_TITLE.into(),
+                resolution: WindowResolution::new(WINDOW_WIDTH as u32, WINDOW_HEIGHT as u32),
+                resize_constraints: WindowResizeConstraints {
+                    min_width: WINDOW_WIDTH,
+                    min_height: WINDOW_HEIGHT,
+                    ..default()
+                },
+                ..default()
+            }),
+            ..default()
+        }))
+        .add_plugins(EguiPlugin::default())
+        .insert_resource(ClearColor(nord::bevy(nord::NORD0)))
+        .insert_resource(GameState::new())
+        .insert_resource(ui::DockLayout(ui::initial_dock_state()))
+        .insert_resource(bridge::Logs::default())
+        .insert_resource(bridge::EventReceiver(rx))
+        .insert_resource(server)
+        .insert_resource(controls)
+        .add_systems(Startup, spawn_camera)
+        // Install the theme once the primary context exists (it is attached to
+        // the camera in InitContexts) but strictly before BeginPass of the
+        // same frame: `set_fonts` only becomes active at the start of the next
+        // pass, and text styles referencing the new families would panic if
+        // laid out with the still-default fonts.
+        .add_systems(
+            PreUpdate,
+            apply_theme
+                .after(EguiPreUpdateSet::InitContexts)
+                .before(EguiPreUpdateSet::BeginPass),
         )
-        .expect("failed to open window");
+        .add_systems(Update, (bridge::receive_moves_system, window_shortcuts))
+        .add_systems(EguiPrimaryContextPass, ui::render_dock_system)
+        .run();
+}
 
-        cx.activate(true);
-    });
+/// Install Nord visuals, all CaskaydiaCove fonts and the text styles.
+fn apply_theme(mut contexts: EguiContexts, mut done: Local<bool>) -> Result {
+    if *done {
+        return Ok(());
+    }
+    // If the context is not attached yet, silently retry on the next frame;
+    // the ordering above makes a same-frame BeginPass race impossible.
+    let Ok(ctx) = contexts.ctx_mut() else {
+        return Ok(());
+    };
+    nord::apply(ctx);
+    *done = true;
+    Ok(())
+}
+
+/// Esc / Ctrl-Cmd+Q quits, F11 toggles fullscreen, F10 toggles vsync.
+fn window_shortcuts(
+    keys: Res<ButtonInput<KeyCode>>,
+    mut windows: Query<&mut Window>,
+    mut exit: MessageWriter<AppExit>,
+) {
+    let modifier = keys.pressed(KeyCode::ControlLeft) || keys.pressed(KeyCode::SuperLeft);
+    if keys.just_pressed(KeyCode::Escape) || (modifier && keys.just_pressed(KeyCode::KeyQ)) {
+        exit.write(AppExit::Success);
+        return;
+    }
+
+    let Ok(mut window) = windows.single_mut() else {
+        return;
+    };
+    if keys.just_pressed(KeyCode::F11) {
+        window.mode = match window.mode {
+            WindowMode::Windowed => WindowMode::BorderlessFullscreen(MonitorSelection::Current),
+            _ => WindowMode::Windowed,
+        };
+    }
+    if keys.just_pressed(KeyCode::F10) {
+        window.present_mode = match window.present_mode {
+            PresentMode::Fifo | PresentMode::AutoVsync => PresentMode::AutoNoVsync,
+            _ => PresentMode::Fifo,
+        };
+    }
+}
+
+/// bevy_egui attaches its primary context to the first camera it finds.
+fn spawn_camera(mut commands: Commands) {
+    commands.spawn(Camera2d);
 }

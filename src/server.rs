@@ -1,6 +1,8 @@
 use std::collections::HashMap;
+use std::io;
 use std::net::SocketAddr;
 use std::sync::{Arc, Mutex};
+use std::thread::JoinHandle;
 
 use axum::{
     Router,
@@ -11,8 +13,11 @@ use axum::{
     response::IntoResponse,
     routing::get,
 };
-use tokio::sync::mpsc::{self, UnboundedSender};
+use bevy::prelude::Resource;
+use crossbeam_channel::Sender;
+use tokio::sync::{mpsc, oneshot};
 
+use crate::bridge::ServerEvent;
 use crate::moves::Move;
 
 const MAX_ENGINES: usize = 2;
@@ -22,60 +27,142 @@ const REJECT_REASON: &str = "Server is full. Two engines are already connected."
 type EngineId = u8;
 
 struct ServerState {
-    engines: Mutex<HashMap<EngineId, UnboundedSender<Message>>>,
-    to_ui: UnboundedSender<Move>,
+    engines: Mutex<HashMap<EngineId, mpsc::UnboundedSender<Message>>>,
+    events: Sender<ServerEvent>,
 }
 
 impl ServerState {
-    fn new(to_ui: UnboundedSender<Move>) -> Self {
+    fn new(events: Sender<ServerEvent>) -> Self {
         Self {
             engines: Mutex::new(HashMap::new()),
-            to_ui,
+            events,
+        }
+    }
+
+    fn log(&self, line: impl Into<String>) {
+        let line = line.into();
+        eprintln!("[server] {line}");
+        let _ = self.events.send(ServerEvent::Log(line));
+    }
+}
+
+struct ServerHandle {
+    shutdown: Option<oneshot::Sender<()>>,
+    thread: Option<JoinHandle<()>>,
+}
+
+impl ServerHandle {
+    fn stop(mut self) {
+        if let Some(shutdown) = self.shutdown.take() {
+            let _ = shutdown.send(());
+        }
+        if let Some(thread) = self.thread.take() {
+            let _ = thread.join();
         }
     }
 }
 
-/// Spawn the engine websocket server on a dedicated OS thread running its own
-/// multi-threaded Tokio runtime. Every text/binary frame is parsed as a
-/// `Move`, forwarded to the other connected engine, and delivered to the UI
-/// over `to_ui`.
-pub fn spawn_engine_server(
-    addr: SocketAddr,
-    to_ui: UnboundedSender<Move>,
-) -> std::thread::JoinHandle<()> {
-    std::thread::Builder::new()
+/// Live websocket server owned as a Bevy resource: current address, last
+/// startup error, and a handle used to stop/restart it at runtime.
+#[derive(Resource)]
+pub struct ServerControl {
+    pub addr: SocketAddr,
+    pub last_error: Option<String>,
+    events: Sender<ServerEvent>,
+    handle: Option<ServerHandle>,
+}
+
+impl ServerControl {
+    /// Bind first (so a busy port fails synchronously), then spawn the
+    /// dedicated OS thread running its own Tokio runtime.
+    pub fn start(addr: SocketAddr, events: Sender<ServerEvent>) -> Self {
+        let mut control = Self {
+            addr,
+            last_error: None,
+            events,
+            handle: None,
+        };
+        let result = bind_and_spawn(addr, control.events.clone());
+        control.replace_handle(addr, result);
+        control
+    }
+
+    /// Swap in a newly spawned server; the old one is stopped only after the
+    /// new listener bound successfully, so a failed restart keeps it running.
+    fn replace_handle(&mut self, addr: SocketAddr, result: io::Result<ServerHandle>) {
+        match result {
+            Ok(handle) => {
+                if let Some(old) = self.handle.take() {
+                    old.stop();
+                }
+                self.addr = addr;
+                self.last_error = None;
+                self.handle = Some(handle);
+            }
+            Err(err) => {
+                let line = format!("failed to start websocket server on {addr}: {err}");
+                eprintln!("[server] {line}");
+                let _ = self.events.send(ServerEvent::Log(line.clone()));
+                self.last_error = Some(line);
+            }
+        }
+    }
+
+    pub fn restart(&mut self, addr: SocketAddr) {
+        let result = bind_and_spawn(addr, self.events.clone());
+        self.replace_handle(addr, result);
+    }
+}
+
+fn bind_and_spawn(addr: SocketAddr, events: Sender<ServerEvent>) -> io::Result<ServerHandle> {
+    let listener = std::net::TcpListener::bind(addr)?;
+    listener.set_nonblocking(true)?;
+
+    let (shutdown_tx, shutdown_rx) = oneshot::channel();
+    let thread = std::thread::Builder::new()
         .name("engine-server".into())
         .spawn(move || {
-            let runtime = tokio::runtime::Builder::new_multi_thread()
-                .worker_threads(2)
-                .enable_all()
-                .thread_name("engine-server-worker")
-                .build()
-                .expect("failed to build engine server runtime");
-
+            let runtime = match tokio::runtime::Runtime::new() {
+                Ok(runtime) => runtime,
+                Err(err) => {
+                    eprintln!("[server] failed to build engine server runtime: {err}");
+                    return;
+                }
+            };
             runtime.block_on(async move {
-                let state = Arc::new(ServerState::new(to_ui));
+                let listener = match tokio::net::TcpListener::from_std(listener) {
+                    Ok(listener) => listener,
+                    Err(err) => {
+                        eprintln!("[server] failed to convert listener: {err}");
+                        return;
+                    }
+                };
+
+                let state = Arc::new(ServerState::new(events));
+                state.log(format!(
+                    "Engine Server is running! Engines should connect to: ws://{addr}"
+                ));
+
                 let app = Router::new()
                     .route("/", get(ws_upgrade))
                     .fallback(ws_upgrade)
                     .with_state(state);
 
-                match tokio::net::TcpListener::bind(addr).await {
-                    Ok(listener) => {
-                        eprintln!(
-                            "[server] Engine Server is running! Engines should connect to: ws://{addr}"
-                        );
-                        if let Err(err) = axum::serve(listener, app).await {
+                tokio::select! {
+                    result = axum::serve(listener, app) => {
+                        if let Err(err) = result {
                             eprintln!("[server] server terminated: {err}");
                         }
                     }
-                    Err(err) => {
-                        eprintln!("[server] failed to start websocket server on {addr}: {err}");
-                    }
+                    _ = shutdown_rx => {}
                 }
             });
-        })
-        .expect("failed to spawn engine server thread")
+        })?;
+
+    Ok(ServerHandle {
+        shutdown: Some(shutdown_tx),
+        thread: Some(thread),
+    })
 }
 
 async fn ws_upgrade(
@@ -112,11 +199,11 @@ async fn handle_engine(mut socket: WebSocket, state: Arc<ServerState>) {
                 reason: REJECT_REASON.into(),
             })))
             .await;
-        eprintln!("[server] Rejected connection: {REJECT_REASON}");
+        state.log(format!("Rejected connection: {REJECT_REASON}"));
         return;
     };
 
-    eprintln!("[server] Engine {engine_id} connected");
+    state.log(format!("Engine {engine_id} connected"));
 
     loop {
         // The select statement owns both futures; once it resolves they are
@@ -137,7 +224,7 @@ async fn handle_engine(mut socket: WebSocket, state: Arc<ServerState>) {
                     continue;
                 };
 
-                eprintln!("[server] Move received from Engine {engine_id}: {raw}");
+                state.log(format!("Move received from Engine {engine_id}: {raw}"));
 
                 {
                     let engines = state.engines.lock().expect("engine registry lock");
@@ -150,16 +237,16 @@ async fn handle_engine(mut socket: WebSocket, state: Arc<ServerState>) {
 
                 match raw.parse::<Move>() {
                     Ok(movement) => {
-                        if state.to_ui.send(movement).is_err() {
-                            eprintln!("[server] UI channel closed, dropping move {movement}");
+                        if state.events.send(ServerEvent::Move(movement)).is_err() {
+                            state.log(format!("UI channel closed, dropping move"));
                             break;
                         }
                     }
-                    Err(err) => eprintln!("[server] {err}"),
+                    Err(err) => state.log(format!("{err}")),
                 }
             }
             EngineEvent::Incoming(Some(Err(err))) => {
-                eprintln!("[server] Engine {engine_id} error: {err}");
+                state.log(format!("Engine {engine_id} error: {err}"));
                 break;
             }
             EngineEvent::Incoming(None) => break,
@@ -177,5 +264,5 @@ async fn handle_engine(mut socket: WebSocket, state: Arc<ServerState>) {
         .lock()
         .expect("engine registry lock")
         .remove(&engine_id);
-    eprintln!("[server] Engine {engine_id} disconnected");
+    state.log(format!("Engine {engine_id} disconnected"));
 }
