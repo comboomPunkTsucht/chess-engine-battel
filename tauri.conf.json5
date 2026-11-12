@@ -1,0 +1,41 @@
+{
+  $schema: "https://schema.tauri.app/config/2",
+  productName: "Chess Engine Battle",
+  identifier: "app.comboompunktsucht.chess-engine-battel",
+  bundle: {
+    active: true,
+    targets: ["app", "deb", "appimage", "dmg", "msi", "nsis"],
+    icon: [
+      "assets/AppIcon.icns",
+      "assets/icon.png",
+      "assets/icon.ico",
+    ],
+    category: "Game",
+    shortDescription: "Chess engine battle visualizer",
+    longDescription: "Chess engine battle visualizer connecting two engines over WebSocket.",
+    macOS: {
+      minimumSystemVersion: "27.0",
+    },
+    linux: {
+      deb: {
+        depends: [
+          "libgl1",
+          "libxkbcommon0",
+          "libxkbcommon-x11-0",
+          "libwayland-client0",
+          "libx11-6",
+          "libx11-xcb1",
+          "libxcursor1",
+          "libxrandr2",
+          "libxi6",
+        ],
+      },
+    },
+    windows: {
+      webviewInstallMode: {
+        type: "skip",
+      },
+    },
+    createUpdaterArtifacts: false,
+  },
+}
