@@ -27,7 +27,7 @@ jobs:
 
           - os: macos-latest
             name: macos-arm64
-            archive_ext: ".dmg"
+            archive_ext: ".tar.gz"
 
           - os: windows-latest
             name: windows-x86_64
@@ -48,115 +48,53 @@ jobs:
         with:
           tool: just
 
-      - name: tauri-cli installieren
-        shell: bash
-        run: |
-          set -euo pipefail
-          # Prebuilt CLI binaries via npm (no openssl/sigstore, unlike cargo-bundle)
-          npm install -g @tauri-apps/cli@2.12.4
-          tauri --version
-
-      - name: Linux Abhängigkeiten installieren
+      - name: Systemabhängigkeiten (Linux)
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y \
             clang g++ make cmake pkg-config \
             zlib1g-dev \
+            libxcb-render0-dev libxcb-shape0-dev libxcb-xfixes0-dev \
             libxkbcommon-dev libxkbcommon-x11-dev libwayland-dev wayland-protocols \
             libx11-dev libx11-xcb-dev libxcursor-dev libxrandr-dev libxi-dev \
             libgl-dev libglu1-mesa-dev
 
-      - name: Bundle (Release)
-        shell: bash
-        run: just bundle-release
-
-      - name: Binary-Abhängigkeiten prüfen
-        shell: bash
+      - name: Cargo configlesen
         run: |
-          set -euo pipefail
-          case "${{ runner.os }}" in
-            Windows)
-              BIN=$(find target/release/bundle -name '*.msi' -o -name '*.exe' | head -1)
-              # check the actual binary next to the installers
-              BIN="target/release/chess-engine-battel.exe"
-              if [ -f "$BIN" ]; then
-                llvm-objdump -p "$BIN" | grep "DLL Name" || true
-              fi
-              ;;
-            Linux)
-              ldd target/release/chess-engine-battel || true
-              ;;
-            *)
-              otool -L "target/release/bundle/macos/Chess Engine Battle.app/Contents/MacOS/chess-engine-battel" || true
-              ;;
-          esac
+          cargo config set build.rustc.flags "--remap-path-prefix=/home/runner/.cargo/git=/home/runner/cargo/git 2>/dev/null || true"
 
-      - name: Bundle-Artefakte sammeln
-        shell: bash
+      - name: Cargo build (Release)
+        run: cargo build --release
+
+      - name: Binary prüfen
         run: |
-          set -euo pipefail
-          STAGE="chess-engine-battel-${{ matrix.name }}"
-          mkdir -p "$STAGE"
-          cp LICENSE "$STAGE/LICENSE" 2>/dev/null || true
+          ./target/release/chess-engine-battel --help
 
-          # tauri-bundler outputs:
-          #   Linux:   bundle/deb/*.deb, bundle/appimage/*.AppImage
-          #   macOS:   bundle/dmg/*.dmg only (no .app in release)
-          #   Windows: bundle/msi/*.msi, bundle/nsis/*.exe
-          found=0
-          if [ "${{ runner.os }}" = "macOS" ]; then
-            while IFS= read -r -d '' f; do
-              cp -v "$f" "$STAGE/"
-              found=1
-            done < <(find target/release/bundle/dmg -type f -name '*.dmg' -print0 2>/dev/null)
-          else
-            while IFS= read -r -d '' f; do
-              cp -v "$f" "$STAGE/"
-              found=1
-            done < <(find target/release/bundle -type f \
-              \( -name '*.deb' -o -name '*.AppImage' -o -name '*.msi' -o -name '*.exe' \) -print0 2>/dev/null)
-          fi
-
-          if [ "$found" -eq 0 ]; then
-            echo "ERROR: no bundle artifacts found under target/release/bundle" >&2
-            find target/release/bundle -type f -o -type d | head -50 >&2 || true
-            exit 1
-          fi
-
-          ls -lR "$STAGE"
-
-      - name: Archiv erstellen (tar.gz)
-        if: runner.os != 'macOS'
-        shell: bash
+      - name: Archiv erstellen (Linux)
+        if: runner.os == 'Linux'
         run: |
-          set -euo pipefail
-          STAGE="chess-engine-battel-${{ matrix.name }}"
-          COPYFILE_DISABLE=1 tar -czf "${STAGE}.tar.gz" "$STAGE"
-          ls -l "${STAGE}.tar.gz"
+          mkdir -p release
+          cp target/release/chess-engine-battel release/
+          tar -czf chess-engine-battel-linux-x86_64.tar.gz -C release chess-engine-battel
+          ls -l chess-engine-battel-linux-x86_64.tar.gz
 
-      - name: Archiv erstellen (dmg)
-        if: runner.os == 'macOS'
-        shell: bash
+      - name: Archiv erstellen (macOS)
+        if: runner.os == 'macos-latest'
         run: |
-          set -euo pipefail
-          STAGE="chess-engine-battel-${{ matrix.name }}"
-          DMG=$(find "$STAGE" -maxdepth 1 -name '*.dmg' | head -1)
-          if [ -z "$DMG" ]; then
-            echo "ERROR: no dmg produced" >&2
-            exit 1
-          fi
-          mv -v "$DMG" "${STAGE}.dmg"
-          rm -rf "$STAGE"
-          ls -l "${STAGE}.dmg"
+          mkdir -p release
+          cp target/release/chess-engine-battel release/
+          tar -czf chess-engine-battel-macos-arm64.tar.gz -C release chess-engine-battel
+          ls -l chess-engine-battel-macos-arm64.tar.gz
 
-      - name: Archiv erstellen (zip)
-        if: runner.os == 'Windows'
+      - name: Archiv erstellen (Windows)
+        if: runner.os == 'windows-latest'
         shell: pwsh
         run: |
-          $stage = "chess-engine-battel-${{ matrix.name }}"
-          Compress-Archive -Path $stage -DestinationPath "$stage.zip" -Force
-          Get-Item "$stage.zip"
+          mkdir release
+          Copy-Item -Path target/release/chess-engine-battel.exe -Destination release\
+          Compress-Archive -Path release -DestinationPath chess-engine-battel-windows-x86_64.zip -Force
+          ls -l chess-engine-battel-windows-x86_64.zip
 
       - name: Artefakt hochladen
         uses: actions/upload-artifact@v4
@@ -164,29 +102,3 @@ jobs:
           name: chess-engine-battel-${{ matrix.name }}
           path: chess-engine-battel-${{ matrix.name }}${{ matrix.archive_ext }}
           if-no-files-found: error
-
-  release:
-    name: Release erstellen
-    if: startsWith(github.ref, 'refs/tags/')
-    needs: build
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Artefakte herunterladen
-        uses: actions/download-artifact@v4
-        with:
-          path: dist
-          merge-multiple: true
-
-      - name: Checksums erstellen
-        working-directory: dist
-        run: |
-          sha256sum * > SHA256SUMS.txt
-          ls -l
-          cat SHA256SUMS.txt
-
-      - name: Release veröffentlichen
-        uses: softprops/action-gh-release@v2
-        with:
-          files: dist/*
-          generate_release_notes: true
