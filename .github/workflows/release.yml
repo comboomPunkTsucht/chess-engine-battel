@@ -64,6 +64,7 @@ jobs:
             clang g++ make cmake pkg-config \
             zlib1g-dev \
             libxkbcommon-dev libxkbcommon-x11-dev libwayland-dev wayland-protocols \
+            libxcb-render0-dev libxcb-shape0-dev libxcb-xfixes0-dev \
             libx11-dev libx11-xcb-dev libxcursor-dev libxrandr-dev libxi-dev \
             libgl-dev libglu1-mesa-dev
 
