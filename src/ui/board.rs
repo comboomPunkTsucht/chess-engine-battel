@@ -1,10 +1,10 @@
 use gpui_kit::{
-    BorderStyle, Context, IntoElement, ParentElement as _, Rgba, Styled as _, Window, canvas, div,
+    BorderStyle, Context, IntoElement, ParentElement as _, Rgba, Styled as _, canvas, div,
     point, px, quad, size, transparent_black,
 };
 
 use crate::game::{BOARD_DIM, GameState};
-use crate::nord::{self, FONT_FAMILY, NORD0, NORD1, NORD3, NORD4, NORD6, NORD_BACKGROUND, NORD_FOREGROUND};
+use crate::nord::{self, FONT_FAMILY, NORD1, NORD3, NORD4, NORD6, NORD_BACKGROUND, NORD_FOREGROUND};
 use crate::piece::{PieceColor, PieceType};
 use crate::ui::BattleView;
 

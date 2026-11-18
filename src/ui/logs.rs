@@ -1,7 +1,7 @@
 use gpui_kit::{
     Context, StatefulInteractiveElement, InteractiveElement as _, IntoElement, ParentElement as _, Styled as _, div,
 };
-use gpui_kit::component::{ActiveTheme as _, label::Label};
+use gpui_kit::component::label::Label;
 
 use crate::nord::FONT_FAMILY_MONO;
 use crate::ui::BattleView;

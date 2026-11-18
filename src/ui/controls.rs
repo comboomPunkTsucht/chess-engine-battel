@@ -6,13 +6,12 @@ use gpui_kit::{
 use gpui_kit::component::{
     ActiveTheme as _,
     button::Button,
-    input::{Input, InputState},
+    input::Input,
     label::Label,
 };
 
 use crate::game::GameState;
 use crate::nord::{self, FONT_FAMILY, NORD11, NORD14, NORD6};
-use crate::server::ServerControl;
 use crate::ui::BattleView;
 
 /// Editable server URI plus the last Apply result, shown in the Controls tab.

@@ -114,9 +114,9 @@ impl ServerControl {
                     runtime.block_on(async move {
                         // Axum's `serve` requires a `tokio::net::TcpListener`, not `std::net::TcpListener`.
                         // Convert the std listener by setting it nonblocking first.
-                        let mut std_listener = listener;
+                        let std_listener = listener;
                         let _ = std_listener.set_nonblocking(true);
-let tcp_listener = tokio::net::TcpListener::from_std(std_listener).unwrap();
+                        let tcp_listener = tokio::net::TcpListener::from_std(std_listener).unwrap();
                         let app = Router::new()
                             .route("/ws", get(ws_handler))
                             .with_state(state);
@@ -162,7 +162,12 @@ async fn ws_handler(
     let Some(engine_id) = engine_id else {
         return ws
             .on_upgrade(|mut socket| async move {
-                let _ = socket.close().await;
+                let _ = socket
+                    .send(Message::Close(Some(CloseFrame {
+                        code: REJECT_CLOSE_CODE,
+                        reason: REJECT_REASON.into(),
+                    })))
+                    .await;
             })
             .into_response();
     };
