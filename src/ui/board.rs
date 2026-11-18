@@ -1,183 +1,201 @@
-use std::net::SocketAddr;
+use gpui_kit::{
+    BorderStyle, Context, IntoElement, ParentElement as _, Rgba, Styled as _, Window, canvas, div,
+    point, px, quad, size, transparent_black,
+};
 
-use bevy_egui::egui;
-
-use crate::game::{GameState, BOARD_DIM};
-use crate::nord::{NORD0, NORD1, NORD3, NORD4, NORD6, hex};
+use crate::game::{BOARD_DIM, GameState};
+use crate::nord::{self, FONT_FAMILY, NORD0, NORD1, NORD3, NORD4, NORD6, NORD_BACKGROUND, NORD_FOREGROUND};
 use crate::piece::{PieceColor, PieceType};
+use crate::ui::BattleView;
 
 include!(concat!(env!("OUT_DIR"), "/piece_sprites.rs"));
 
-/// Tinted piece textures (white art × Nord tint, loaded once per color/kind).
-pub struct PieceTextures {
-    handles: [[Option<egui::TextureHandle>; 6]; 2],
-}
+const BORDER_WIDTH: f32 = 1.0;
 
-impl Default for PieceTextures {
-    fn default() -> Self {
-        Self {
-            handles: std::array::from_fn(|_| std::array::from_fn(|_| None)),
-        }
-    }
-}
-
-impl PieceTextures {
-    pub fn ensure_loaded(&mut self, ctx: &egui::Context) {
-        for (color_idx, tint) in [(0usize, NORD4), (1, NORD3)] {
-            for kind in 1..=6u8 {
-                if self.handles[color_idx][(kind - 1) as usize].is_some() {
-                    continue;
-                }
-                // Source is always the white art; black is only tinted (C++/gpui parity).
-                let Some(sprite) = sprite(0, kind) else {
-                    continue;
-                };
-                let handle = load_tinted(ctx, sprite, tint, color_idx as u8, kind);
-                self.handles[color_idx][(kind - 1) as usize] = Some(handle);
-            }
-        }
-    }
-
-    pub fn get(&self, color_idx: usize, kind: PieceType) -> Option<&egui::TextureHandle> {
-        let kind_idx = (kind as usize).checked_sub(1)?;
-        self.handles[color_idx].get(kind_idx)?.as_ref()
+fn piece_kind_byte(kind: PieceType) -> Option<u8> {
+    match kind {
+        PieceType::None => None,
+        PieceType::Pawn => Some(1),
+        PieceType::Knight => Some(2),
+        PieceType::Bishop => Some(3),
+        PieceType::Rook => Some(4),
+        PieceType::Queen => Some(5),
+        PieceType::King => Some(6),
     }
 }
 
 /// Raylib `DrawTexturePro` tint: per-channel multiply of sprite RGB by the
-/// palette color (white pieces → NORD4, black pieces → NORD3).
-fn load_tinted(
-    ctx: &egui::Context,
-    sprite: &Sprite,
-    tint: u32,
-    color: u8,
-    kind: u8,
-) -> egui::TextureHandle {
-    let [tr, tg, tb, ta] = tint.to_be_bytes();
-    let pixels: Vec<egui::Color32> = sprite
-        .rgba
-        .chunks_exact(4)
-        .map(|px| {
-            egui::Color32::from_rgba_unmultiplied(
-                ((px[0] as u16 * tr as u16) / 255) as u8,
-                ((px[1] as u16 * tg as u16) / 255) as u8,
-                ((px[2] as u16 * tb as u16) / 255) as u8,
-                ((px[3] as u16 * ta as u16) / 255) as u8,
-            )
-        })
-        .collect();
-    let image = egui::ColorImage::new([sprite.width as usize, sprite.height as usize], pixels);
-    ctx.load_texture(
-        format!("piece-{color}-{kind}"),
-        image,
-        egui::TextureOptions {
-            magnification: egui::TextureFilter::Nearest,
-            ..Default::default()
-        },
-    )
+/// palette color (white pieces → NORD4, black pieces → NORD3). The source
+/// sprite is always the white art; black is only tinted, never a separate asset.
+fn tinted_rgb(sprite_rgb: [u8; 3], tint: u32) -> [f32; 3] {
+    let [tr, tg, tb, _] = tint.to_be_bytes();
+    [
+        sprite_rgb[0] as f32 * tr as f32 / 255.0 / 255.0,
+        sprite_rgb[1] as f32 * tg as f32 / 255.0 / 255.0,
+        sprite_rgb[2] as f32 * tb as f32 / 255.0 / 255.0,
+    ]
 }
 
-/// Board painting parity with C++ `render.cpp` and the gpui port: NORD1/NORD0
-/// squares, 1px NORD6 border outside, pieces at 0.7×space centered per square,
-/// labels for server/moves/turn below the board.
-pub fn show_board(
-    ui: &mut egui::Ui,
-    game: &GameState,
-    textures: &PieceTextures,
-    server_addr: SocketAddr,
-) {
-    let (response, painter) = ui.allocate_painter(ui.available_size(), egui::Sense::hover());
-    let rect = response.rect;
-
-    painter.rect_filled(rect, 0.0, hex(NORD0));
-
-    let space = GameState::compute_layout(rect.width(), rect.height());
-    if space < 1.0 {
-        return;
-    }
-
-    let board_size = space * BOARD_DIM as f32;
-    let x_start = rect.left() + (rect.width() - board_size) / 2.0;
-    let y_start = rect.top() + (rect.height() - board_size) / 2.0;
-    let board_rect = egui::Rect::from_min_size(
-        egui::pos2(x_start, y_start),
-        egui::vec2(board_size, board_size),
-    );
-
-    // 1px border just outside the board (C++: DrawRectangleLines at -1/+2).
-    painter.rect_stroke(
-        board_rect,
-        0.0,
-        egui::Stroke::new(1.0, hex(NORD6)),
-        egui::StrokeKind::Outside,
-    );
-
+pub fn render(view: &BattleView, _cx: &mut Context<BattleView>) -> impl IntoElement {
+    let mut piece_cells = Vec::new();
     for y in 0..BOARD_DIM {
         for x in 0..BOARD_DIM {
-            let cell = egui::Rect::from_min_size(
-                egui::pos2(x_start + x as f32 * space, y_start + y as f32 * space),
-                egui::vec2(space, space),
-            );
-            let fill = if (x + y) % 2 == 0 { NORD1 } else { NORD0 };
-            painter.rect_filled(cell, 0.0, hex(fill));
+            let piece = view.game.board[x + y * BOARD_DIM];
+            let Some(kind) = piece_kind_byte(piece.kind) else {
+                continue;
+            };
+            // Always the white sprite; black is tinted at paint time (C++).
+            let Some(sprite) = sprite(0, kind) else {
+                continue;
+            };
+            let tint = match piece.color {
+                PieceColor::White => NORD4,
+                PieceColor::Black => NORD3,
+                PieceColor::None => continue,
+            };
+            piece_cells.push((x, y, sprite, tint));
         }
     }
 
-    let piece_size = (space * 0.7).floor();
-    let center_offset = (space - piece_size) / 2.0;
-    let uv = egui::Rect::from_min_max(egui::pos2(0.0, 0.0), egui::pos2(1.0, 1.0));
-
-    for y in 0..BOARD_DIM {
-        for x in 0..BOARD_DIM {
-            let piece = game.board[x + y * BOARD_DIM];
-            if piece.kind == PieceType::None || piece.color == PieceColor::None {
-                continue;
-            }
-            let color_idx = match piece.color {
-                PieceColor::White => 0,
-                _ => 1,
-            };
-            let Some(handle) = textures.get(color_idx, piece.kind) else {
-                continue;
-            };
-            let dest = egui::Rect::from_min_size(
-                egui::pos2(
-                    x_start + x as f32 * space + center_offset,
-                    y_start + y as f32 * space + center_offset,
-                ),
-                egui::vec2(piece_size, piece_size),
-            );
-            painter.image(handle.id(), dest, uv, egui::Color32::WHITE);
-        }
-    }
-
-    let turn = match game.turn {
+    let server_label = format!("Server: ws://{}", view.server.addr);
+    let move_count = view.game.history.len();
+    let turn_label = match view.game.turn {
         PieceColor::White => "White",
         PieceColor::Black => "Black",
         PieceColor::None => "-",
     };
-    let font = egui::FontId::proportional(14.0);
-    let color = hex(NORD6);
-    let label_y = board_rect.bottom() + 6.0;
-    painter.text(
-        egui::pos2(rect.left() + 6.0, label_y),
-        egui::Align2::LEFT_TOP,
-        format!("Server: ws://{server_addr}"),
-        font.clone(),
-        color,
-    );
-    painter.text(
-        egui::pos2(rect.center().x, label_y),
-        egui::Align2::CENTER_TOP,
-        format!("Moves: {}", game.history.len()),
-        font.clone(),
-        color,
-    );
-    painter.text(
-        egui::pos2(rect.right() - 6.0, label_y),
-        egui::Align2::RIGHT_TOP,
-        format!("Turn: {turn}"),
-        font,
-        color,
-    );
+
+    let light_fill = nord::hex(NORD1);
+    let dark_fill = nord::hex(NORD_BACKGROUND);
+    let border_color = nord::hex(NORD_FOREGROUND);
+
+    div()
+        .size_full()
+        .flex()
+        .flex_col()
+        .child(
+            div().flex_1().min_h_0().w_full().relative().child(
+                canvas(
+                    move |_, _, _| {},
+                    move |bounds, _, window, _| {
+                        let w = f32::from(bounds.size.width);
+                        let h = f32::from(bounds.size.height);
+                        let space = GameState::compute_layout(w, h);
+                        let piece_size = (space * 0.7).floor();
+                        let center_offset = (space - piece_size) / 2.0;
+
+                        // The board container includes a 1px ring for the border,
+                        // matching the C++ DrawRectangleLines at (x_start - 1, y_start - 1).
+                        let board_size = space * BOARD_DIM as f32 + BORDER_WIDTH * 2.0;
+                        let cells_offset = BORDER_WIDTH;
+                        let origin_x = bounds.origin.x + px((w - board_size) / 2.0);
+                        let origin_y = bounds.origin.y + px((h - board_size) / 2.0);
+
+                        for y in 0..BOARD_DIM {
+                            for x in 0..BOARD_DIM {
+                                let cell = gpui_kit::Bounds::new(
+                                    point(
+                                        origin_x + px(cells_offset + x as f32 * space),
+                                        origin_y + px(cells_offset + y as f32 * space),
+                                    ),
+                                    size(px(space), px(space)),
+                                );
+                                let fill = if (x + y) % 2 == 0 {
+                                    light_fill
+                                } else {
+                                    dark_fill
+                                };
+                                window.paint_quad(quad(
+                                    cell,
+                                    px(0.),
+                                    fill,
+                                    px(0.),
+                                    transparent_black(),
+                                    BorderStyle::Solid,
+                                ));
+                            }
+                        }
+
+                        // Per-pixel piece sprites: nearest-neighbor equivalent via
+                        // one solid quad per opaque texel (gpui img() is bilinear).
+                        // Source is always white art; tint matches C++ DrawTexturePro.
+                        for &(x, y, sprite, tint) in &piece_cells {
+                            let base_x = cells_offset + x as f32 * space + center_offset;
+                            let base_y = cells_offset + y as f32 * space + center_offset;
+                            let scale_x = piece_size / sprite.width as f32;
+                            let scale_y = piece_size / sprite.height as f32;
+
+                            for sy in 0..sprite.height {
+                                for sx in 0..sprite.width {
+                                    let idx = ((sy * sprite.width + sx) * 4) as usize;
+                                    let a = sprite.rgba[idx + 3];
+                                    if a == 0 {
+                                        continue;
+                                    }
+                                    let [r, g, b] = tinted_rgb(
+                                        [
+                                            sprite.rgba[idx],
+                                            sprite.rgba[idx + 1],
+                                            sprite.rgba[idx + 2],
+                                        ],
+                                        tint,
+                                    );
+                                    let color = Rgba {
+                                        r,
+                                        g,
+                                        b,
+                                        a: a as f32 / 255.0,
+                                    };
+                                    let texel = gpui_kit::Bounds::new(
+                                        point(
+                                            origin_x + px(base_x + sx as f32 * scale_x),
+                                            origin_y + px(base_y + sy as f32 * scale_y),
+                                        ),
+                                        size(px(scale_x), px(scale_y)),
+                                    );
+                                    window.paint_quad(quad(
+                                        texel,
+                                        px(0.),
+                                        color,
+                                        px(0.),
+                                        transparent_black(),
+                                        BorderStyle::Solid,
+                                    ));
+                                }
+                            }
+                        }
+
+                        let board_bounds = gpui_kit::Bounds::new(
+                            point(origin_x, origin_y),
+                            size(px(board_size), px(board_size)),
+                        );
+                        window.paint_quad(quad(
+                            board_bounds,
+                            px(0.),
+                            transparent_black(),
+                            px(BORDER_WIDTH),
+                            border_color,
+                            BorderStyle::Solid,
+                        ));
+                    },
+                )
+                .size_full(),
+            ),
+        )
+        .child(
+            div()
+                .w_full()
+                .flex()
+                .flex_row()
+                .justify_between()
+                .px(px(12.))
+                .py(px(6.))
+                .text_sm()
+                .font_family(FONT_FAMILY)
+                .text_color(nord::hex(NORD6))
+                .child(server_label)
+                .child(format!("Moves: {move_count}"))
+                .child(format!("Turn: {turn_label}")),
+        )
+        
 }
