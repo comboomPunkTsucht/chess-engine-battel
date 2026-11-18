@@ -2,17 +2,15 @@
 name = "chess-engine-battel"
 version = "0.0.1"
 edition = "2024"
-description = "Chess engine battle visualizer (Bevy + egui_dock + Axum)"
+description = "Chess engine battle visualizer (gpui-kit + Axum)"
 authors = ["mahd"]
 
 [dependencies]
 # gui
-bevy = "0.20.1"
-bevy_egui = "0.43.1"
-egui = "0.36"
-egui_dock = "0.21.1"
+gpui-kit = "0.10"
 # networking
 crossbeam-channel = "0.5.17"
+futures-util = "0.3"
 axum = { version = "0.8.9", features = [
   "default",
   "form",

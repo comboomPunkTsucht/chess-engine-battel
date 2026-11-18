@@ -1,9 +1,8 @@
 #![allow(dead_code)]
 
-use std::sync::Arc;
+use std::borrow::Cow;
 
-use bevy::color::Color;
-use egui::{Color32, FontData, FontFamily, FontId, Stroke, TextStyle};
+use gpui_kit::{App, Hsla, rgba};
 
 // Polar Night
 pub const NORD0: u32 = 0x2e3440ff;
@@ -46,28 +45,19 @@ pub const NORD_DEBUG: u32 = NORD15;
 pub const NORD_FATAL: u32 = NORD11;
 pub const NORD_SUCCESS: u32 = NORD14;
 
-/// Convert an `0xRRGGBBAA` palette entry into an egui color.
-pub fn hex(color: u32) -> Color32 {
-    let r = ((color >> 24) & 0xff) as u8;
-    let g = ((color >> 16) & 0xff) as u8;
-    let b = ((color >> 8) & 0xff) as u8;
-    let a = (color & 0xff) as u8;
-    Color32::from_rgba_unmultiplied(r, g, b, a)
+/// UI / proportional family used across the app.
+pub const FONT_FAMILY: &str = "CaskaydiaCove Nerd Font Propo";
+/// Monospace family for engine logs.
+pub const FONT_FAMILY_MONO: &str = "CaskaydiaCove Nerd Font Mono";
+
+/// Convert an `0xRRGGBBAA` palette entry into an `Hsla`.
+pub fn hex(color: u32) -> Hsla {
+    rgba(color).into()
 }
 
-/// Convert a palette entry by index (0..16) into an egui color.
-pub fn nord(index: usize) -> Color32 {
+/// Convert a palette entry by index (0..16) into an `Hsla`.
+pub fn nord(index: usize) -> Hsla {
     hex(NORD_COLORS[index])
-}
-
-/// Convert a palette entry into a Bevy color (e.g. the clear color).
-pub fn bevy(color: u32) -> Color {
-    Color::srgba_u8(
-        ((color >> 24) & 0xff) as u8,
-        ((color >> 16) & 0xff) as u8,
-        ((color >> 8) & 0xff) as u8,
-        (color & 0xff) as u8,
-    )
 }
 
 // All three CaskaydiaCove variants (Code, Mono, Propo) with every weight and
@@ -219,153 +209,162 @@ const FONTS: [(&str, &[u8]); 36] = [
     ),
 ];
 
-/// Apply the complete Nord theme to an egui context: visuals, fonts and
-/// text styles (run once per context).
-pub fn apply(ctx: &egui::Context) {
-    set_visuals(ctx);
-    set_fonts(ctx);
-    set_text_styles(ctx);
+/// Embed every CaskaydiaCove face into the GPUI text system.
+pub fn register_fonts(cx: &mut App) {
+    let fonts: Vec<Cow<'static, [u8]>> = FONTS.iter().map(|(_, bytes)| Cow::Borrowed(*bytes)).collect();
+    if let Err(err) = cx.text_system().add_fonts(fonts) {
+        eprintln!("[ui] failed to register fonts: {err}");
+    }
 }
 
-fn set_visuals(ctx: &egui::Context) {
-    let mut v = egui::Visuals::dark();
-    v.dark_mode = true;
-    v.override_text_color = Some(hex(NORD6));
-    v.panel_fill = hex(NORD0);
-    v.window_fill = hex(NORD0);
-    v.window_stroke = Stroke::new(1.0, hex(NORD3));
-    v.extreme_bg_color = hex(NORD1);
-    v.faint_bg_color = hex(NORD1);
-    v.code_bg_color = hex(NORD1);
-    v.hyperlink_color = hex(NORD8);
-    v.warn_fg_color = hex(NORD13);
-    v.error_fg_color = hex(NORD11);
-    v.selection.bg_fill = hex(NORD9);
-    v.selection.stroke = Stroke::new(1.0, hex(NORD6));
-    v.text_cursor.stroke = Stroke::new(1.5, hex(NORD8));
-    v.button_frame = true;
+/// Install Nord as the dark theme: mode first (loads the registered dark
+/// config), then explicit colors and font families. `resolve_default_font`
+/// only rewrites `.SystemUIFont`, so an explicit family is kept as-is.
+pub fn apply(cx: &mut App) {
+    use gpui_kit::component::{Theme, ThemeMode};
 
-    v.widgets.noninteractive.bg_fill = hex(NORD0);
-    v.widgets.noninteractive.weak_bg_fill = hex(NORD0);
-    v.widgets.noninteractive.bg_stroke = Stroke::new(1.0, hex(NORD2));
-    v.widgets.noninteractive.fg_stroke = Stroke::new(1.0, hex(NORD6));
+    Theme::change(ThemeMode::Dark, None, cx);
+    Theme::update(cx, |theme| {
+        theme.font_family = FONT_FAMILY.into();
+        theme.mono_font_family = FONT_FAMILY_MONO.into();
 
-    v.widgets.inactive.bg_fill = hex(NORD2);
-    v.widgets.inactive.weak_bg_fill = hex(NORD2);
-    v.widgets.inactive.bg_stroke = Stroke::new(1.0, hex(NORD3));
-    v.widgets.inactive.fg_stroke = Stroke::new(1.0, hex(NORD6));
+        theme.background = hex(NORD0);
+        theme.foreground = hex(NORD6);
+        theme.border = hex(NORD2);
+        theme.muted = hex(NORD1);
+        theme.muted_foreground = hex(NORD4);
 
-    v.widgets.hovered.bg_fill = hex(NORD3);
-    v.widgets.hovered.weak_bg_fill = hex(NORD3);
-    v.widgets.hovered.bg_stroke = Stroke::new(1.0, hex(NORD9));
-    v.widgets.hovered.fg_stroke = Stroke::new(1.0, hex(NORD6));
+        theme.primary = hex(NORD14);
+        theme.primary_hover = hex(NORD13);
+        theme.primary_active = hex(NORD15);
+        theme.primary_foreground = hex(NORD0);
 
-    v.widgets.active.bg_fill = hex(NORD1);
-    v.widgets.active.weak_bg_fill = hex(NORD1);
-    v.widgets.active.bg_stroke = Stroke::new(1.0, hex(NORD9));
-    v.widgets.active.fg_stroke = Stroke::new(1.0, hex(NORD6));
+        theme.secondary = hex(NORD2);
+        theme.secondary_hover = hex(NORD3);
+        theme.secondary_active = hex(NORD1);
+        theme.secondary_foreground = hex(NORD6);
 
-    v.widgets.open.bg_fill = hex(NORD3);
-    v.widgets.open.weak_bg_fill = hex(NORD3);
-    v.widgets.open.bg_stroke = Stroke::new(1.0, hex(NORD9));
-    v.widgets.open.fg_stroke = Stroke::new(1.0, hex(NORD6));
+        theme.button = hex(NORD2);
+        theme.button_hover = hex(NORD3);
+        theme.button_active = hex(NORD1);
+        theme.button_foreground = hex(NORD6);
 
-    ctx.set_visuals(v);
-}
+        theme.button_primary = hex(NORD14);
+        theme.button_primary_hover = hex(NORD13);
+        theme.button_primary_active = hex(NORD15);
+        theme.button_primary_foreground = hex(NORD0);
 
-fn set_fonts(ctx: &egui::Context) {
-    let mut fonts = egui::FontDefinitions::default();
-    for (name, bytes) in FONTS {
-        fonts
-            .font_data
-            .insert((*name).to_owned(), Arc::new(FontData::from_static(bytes)));
-    }
+        theme.button_secondary = hex(NORD2);
+        theme.button_secondary_hover = hex(NORD3);
+        theme.button_secondary_active = hex(NORD1);
+        theme.button_secondary_foreground = hex(NORD6);
 
-    // Glyph-fallback order per family: Regular first, then the other weights.
-    // The first face holding a glyph wins, so body text stays Regular while
-    // every other weight remains available behind its own family.
-    const WEIGHTS: [&str; 12] = [
-        "Regular",
-        "SemiBold",
-        "Bold",
-        "Italic",
-        "SemiBoldItalic",
-        "BoldItalic",
-        "SemiLight",
-        "SemiLightItalic",
-        "Light",
-        "LightItalic",
-        "ExtraLight",
-        "ExtraLightItalic",
-    ];
-    let ordered = |prefix: &str| -> Vec<String> {
-        WEIGHTS
-            .iter()
-            .map(|weight| format!("{prefix}{weight}"))
-            .collect()
-    };
+        theme.button_danger = hex(NORD11);
+        theme.button_danger_hover = hex(NORD12);
+        theme.button_danger_active = hex(NORD13);
+        theme.button_danger_foreground = hex(NORD0);
 
-    // Proportional UI text uses the Propo variant; logs/code use Mono.
-    // egui's emoji fonts stay as final glyph fallback.
-    if let Some(list) = fonts.families.get_mut(&FontFamily::Proportional) {
-        let mut faces = ordered("CaskaydiaCovePropo-");
-        faces.append(list);
-        *list = faces;
-    }
-    if let Some(list) = fonts.families.get_mut(&FontFamily::Monospace) {
-        let mut faces = ordered("CaskaydiaCoveMono-");
-        faces.append(list);
-        *list = faces;
-    }
+        theme.input = hex(NORD1);
+        theme.caret = hex(NORD8);
+        theme.selection = hex(NORD9);
+        theme.ring = hex(NORD8);
 
-    // Every single face is also selectable on its own via FontId (each one
-    // falls back to the Regular of its own variant for missing glyphs).
-    for (name, _) in FONTS {
-        let regular = if name.contains("Mono") {
-            "CaskaydiaCoveMono-Regular"
-        } else if name.contains("Propo") {
-            "CaskaydiaCovePropo-Regular"
-        } else {
-            "CaskaydiaCove-Regular"
-        };
-        let mut faces = vec![name.to_owned()];
-        if name != regular {
-            faces.push(regular.to_owned());
-        }
-        fonts
-            .families
-            .insert(FontFamily::Name(name.into()), faces);
-    }
+        theme.link = hex(NORD8);
+        theme.link_hover = hex(NORD7);
+        theme.link_active = hex(NORD9);
 
-    ctx.set_fonts(fonts);
-}
+        theme.danger = hex(NORD11);
+        theme.danger_hover = hex(NORD12);
+        theme.danger_active = hex(NORD13);
+        theme.danger_foreground = hex(NORD0);
 
-fn set_text_styles(ctx: &egui::Context) {
-    ctx.global_style_mut(|style| {
-        // Headings render in the real Bold face, buttons in SemiBold.
-        let heading_size = style
-            .text_styles
-            .get(&TextStyle::Heading)
-            .map_or(22.0, |font_id| font_id.size);
-        let button_size = style
-            .text_styles
-            .get(&TextStyle::Button)
-            .map_or(14.0, |font_id| font_id.size);
-        style.text_styles.insert(
-            TextStyle::Heading,
-            FontId::new(
-                heading_size,
-                FontFamily::Name("CaskaydiaCovePropo-Bold".into()),
-            ),
-        );
-        style.text_styles.insert(
-            TextStyle::Button,
-            FontId::new(
-                button_size,
-                FontFamily::Name("CaskaydiaCovePropo-SemiBold".into()),
-            ),
-        );
-        // Body / Small / Monospace already resolve through the Proportional /
-        // Monospace families set up in `set_fonts`.
+        theme.success = hex(NORD14);
+        theme.success_hover = hex(NORD13);
+        theme.success_active = hex(NORD15);
+        theme.success_foreground = hex(NORD0);
+
+        theme.warning = hex(NORD13);
+        theme.warning_hover = hex(NORD12);
+        theme.warning_active = hex(NORD15);
+        theme.warning_foreground = hex(NORD0);
+
+        theme.info = hex(NORD8);
+        theme.info_hover = hex(NORD7);
+        theme.info_active = hex(NORD9);
+        theme.info_foreground = hex(NORD0);
+
+        theme.accent = hex(NORD14);
+        theme.accent_foreground = hex(NORD0);
+
+        theme.tab = hex(NORD0);
+        theme.tab_foreground = hex(NORD4);
+        theme.tab_active = hex(NORD1);
+        theme.tab_active_foreground = hex(NORD6);
+        theme.tab_bar = hex(NORD0);
+        theme.tab_bar_segmented = hex(NORD1);
+
+        theme.title_bar = hex(NORD0);
+        theme.title_bar_border = hex(NORD2);
+        theme.status_bar = hex(NORD0);
+        theme.status_bar_border = hex(NORD2);
+        theme.window_border = hex(NORD2);
+
+        theme.popover = hex(NORD1);
+        theme.popover_foreground = hex(NORD6);
+        theme.overlay = hex(NORD0);
+
+        theme.scrollbar = hex(NORD1);
+        theme.scrollbar_thumb = hex(NORD3);
+        theme.scrollbar_thumb_hover = hex(NORD4);
+
+        theme.progress_bar = hex(NORD14);
+        theme.slider_bar = hex(NORD2);
+        theme.slider_thumb = hex(NORD8);
+
+        theme.list_even = hex(NORD1);
+        theme.list_hover = hex(NORD2);
+        theme.list_head = hex(NORD1);
+        theme.list_active = hex(NORD2);
+        theme.list_active_border = hex(NORD8);
+        theme.list_highlight_foreground = hex(NORD6);
+
+        theme.table = hex(NORD0);
+        theme.table_even = hex(NORD1);
+        theme.table_head = hex(NORD1);
+        theme.table_head_foreground = hex(NORD6);
+        theme.table_hover = hex(NORD2);
+        theme.table_active = hex(NORD2);
+        theme.table_active_border = hex(NORD8);
+        theme.table_row_border = hex(NORD2);
+
+        theme.sidebar = hex(NORD0);
+        theme.sidebar_foreground = hex(NORD6);
+        theme.sidebar_border = hex(NORD2);
+        theme.sidebar_accent = hex(NORD1);
+        theme.sidebar_accent_foreground = hex(NORD6);
+        theme.sidebar_primary = hex(NORD14);
+        theme.sidebar_primary_foreground = hex(NORD0);
+
+        theme.group_box = hex(NORD1);
+        theme.group_box_foreground = hex(NORD6);
+        theme.description_list_label = hex(NORD4);
+        theme.description_list_label_foreground = hex(NORD6);
+
+        theme.skeleton = hex(NORD2);
+        theme.drag_border = hex(NORD8);
+        theme.drop_target = hex(NORD9);
+
+        theme.red = hex(NORD11);
+        theme.red_light = hex(NORD12);
+        theme.green = hex(NORD14);
+        theme.green_light = hex(NORD13);
+        theme.blue = hex(NORD8);
+        theme.blue_light = hex(NORD7);
+        theme.yellow = hex(NORD13);
+        theme.yellow_light = hex(NORD12);
+        theme.magenta = hex(NORD15);
+        theme.magenta_light = hex(NORD12);
+        theme.cyan = hex(NORD7);
+        theme.cyan_light = hex(NORD8);
     });
 }

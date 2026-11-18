@@ -8,20 +8,21 @@ mod ui;
 
 use std::net::SocketAddr;
 
-use bevy::app::AppExit;
-use bevy::ecs::message::MessageWriter;
-use bevy::prelude::*;
-use bevy::window::{MonitorSelection, PresentMode, WindowMode, WindowResolution};
-use bevy_egui::{EguiContexts, EguiPlugin, EguiPrimaryContextPass, EguiPreUpdateSet};
 use clap::Parser;
 use crossbeam_channel::unbounded;
+use gpui_kit::{
+    App, AppContext as _, KeyBinding, TitlebarOptions, WindowBounds, WindowOptions, open_window,
+    px, size,
+};
+use gpui_kit::component::input::InputState;
 
-use crate::game::GameState;
 use crate::server::ServerControl;
 
-const WINDOW_WIDTH: f32 = 1280f32;
-const WINDOW_HEIGHT: f32 = 720f32;
+const WINDOW_WIDTH: f32 = 1280.0;
+const WINDOW_HEIGHT: f32 = 720.0;
 const WINDOW_TITLE: &str = "Chess Engine Battle";
+
+gpui_kit::actions!(app, [Quit, ToggleFullscreen]);
 
 #[derive(Parser)]
 #[command(
@@ -51,95 +52,56 @@ fn main() {
 
     let (tx, rx) = unbounded();
     let server = ServerControl::start(addr, tx);
-    let controls = ui::controls::ControlsState {
-        uri_text: format!("ws://{}", server.addr),
-        ..Default::default()
-    };
+    eprintln!("[server] Websocket server URI: ws://{}", server.addr);
 
-    App::new()
-        .add_plugins(DefaultPlugins.set(WindowPlugin {
-            primary_window: Some(Window {
-                title: WINDOW_TITLE.into(),
-                resolution: WindowResolution::new(WINDOW_WIDTH as u32, WINDOW_HEIGHT as u32),
-                resize_constraints: WindowResizeConstraints {
-                    min_width: WINDOW_WIDTH,
-                    min_height: WINDOW_HEIGHT,
-                    ..default()
-                },
-                ..default()
-            }),
-            ..default()
-        }))
-        .add_plugins(EguiPlugin::default())
-        .insert_resource(ClearColor(nord::bevy(nord::NORD0)))
-        .insert_resource(GameState::new())
-        .insert_resource(ui::DockLayout(ui::initial_dock_state()))
-        .insert_resource(bridge::Logs::default())
-        .insert_resource(bridge::EventReceiver(rx))
-        .insert_resource(server)
-        .insert_resource(controls)
-        .add_systems(Startup, spawn_camera)
-        // Install the theme once the primary context exists (it is attached to
-        // the camera in InitContexts) but strictly before BeginPass of the
-        // same frame: `set_fonts` only becomes active at the start of the next
-        // pass, and text styles referencing the new families would panic if
-        // laid out with the still-default fonts.
-        .add_systems(
-            PreUpdate,
-            apply_theme
-                .after(EguiPreUpdateSet::InitContexts)
-                .before(EguiPreUpdateSet::BeginPass),
+    gpui_kit::application().run(move |cx: &mut App| {
+        gpui_kit::init(cx);
+        nord::register_fonts(cx);
+        nord::apply(cx);
+
+        cx.bind_keys([
+            KeyBinding::new("escape", Quit, None),
+            KeyBinding::new("cmd-q", Quit, None),
+            KeyBinding::new("ctrl-q", Quit, None),
+            KeyBinding::new("f11", ToggleFullscreen, None),
+        ]);
+        cx.on_action(|_: &Quit, cx| cx.quit());
+        cx.on_action(|_: &ToggleFullscreen, cx| {
+            if let Some(window) = cx.active_window() {
+                let _ = window.update(cx, |_, window, _| window.toggle_fullscreen());
+            }
+        });
+        cx.on_window_closed(|cx, _| {
+            if cx.windows().is_empty() {
+                cx.quit();
+            }
+        })
+        .detach();
+
+        let events = bridge::EventReceiver(rx);
+        open_window(
+            WindowOptions {
+                window_bounds: Some(WindowBounds::centered(
+                    size(px(WINDOW_WIDTH), px(WINDOW_HEIGHT)),
+                    cx,
+                )),
+                titlebar: Some(TitlebarOptions {
+                    title: Some(WINDOW_TITLE.into()),
+                    ..Default::default()
+                }),
+                window_min_size: Some(size(px(WINDOW_WIDTH), px(WINDOW_HEIGHT))),
+                ..Default::default()
+            },
+            cx,
+            move |window, cx| {
+                let uri = format!("ws://{}", server.addr);
+                let uri_input =
+                    cx.new(|cx| InputState::new(window, cx).default_value(uri));
+                cx.new(|cx| ui::BattleView::new(events, server, uri_input, cx))
+            },
         )
-        .add_systems(Update, (bridge::receive_moves_system, window_shortcuts))
-        .add_systems(EguiPrimaryContextPass, ui::render_dock_system)
-        .run();
-}
+        .expect("failed to open window");
 
-/// Install Nord visuals, all CaskaydiaCove fonts and the text styles.
-fn apply_theme(mut contexts: EguiContexts, mut done: Local<bool>) -> Result {
-    if *done {
-        return Ok(());
-    }
-    // If the context is not attached yet, silently retry on the next frame;
-    // the ordering above makes a same-frame BeginPass race impossible.
-    let Ok(ctx) = contexts.ctx_mut() else {
-        return Ok(());
-    };
-    nord::apply(ctx);
-    *done = true;
-    Ok(())
-}
-
-/// Esc / Ctrl-Cmd+Q quits, F11 toggles fullscreen, F10 toggles vsync.
-fn window_shortcuts(
-    keys: Res<ButtonInput<KeyCode>>,
-    mut windows: Query<&mut Window>,
-    mut exit: MessageWriter<AppExit>,
-) {
-    let modifier = keys.pressed(KeyCode::ControlLeft) || keys.pressed(KeyCode::SuperLeft);
-    if keys.just_pressed(KeyCode::Escape) || (modifier && keys.just_pressed(KeyCode::KeyQ)) {
-        exit.write(AppExit::Success);
-        return;
-    }
-
-    let Ok(mut window) = windows.single_mut() else {
-        return;
-    };
-    if keys.just_pressed(KeyCode::F11) {
-        window.mode = match window.mode {
-            WindowMode::Windowed => WindowMode::BorderlessFullscreen(MonitorSelection::Current),
-            _ => WindowMode::Windowed,
-        };
-    }
-    if keys.just_pressed(KeyCode::F10) {
-        window.present_mode = match window.present_mode {
-            PresentMode::Fifo | PresentMode::AutoVsync => PresentMode::AutoNoVsync,
-            _ => PresentMode::Fifo,
-        };
-    }
-}
-
-/// bevy_egui attaches its primary context to the first camera it finds.
-fn spawn_camera(mut commands: Commands) {
-    commands.spawn(Camera2d);
+        cx.activate(true);
+    });
 }

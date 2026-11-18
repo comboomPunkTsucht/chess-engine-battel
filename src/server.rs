@@ -13,12 +13,14 @@ use axum::{
     response::IntoResponse,
     routing::get,
 };
-use bevy::prelude::Resource;
 use crossbeam_channel::Sender;
+use futures_util::StreamExt;
+use futures_util::SinkExt;
 use tokio::sync::{mpsc, oneshot};
 
 use crate::bridge::ServerEvent;
-use crate::moves::Move;
+use crate::moves::{Move, MoveType};
+use crate::piece::PieceType;
 
 const MAX_ENGINES: usize = 2;
 const REJECT_CLOSE_CODE: u16 = 1000;
@@ -62,9 +64,8 @@ impl ServerHandle {
     }
 }
 
-/// Live websocket server owned as a Bevy resource: current address, last
-/// startup error, and a handle used to stop/restart it at runtime.
-#[derive(Resource)]
+/// Live websocket server: current address, last startup error, and a handle
+/// used to stop/restart it at runtime.
 pub struct ServerControl {
     pub addr: SocketAddr,
     pub last_error: Option<String>,
@@ -82,187 +83,199 @@ impl ServerControl {
             events,
             handle: None,
         };
-        let result = bind_and_spawn(addr, control.events.clone());
-        control.replace_handle(addr, result);
+        control.restart(addr);
         control
     }
 
-    /// Swap in a newly spawned server; the old one is stopped only after the
-    /// new listener bound successfully, so a failed restart keeps it running.
-    fn replace_handle(&mut self, addr: SocketAddr, result: io::Result<ServerHandle>) {
-        match result {
-            Ok(handle) => {
-                if let Some(old) = self.handle.take() {
-                    old.stop();
-                }
-                self.addr = addr;
-                self.last_error = None;
-                self.handle = Some(handle);
+    /// Stop the current server (if any) and start a new one on `addr`.
+    pub fn restart(&mut self, addr: SocketAddr) {
+        if let Some(handle) = self.handle.take() {
+            handle.stop();
+        }
+        self.last_error = None;
+
+        match try_bind(addr) {
+            Ok(listener) => {
+                self.addr = listener.local_addr().unwrap_or(addr);
+                let (shutdown_tx, shutdown_rx) = oneshot::channel();
+                let events = self.events.clone();
+                let state = Arc::new(ServerState::new(events));
+                let thread = std::thread::spawn(move || {
+                    let runtime = match tokio::runtime::Builder::new_multi_thread()
+                        .enable_all()
+                        .build()
+                    {
+                        Ok(runtime) => runtime,
+                        Err(err) => {
+                            eprintln!("[server] failed to build tokio runtime: {err}");
+                            return;
+                        }
+                    };
+                    runtime.block_on(async move {
+                        // Axum's `serve` requires a `tokio::net::TcpListener`, not `std::net::TcpListener`.
+                        // Convert the std listener by setting it nonblocking first.
+                        let std_listener = listener;
+                        let _ = std_listener.set_nonblocking(true);
+                        let tcp_listener = tokio::net::TcpListener::from_std(std_listener).unwrap();
+                        let app = Router::new()
+                            .route("/ws", get(ws_handler))
+                            .with_state(state);
+                        let server = axum::serve(tcp_listener, app).with_graceful_shutdown(async {
+                            let _ = shutdown_rx.await;
+                        });
+                        if let Err(err) = server.await {
+                            eprintln!("[server] server error: {err}");
+                        }
+                    });
+                });
+                self.handle = Some(ServerHandle {
+                    shutdown: Some(shutdown_tx),
+                    thread: Some(thread),
+                });
+                eprintln!("[server] listening on ws://{}", self.addr);
             }
             Err(err) => {
-                let line = format!("failed to start websocket server on {addr}: {err}");
-                eprintln!("[server] {line}");
-                let _ = self.events.send(ServerEvent::Log(line.clone()));
-                self.last_error = Some(line);
+                self.last_error = Some(format!("Failed to bind {addr}: {err}"));
+                eprintln!("[server] {}", self.last_error.as_deref().unwrap_or_default());
             }
         }
     }
+}
 
-    pub fn restart(&mut self, addr: SocketAddr) {
-        let result = bind_and_spawn(addr, self.events.clone());
-        self.replace_handle(addr, result);
+impl Drop for ServerControl {
+    fn drop(&mut self) {
+        if let Some(handle) = self.handle.take() {
+            handle.stop();
+        }
     }
 }
 
-fn bind_and_spawn(addr: SocketAddr, events: Sender<ServerEvent>) -> io::Result<ServerHandle> {
-    let listener = std::net::TcpListener::bind(addr)?;
-    listener.set_nonblocking(true)?;
-
-    let (shutdown_tx, shutdown_rx) = oneshot::channel();
-    let thread = std::thread::Builder::new()
-        .name("engine-server".into())
-        .spawn(move || {
-            let runtime = match tokio::runtime::Runtime::new() {
-                Ok(runtime) => runtime,
-                Err(err) => {
-                    eprintln!("[server] failed to build engine server runtime: {err}");
-                    return;
-                }
-            };
-            runtime.block_on(async move {
-                let listener = match tokio::net::TcpListener::from_std(listener) {
-                    Ok(listener) => listener,
-                    Err(err) => {
-                        eprintln!("[server] failed to convert listener: {err}");
-                        return;
-                    }
-                };
-
-                let state = Arc::new(ServerState::new(events));
-                state.log(format!(
-                    "Engine Server is running! Engines should connect to: ws://{addr}"
-                ));
-
-                let app = Router::new()
-                    .route("/", get(ws_upgrade))
-                    .fallback(ws_upgrade)
-                    .with_state(state);
-
-                tokio::select! {
-                    result = axum::serve(listener, app) => {
-                        if let Err(err) = result {
-                            eprintln!("[server] server terminated: {err}");
-                        }
-                    }
-                    _ = shutdown_rx => {}
-                }
-            });
-        })?;
-
-    Ok(ServerHandle {
-        shutdown: Some(shutdown_tx),
-        thread: Some(thread),
-    })
+fn try_bind(addr: SocketAddr) -> io::Result<std::net::TcpListener> {
+    std::net::TcpListener::bind(addr)
 }
 
-async fn ws_upgrade(
+async fn ws_handler(
     ws: WebSocketUpgrade,
     State(state): State<Arc<ServerState>>,
 ) -> impl IntoResponse {
-    ws.on_upgrade(move |socket| handle_engine(socket, state))
-}
-
-enum EngineEvent {
-    Incoming(Option<Result<Message, axum::Error>>),
-    Outgoing(Option<Message>),
-}
-
-async fn handle_engine(mut socket: WebSocket, state: Arc<ServerState>) {
-    let registration = {
-        let mut engines = state.engines.lock().expect("engine registry lock");
-        if engines.len() >= MAX_ENGINES {
-            None
-        } else {
-            let engine_id = (1..=MAX_ENGINES as EngineId)
-                .find(|id| !engines.contains_key(id))
-                .expect("free engine slot");
-            let (tx, rx) = mpsc::unbounded_channel();
-            engines.insert(engine_id, tx);
-            Some((engine_id, rx))
-        }
+    let engine_id = allocate_engine_id(&state);
+    let Some(engine_id) = engine_id else {
+        return ws
+            .on_upgrade(|mut socket| async move {
+                let _ = socket
+                    .send(Message::Close(Some(CloseFrame {
+                        code: REJECT_CLOSE_CODE,
+                        reason: REJECT_REASON.into(),
+                    })))
+                    .await;
+            })
+            .into_response();
     };
 
-    let Some((engine_id, mut rx)) = registration else {
-        let _ = socket
-            .send(Message::Close(Some(CloseFrame {
-                code: REJECT_CLOSE_CODE,
-                reason: REJECT_REASON.into(),
-            })))
-            .await;
-        state.log(format!("Rejected connection: {REJECT_REASON}"));
-        return;
-    };
+    ws.on_upgrade(move |socket| handle_socket(socket, engine_id, state))
+        .into_response()
+}
+
+fn allocate_engine_id(state: &ServerState) -> Option<EngineId> {
+    let mut engines = state.engines.lock().ok()?;
+    if engines.len() >= MAX_ENGINES {
+        return None;
+    }
+    let id = (0..MAX_ENGINES as u8).find(|id| !engines.contains_key(id))?;
+    let (tx, _rx) = mpsc::unbounded_channel();
+    engines.insert(id, tx);
+    Some(id)
+}
+
+async fn handle_socket(socket: WebSocket, engine_id: EngineId, state: Arc<ServerState>) {
+    let (mut sender, mut receiver) = socket.split();
+    let (tx, mut rx) = mpsc::unbounded_channel::<Message>();
+
+    {
+        let mut engines = match state.engines.lock() {
+            Ok(engines) => engines,
+            Err(_) => return,
+        };
+        engines.insert(engine_id, tx);
+    }
 
     state.log(format!("Engine {engine_id} connected"));
 
-    loop {
-        // The select statement owns both futures; once it resolves they are
-        // dropped, releasing the `&mut socket` borrow for the handler below.
-        let event = tokio::select! {
-            incoming = socket.recv() => EngineEvent::Incoming(incoming),
-            outgoing = rx.recv() => EngineEvent::Outgoing(outgoing),
-        };
-
-        match event {
-            EngineEvent::Incoming(Some(Ok(message))) => {
-                let payload = match &message {
-                    Message::Text(text) => Some(text.to_string()),
-                    Message::Binary(bytes) => Some(String::from_utf8_lossy(bytes).into_owned()),
-                    _ => None,
-                };
-                let Some(raw) = payload else {
-                    continue;
-                };
-
-                state.log(format!("Move received from Engine {engine_id}: {raw}"));
-
-                {
-                    let engines = state.engines.lock().expect("engine registry lock");
-                    for (other_id, tx) in engines.iter() {
-                        if *other_id != engine_id {
-                            let _ = tx.send(message.clone());
-                        }
-                    }
-                }
-
-                match raw.parse::<Move>() {
-                    Ok(movement) => {
-                        if state.events.send(ServerEvent::Move(movement)).is_err() {
-                            state.log(format!("UI channel closed, dropping move"));
-                            break;
-                        }
-                    }
-                    Err(err) => state.log(format!("{err}")),
-                }
-            }
-            EngineEvent::Incoming(Some(Err(err))) => {
-                state.log(format!("Engine {engine_id} error: {err}"));
+    let send_task = tokio::spawn(async move {
+        while let Some(msg) = rx.recv().await {
+            if sender.send(msg).await.is_err() {
                 break;
             }
-            EngineEvent::Incoming(None) => break,
-            EngineEvent::Outgoing(Some(message)) => {
-                if socket.send(message).await.is_err() {
-                    break;
+        }
+    });
+
+    while let Some(Ok(msg)) = receiver.next().await {
+        match msg {
+            Message::Text(text) => {
+                if let Some(movement) = parse_move(&text) {
+                    let _ = state.events.send(ServerEvent::Move(movement));
+                } else {
+                    state.log(format!("Engine {engine_id} sent unparsable message: {text}"));
                 }
             }
-            EngineEvent::Outgoing(None) => break,
+            Message::Close(_) => break,
+            _ => {}
         }
     }
 
-    state
-        .engines
-        .lock()
-        .expect("engine registry lock")
-        .remove(&engine_id);
+    send_task.abort();
+    if let Ok(mut engines) = state.engines.lock() {
+        engines.remove(&engine_id);
+    }
     state.log(format!("Engine {engine_id} disconnected"));
+}
+
+fn parse_move(text: &str) -> Option<Move> {
+    let text = text.trim();
+    if text.len() != 4 && text.len() != 5 {
+        return None;
+    }
+    let bytes = text.as_bytes();
+    let from_file = (bytes[0] as u8 - b'a') as usize;
+    let from_rank = (bytes[1] as u8 - b'1') as usize;
+    let to_file = (bytes[2] as u8 - b'a') as usize;
+    let to_rank = (bytes[3] as u8 - b'1') as usize;
+    let from = from_rank * 8 + from_file;
+    let to = to_rank * 8 + to_file;
+    let promo = if text.len() == 5 {
+        match bytes[4] as char {
+            'q' | 'Q' => PieceTypeProxy::Queen,
+            'r' | 'R' => PieceTypeProxy::Rook,
+            'b' | 'B' => PieceTypeProxy::Bishop,
+            'n' | 'N' => PieceTypeProxy::Knight,
+            _ => return None,
+        }
+    } else {
+        PieceTypeProxy::None
+    };
+    Some(Move::make_move(from, to, MoveType::Normal, PieceType::None, promo.into(), 0, 0))
+}
+
+// Local proxy so parse_move can name promotion pieces without importing the
+// full piece module into the server path.
+#[derive(Clone, Copy)]
+enum PieceTypeProxy {
+    None,
+    Queen,
+    Rook,
+    Bishop,
+    Knight,
+}
+
+impl From<PieceTypeProxy> for crate::piece::PieceType {
+    fn from(value: PieceTypeProxy) -> Self {
+        use crate::piece::PieceType;
+        match value {
+            PieceTypeProxy::None => PieceType::None,
+            PieceTypeProxy::Queen => PieceType::Queen,
+            PieceTypeProxy::Rook => PieceType::Rook,
+            PieceTypeProxy::Bishop => PieceType::Bishop,
+            PieceTypeProxy::Knight => PieceType::Knight,
+        }
+    }
 }
