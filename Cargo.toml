@@ -1,6 +1,6 @@
 [package]
 name = "chess-engine-battel"
-version = "0.0.1"
+version = "0.0.3"
 edition = "2024"
 description = "Chess engine battle visualizer (gpui-kit + Axum)"
 authors = ["mahd"]

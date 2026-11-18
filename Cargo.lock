@@ -918,14 +918,14 @@ dependencies = [
 
 [[package]]
 name = "chess-engine-battel"
-version = "0.0.1"
+version = "0.0.3"
 dependencies = [
  "axum",
  "clap",
  "crossbeam-channel",
  "futures-util",
  "gpui-kit",
- "png 0.18.1",
+ "png 0.17.16",
  "tokio",
 ]
 

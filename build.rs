@@ -46,11 +46,7 @@ fn emit_piece_sprites() {
     .unwrap();
 
     for (color, kind) in PIECES {
-        let file_name = format!(
-            "{}_{}.png",
-            color.to_lowercase(),
-            kind.to_lowercase()
-        );
+        let file_name = format!("{}_{}.png", color.to_lowercase(), kind.to_lowercase());
         let path = piece_dir.join(&file_name);
         println!("cargo:rerun-if-changed={}", path.display());
 
@@ -97,8 +93,7 @@ fn emit_piece_sprites() {
 }
 
 fn decode_png_rgba8(path: &Path) -> (u32, u32, Vec<u8>) {
-    let file = fs::File::open(path)
-        .unwrap_or_else(|err| panic!("open {}: {err}", path.display()));
+    let file = fs::File::open(path).unwrap_or_else(|err| panic!("open {}: {err}", path.display()));
     // png 0.18 requires `BufRead + Seek`; `File` only implements `Seek`.
     let mut decoder = png::Decoder::new(std::io::BufReader::new(file));
     decoder.set_transformations(
@@ -107,7 +102,7 @@ fn decode_png_rgba8(path: &Path) -> (u32, u32, Vec<u8>) {
     let mut reader = decoder
         .read_info()
         .unwrap_or_else(|err| panic!("read info {}: {err}", path.display()));
-    let mut buf = vec![0u8; reader.output_buffer_size().expect("buffer size")];
+    let mut buf = vec![0u8; reader.output_buffer_size()];
     let info = reader
         .next_frame(&mut buf)
         .unwrap_or_else(|err| panic!("decode {}: {err}", path.display()));
@@ -156,4 +151,3 @@ fn decode_png_rgba8(path: &Path) -> (u32, u32, Vec<u8>) {
     );
     (width, height, rgba)
 }
-
