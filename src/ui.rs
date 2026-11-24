@@ -1,8 +1,8 @@
 use std::time::Duration;
 
 use gpui_kit::{
-    Context, Entity, IntoElement, ParentElement as _, Render, ScrollHandle, Styled as _, Window,
-    div,
+    App, Context, Entity, IntoElement, ParentElement as _, Render, ScrollHandle, Styled as _,
+    Window, div,
 };
 use gpui_kit::component::{
     ActiveTheme as _, input::InputState,
@@ -17,6 +17,11 @@ use crate::ui::controls::ControlsState;
 pub mod board;
 pub mod controls;
 pub mod logs;
+pub mod menus;
+
+pub(crate) fn install_menus(cx: &mut App) {
+    menus::install_menus(cx);
+}
 
 const POLL_INTERVAL: Duration = Duration::from_millis(16);
 
