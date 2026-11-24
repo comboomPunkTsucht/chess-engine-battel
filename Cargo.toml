@@ -79,6 +79,7 @@ clap = { version = "4", features = [
   "wrap_help",
 ] }
 
+image = "0.25.10"
 
 [build-dependencies]
 png = "*"

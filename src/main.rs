@@ -10,17 +10,26 @@ use std::net::SocketAddr;
 
 use clap::Parser;
 use crossbeam_channel::unbounded;
-use gpui_kit::{
-    App, AppContext as _, KeyBinding, TitlebarOptions, WindowBounds, WindowOptions, open_window,
-    px, size,
-};
+use gpui_kit::*;
 use gpui_kit::component::input::InputState;
+
+use image::{ImageBuffer, Rgba};
+use std::sync::Arc;
+use std::option::Option;
+
+use ui::install_menus;
 
 use crate::server::ServerControl;
 
 const WINDOW_WIDTH: f32 = 1280.0;
 const WINDOW_HEIGHT: f32 = 720.0;
-const WINDOW_TITLE: &str = "Chess Engine Battle";
+pub const WINDOW_TITLE: &str = "Chess Engine Battle";
+
+pub fn init_icon() -> Option<Arc<ImageBuffer<Rgba<u8>, Vec<u8>>>> {
+    image::load_from_memory(include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/Logo-chess/icon.png")))
+        .ok()
+        .map(|img| Arc::new(img.to_rgba8()))
+}
 
 gpui_kit::actions!(app, [Quit, ToggleFullscreen]);
 
@@ -78,23 +87,32 @@ fn main() {
         })
         .detach();
 
+        install_menus(cx);
+
         let events = bridge::EventReceiver(rx);
+
+        cx.activate(true);
+
+        let window_options = WindowOptions {
+          window_bounds: Some(WindowBounds::centered(
+              size(px(WINDOW_WIDTH), px(WINDOW_HEIGHT)),
+              cx,
+          )),
+          window_min_size: Some(size(px(WINDOW_WIDTH), px(WINDOW_HEIGHT))),
+            kind: WindowKind::Normal,
+            focus: true,
+            show: true,
+            icon: init_icon(),
+            use_display_p3: true,
+            ..Default::default()
+        };
+
         open_window(
-            WindowOptions {
-                window_bounds: Some(WindowBounds::centered(
-                    size(px(WINDOW_WIDTH), px(WINDOW_HEIGHT)),
-                    cx,
-                )),
-                titlebar: Some(TitlebarOptions {
-                    title: Some(WINDOW_TITLE.into()),
-                    ..Default::default()
-                }),
-                window_min_size: Some(size(px(WINDOW_WIDTH), px(WINDOW_HEIGHT))),
-                ..Default::default()
-            },
+          window_options,
             cx,
             move |window, cx| {
                 let uri = format!("ws://{}", server.addr);
+                window.set_window_title(WINDOW_TITLE);
                 let uri_input =
                     cx.new(|cx| InputState::new(window, cx).default_value(uri));
                 cx.new(|cx| ui::BattleView::new(events, server, uri_input, cx))
@@ -102,6 +120,5 @@ fn main() {
         )
         .expect("failed to open window");
 
-        cx.activate(true);
     });
 }
