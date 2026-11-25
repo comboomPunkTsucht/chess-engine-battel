@@ -95,7 +95,7 @@ fn main() {
         cx.activate(true);
 
         let window_options = WindowOptions {
-          window_bounds: Some(WindowBounds::centered(
+          window_bounds: Some(WindowBounds::centered(Default::default(),
               size(px(WINDOW_WIDTH), px(WINDOW_HEIGHT)),
               cx,
           )),

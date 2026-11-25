@@ -102,7 +102,7 @@ fn decode_png_rgba8(path: &Path) -> (u32, u32, Vec<u8>) {
     let mut reader = decoder
         .read_info()
         .unwrap_or_else(|err| panic!("read info {}: {err}", path.display()));
-    let mut buf = vec![0u8; reader.output_buffer_size()];
+    let mut buf = vec![0u8; reader.output_buffer_size().expect("buffr size is not ok")];
     let info = reader
         .next_frame(&mut buf)
         .unwrap_or_else(|err| panic!("decode {}: {err}", path.display()));
