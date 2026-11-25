@@ -81,6 +81,13 @@ thirdparty/raylib/src/*
 thirdparty/raylib/
 thirdparty/raygui/
 
+node_modules/
+
 site/
 
 .temp/
+
+
+# Added by cargo
+
+/target
